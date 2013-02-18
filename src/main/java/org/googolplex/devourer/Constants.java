@@ -13,5 +13,6 @@ public final class Constants {
         }
 
         public static final String MAIN_STACK = "main";
+        public static final String RESULT_STACK = "result";
     }
 }
