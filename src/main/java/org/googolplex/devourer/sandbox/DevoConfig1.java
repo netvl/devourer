@@ -2,7 +2,7 @@ package org.googolplex.devourer.sandbox;
 
 import com.google.common.collect.ImmutableList;
 import org.googolplex.devourer.Constants;
-import org.googolplex.devourer.contexts.AttributedContext;
+import org.googolplex.devourer.contexts.AttributesContext;
 
 import java.util.List;
 
@@ -14,13 +14,13 @@ import java.util.List;
  */
 public class DevoConfig1 {
     @Before("/data")
-    @PushTo(Constants.Stacks.MAIN_STACK)  // unnecessary
+    @PushTo(Constants.Stacks.MAIN_STACK)    // unnecessary
     public ImmutableList.Builder<ExampleData> initData() {
         return ImmutableList.builder();
     }
 
     @Before("/data/datum")
-    public ExampleData.Builder createDatum(AttributedContext context) {
+    public ExampleData.Builder createDatum(AttributesContext context) {
         ExampleData.Builder builder = new ExampleData.Builder();
         builder.setId(Integer.parseInt(context.attribute("id").or("0")));
         return builder;
@@ -37,7 +37,7 @@ public class DevoConfig1 {
     }
 
     @After("/data/datum/header")
-    public void addDatumHeader(@Peek ExampleData.Builder builder, AttributedContext context, String body) {
+    public void addDatumHeader(@Peek ExampleData.Builder builder, AttributesContext context, String body) {
         builder.addHeader(context.attribute("name").get(), body);
     }
 
