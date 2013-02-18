@@ -1,7 +1,7 @@
 package org.googolplex.devourer.reactions;
 
-import org.googolplex.devourer.StackState;
-import org.googolplex.devourer.contexts.AttributedContext;
+import org.googolplex.devourer.Stacks;
+import org.googolplex.devourer.contexts.AttributesContext;
 
 /**
  * Date: 18.02.13
@@ -10,5 +10,5 @@ import org.googolplex.devourer.contexts.AttributedContext;
  * @author Vladimir Matveev
  */
 public interface ReactionAfter extends Reaction {
-    void react(StackState stackState, AttributedContext context, String body);
+    void react(Stacks stacks, AttributesContext context, String body);
 }
