@@ -6,6 +6,9 @@ package org.googolplex.devourer;
  */
 public interface StackState {
     <T> void push(String stack, T object);
+    <T> void push(T object);
     <T> T peek(String stack);
+    <T> T peek();
     <T> T pop(String stack);
+    <T> T pop();
 }
