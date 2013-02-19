@@ -39,9 +39,4 @@ public class BindingBuilder implements ReactionBindingBuilder {
         mappingBinder.afterMappings.put(Path.fromString(route), reaction);
         return this;
     }
-
-    @Override
-    public BindingBuilder and() {
-        return this;
-    }
 }

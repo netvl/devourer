@@ -1,10 +1,7 @@
 package org.googolplex.devourer;
 
-import com.sun.xml.internal.fastinfoset.stax.factory.StAXInputFactory;
 import org.googolplex.devourer.configuration.DevourerConfig;
 import org.googolplex.devourer.configuration.modular.MappingModule;
-import org.googolplex.devourer.configuration.modular.binders.MappingBinder;
-import org.googolplex.devourer.configuration.modular.binders.MappingBinderImpl;
 import org.googolplex.devourer.contexts.AttributesContext;
 import org.googolplex.devourer.contexts.DefaultAttributesContext;
 import org.googolplex.devourer.paths.Path;
@@ -14,6 +11,7 @@ import org.googolplex.devourer.reactions.ReactionAt;
 import org.googolplex.devourer.reactions.ReactionBefore;
 
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.ByteArrayInputStream;
@@ -33,21 +31,13 @@ import java.util.Map;
  */
 public class Devourer {
     private final DevourerConfig config;
+    private final XMLInputFactory inputFactory;
     private final Map<Path, PathMapping> mappings;
 
-    private Devourer(DevourerConfig config, Map<Path, PathMapping> mappings) {
+    protected Devourer(DevourerConfig config, XMLInputFactory inputFactory, Map<Path, PathMapping> mappings) {
         this.config = config;
+        this.inputFactory = inputFactory;
         this.mappings = mappings;
-    }
-
-    public static Devourer create(MappingModule module) {
-        return create(new DevourerConfig.Builder().build(), module);
-    }
-
-    public static Devourer create(DevourerConfig config, MappingModule module) {
-        MappingBinder mappingBinder = new MappingBinderImpl();
-        module.configure(mappingBinder);
-        return new Devourer(config, mappingBinder.mappings());
     }
 
     public Stacks parse(String string) throws XMLStreamException {
@@ -71,10 +61,12 @@ public class Devourer {
     }
 
     public Stacks parse(Reader reader) throws XMLStreamException {
-        XMLStreamReader streamReader = StAXInputFactory.newFactory().createXMLStreamReader(reader);
+        XMLStreamReader streamReader = inputFactory.createXMLStreamReader(reader);
+
         Deque<AttributesContext> contextStack = new ArrayDeque<AttributesContext>();
         Stacks stacks = new DefaultStacks();
         Path currentPath = Path.fromString("/");
+
         while (streamReader.hasNext()) {
             streamReader.next();  // We will ignore exact event value in favor of reader methods
 
@@ -118,6 +110,8 @@ public class Devourer {
                 currentPath = currentPath.moveUp();
             }
         }
+
+        streamReader.close();
 
         return stacks;
     }

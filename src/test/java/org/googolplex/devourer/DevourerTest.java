@@ -32,7 +32,11 @@ public class DevourerTest {
 
     @Test
     public void testName() throws Exception {
-        Devourer devourer = Devourer.create(new DevourerConfig(true), new ExampleDataModule());
+        Devourer devourer = DevourerMaker.create(DevourerConfig.builder()
+                                                               .setStripSpaces(true)
+                                                               .build(),
+                                                 new ExampleDataModule())
+                                         .make();
         Stacks stacks = devourer.parse(EXAMPLE);
 
         List<ExampleData> dataList = stacks.pop();

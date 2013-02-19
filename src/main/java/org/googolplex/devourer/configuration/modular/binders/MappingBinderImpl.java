@@ -25,7 +25,7 @@ public class MappingBinderImpl implements MappingBinder {
     protected final ListMultimap<Path, ReactionAt> atMappings = ArrayListMultimap.create();
 
     @Override
-    public ReactionBindingBuilder map(String route) {
+    public ReactionBindingBuilder on(String route) {
         return new BindingBuilder(this, route);
     }
 
