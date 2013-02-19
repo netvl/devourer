@@ -9,6 +9,6 @@ import org.googolplex.devourer.contexts.AttributesContext;
  *
  * @author Vladimir Matveev
  */
-public interface ReactionBefore extends Reaction {
+public interface ReactionBefore {
     void react(Stacks stacks, AttributesContext context);
 }
