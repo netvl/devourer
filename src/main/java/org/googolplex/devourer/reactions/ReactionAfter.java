@@ -10,5 +10,5 @@ import org.googolplex.devourer.contexts.AttributesContext;
  * @author Vladimir Matveev
  */
 public interface ReactionAfter extends Reaction {
-    void react(Stacks stacks, AttributesContext context, String body);
+    void react(Stacks stacks, AttributesContext context);
 }
