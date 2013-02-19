@@ -9,7 +9,8 @@ import org.googolplex.devourer.reactions.ReactionBefore;
  * Time: 13:54
  */
 public interface ReactionBindingBuilder {
-    void to(ReactionBefore reaction);
-    void to(ReactionAt reaction);
-    void to(ReactionAfter reaction);
+    ReactionBindingBuilder doBefore(ReactionBefore reaction);
+    ReactionBindingBuilder doAt(ReactionAt reaction);
+    ReactionBindingBuilder doAfter(ReactionAfter reaction);
+    ReactionBindingBuilder and();
 }

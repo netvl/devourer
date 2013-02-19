@@ -1,10 +1,15 @@
 package org.googolplex.devourer;
 
-import org.googolplex.devourer.sandbox.DevoConfig3;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import org.googolplex.devourer.configuration.DevourerConfig;
+import org.googolplex.devourer.sandbox.ExampleDataModule;
 import org.googolplex.devourer.sandbox.ExampleData;
 import org.junit.Test;
 
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Date: 19.02.13
@@ -27,9 +32,17 @@ public class DevourerTest {
 
     @Test
     public void testName() throws Exception {
-        Devourer devourer = Devourer.create(new DevoConfig3());
+        Devourer devourer = Devourer.create(new DevourerConfig(true), new ExampleDataModule());
         Stacks stacks = devourer.parse(EXAMPLE);
 
         List<ExampleData> dataList = stacks.pop();
+
+        assertEquals(1, dataList.size());
+
+        ExampleData data = dataList.get(0);
+        assertEquals(0, data.id);
+        assertEquals("Name", data.name);
+        assertEquals(ImmutableList.of(0.3, 0.2), data.args);
+        assertEquals(ImmutableMap.of("Header-1", "header 1 value", "Header-2", "Some bigger value"), data.headers);
     }
 }
