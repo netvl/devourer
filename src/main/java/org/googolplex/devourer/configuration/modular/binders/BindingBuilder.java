@@ -20,20 +20,28 @@ public class BindingBuilder implements ReactionBindingBuilder {
     }
 
     @Override
-    public void to(ReactionBefore reaction) {
+    public BindingBuilder doBefore(ReactionBefore reaction) {
         Preconditions.checkNotNull(reaction, "Reaction is null");
         mappingBinder.beforeMappings.put(Path.fromString(route), reaction);
+        return this;
     }
 
     @Override
-    public void to(ReactionAt reaction) {
+    public BindingBuilder doAt(ReactionAt reaction) {
         Preconditions.checkNotNull(reaction, "Reaction is null");
         mappingBinder.atMappings.put(Path.fromString(route), reaction);
+        return this;
     }
 
     @Override
-    public void to(ReactionAfter reaction) {
+    public BindingBuilder doAfter(ReactionAfter reaction) {
         Preconditions.checkNotNull(reaction, "Reaction is null");
         mappingBinder.afterMappings.put(Path.fromString(route), reaction);
+        return this;
+    }
+
+    @Override
+    public BindingBuilder and() {
+        return this;
     }
 }

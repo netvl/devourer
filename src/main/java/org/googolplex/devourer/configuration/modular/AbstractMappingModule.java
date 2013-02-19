@@ -11,7 +11,7 @@ import org.googolplex.devourer.configuration.modular.binders.MappingBinder;
 public abstract class AbstractMappingModule implements MappingModule {
     private MappingBinder binder = null;
 
-    protected final ReactionBindingBuilder map(String route) {
+    protected final ReactionBindingBuilder on(String route) {
         return binder.map(route);
     }
 

@@ -1,6 +1,7 @@
 package org.googolplex.devourer;
 
 import com.sun.xml.internal.fastinfoset.stax.factory.StAXInputFactory;
+import org.googolplex.devourer.configuration.DevourerConfig;
 import org.googolplex.devourer.configuration.modular.MappingModule;
 import org.googolplex.devourer.configuration.modular.binders.MappingBinder;
 import org.googolplex.devourer.configuration.modular.binders.MappingBinderImpl;
@@ -29,16 +30,22 @@ import java.util.Map;
  * Time: 14:52
  */
 public class Devourer {
+    private final DevourerConfig config;
     private final Map<Path, PathMapping> mappings;
 
-    private Devourer(Map<Path, PathMapping> mappings) {
+    private Devourer(DevourerConfig config, Map<Path, PathMapping> mappings) {
+        this.config = config;
         this.mappings = mappings;
     }
 
     public static Devourer create(MappingModule module) {
+        return create(new DevourerConfig.Builder().build(), module);
+    }
+
+    public static Devourer create(DevourerConfig config, MappingModule module) {
         MappingBinder mappingBinder = new MappingBinderImpl();
         module.configure(mappingBinder);
-        return new Devourer(mappingBinder.mappings());
+        return new Devourer(config, mappingBinder.mappings());
     }
 
     public Stacks parse(String string) throws XMLStreamException {
@@ -76,6 +83,9 @@ public class Devourer {
 
             } else if (streamReader.isCharacters() && !streamReader.isWhiteSpace()) {
                 String body = streamReader.getText();
+                if (config.stripSpaces) {
+                    body = body.trim();
+                }
                 AttributesContext context = contextStack.peek();
 
                 PathMapping mapping = mappings.get(currentPath);
