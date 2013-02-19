@@ -1,8 +1,8 @@
 package org.googolplex.devourer.configuration.modular.binders;
 
-import org.googolplex.devourer.reactions.ReactionAfter;
-import org.googolplex.devourer.reactions.ReactionAt;
-import org.googolplex.devourer.reactions.ReactionBefore;
+import org.googolplex.devourer.configuration.reactions.ReactionAfter;
+import org.googolplex.devourer.configuration.reactions.ReactionAt;
+import org.googolplex.devourer.configuration.reactions.ReactionBefore;
 
 /**
  * Date: 19.02.13

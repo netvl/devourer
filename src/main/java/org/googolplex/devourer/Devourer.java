@@ -6,9 +6,9 @@ import org.googolplex.devourer.contexts.AttributesContext;
 import org.googolplex.devourer.contexts.DefaultAttributesContext;
 import org.googolplex.devourer.paths.Path;
 import org.googolplex.devourer.paths.PathMapping;
-import org.googolplex.devourer.reactions.ReactionAfter;
-import org.googolplex.devourer.reactions.ReactionAt;
-import org.googolplex.devourer.reactions.ReactionBefore;
+import org.googolplex.devourer.configuration.reactions.ReactionAfter;
+import org.googolplex.devourer.configuration.reactions.ReactionAt;
+import org.googolplex.devourer.configuration.reactions.ReactionBefore;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
