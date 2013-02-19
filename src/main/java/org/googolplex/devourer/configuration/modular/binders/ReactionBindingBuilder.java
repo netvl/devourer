@@ -12,5 +12,4 @@ public interface ReactionBindingBuilder {
     ReactionBindingBuilder doBefore(ReactionBefore reaction);
     ReactionBindingBuilder doAt(ReactionAt reaction);
     ReactionBindingBuilder doAfter(ReactionAfter reaction);
-    ReactionBindingBuilder and();
 }

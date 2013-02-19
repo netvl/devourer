@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class DevoConfig1 {
     @Before("/data")
-//    @PushTo(Constants.Stacks.MAIN_STACK)    // unnecessary
+    @PushTo(Constants.Stacks.MAIN_STACK)    // unnecessary
     public ImmutableList.Builder<ExampleData> initData() {
         return ImmutableList.builder();
     }
@@ -47,7 +47,6 @@ public class DevoConfig1 {
     }
 
     @After("/data")
-    @PushTo(Constants.Stacks.RESULT_STACK)
     public List<ExampleData> finishData(@Pop ImmutableList.Builder<ExampleData> dataBuilder) {
         return dataBuilder.build();
     }

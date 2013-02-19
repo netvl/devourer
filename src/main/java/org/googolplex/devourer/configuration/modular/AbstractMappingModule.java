@@ -12,7 +12,7 @@ public abstract class AbstractMappingModule implements MappingModule {
     private MappingBinder binder = null;
 
     protected final ReactionBindingBuilder on(String route) {
-        return binder.map(route);
+        return binder.on(route);
     }
 
     @Override

@@ -10,6 +10,6 @@ import java.util.Map;
  * Time: 13:51
  */
 public interface MappingBinder {
-    ReactionBindingBuilder map(String route);
+    ReactionBindingBuilder on(String route);
     Map<Path, PathMapping> mappings();
 }
