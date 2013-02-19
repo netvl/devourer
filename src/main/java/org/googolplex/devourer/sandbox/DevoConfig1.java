@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class DevoConfig1 {
     @Before("/data")
-    @PushTo(Constants.Stacks.MAIN_STACK)    // unnecessary
+//    @PushTo(Constants.Stacks.MAIN_STACK)    // unnecessary
     public ImmutableList.Builder<ExampleData> initData() {
         return ImmutableList.builder();
     }
@@ -26,17 +26,17 @@ public class DevoConfig1 {
         return builder;
     }
 
-    @After("/data/datum/name")
+    @At("/data/datum/name")
     public void setDatumName(@Peek ExampleData.Builder builder, String body) {
         builder.setName(body);
     }
 
-    @After("/data/datum/arg")
+    @At("/data/datum/arg")
     public void addDatumArg(@Peek ExampleData.Builder builder, String body) {
         builder.addArg(Double.parseDouble(body));
     }
 
-    @After("/data/datum/header")
+    @At("/data/datum/header")
     public void addDatumHeader(@Peek ExampleData.Builder builder, AttributesContext context, String body) {
         builder.addHeader(context.attribute("name").get(), body);
     }
