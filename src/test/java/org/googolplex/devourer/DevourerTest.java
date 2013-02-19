@@ -56,7 +56,7 @@ public class DevourerTest {
                                          .make();
         Stacks stacks = devourer.parse(EXAMPLE);
 
-        List<ExampleData> dataList = stacks.pop();
+        List<ExampleData> dataList = stacks.pop(Constants.Stacks.RESULT_STACK);
 
         assertEquals(1, dataList.size());
 
@@ -65,6 +65,5 @@ public class DevourerTest {
         assertEquals("Name", data.name);
         assertEquals(ImmutableList.of(0.3, 0.2), data.args);
         assertEquals(ImmutableMap.of("Header-1", "header 1 value", "Header-2", "Some bigger value"), data.headers);
-
     }
 }

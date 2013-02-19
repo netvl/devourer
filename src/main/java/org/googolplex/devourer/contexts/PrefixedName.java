@@ -61,4 +61,13 @@ public class PrefixedName {
         result = 31 * result + name.hashCode();
         return result;
     }
+
+    @Override
+    public String toString() {
+        if (prefix.isPresent()) {
+            return prefix.get() + ":" + name;
+        } else {
+            return name;
+        }
+    }
 }
