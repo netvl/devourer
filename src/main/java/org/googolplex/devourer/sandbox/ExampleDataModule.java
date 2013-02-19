@@ -4,15 +4,16 @@ import com.google.common.collect.ImmutableList;
 import org.googolplex.devourer.Stacks;
 import org.googolplex.devourer.configuration.modular.AbstractMappingModule;
 import org.googolplex.devourer.contexts.AttributesContext;
-import org.googolplex.devourer.reactions.ReactionAfter;
-import org.googolplex.devourer.reactions.ReactionAt;
-import org.googolplex.devourer.reactions.ReactionBefore;
+import org.googolplex.devourer.configuration.reactions.ReactionAfter;
+import org.googolplex.devourer.configuration.reactions.ReactionAt;
+import org.googolplex.devourer.configuration.reactions.ReactionBefore;
 
 /**
  * Date: 19.02.13
  * Time: 10:11
  */
 public class ExampleDataModule extends AbstractMappingModule {
+    @Override
     public void configure() {
         on("/data")
             .doBefore(new ReactionBefore() {

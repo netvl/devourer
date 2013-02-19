@@ -7,9 +7,9 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.ListMultimap;
 import org.googolplex.devourer.paths.Path;
 import org.googolplex.devourer.paths.PathMapping;
-import org.googolplex.devourer.reactions.ReactionAfter;
-import org.googolplex.devourer.reactions.ReactionAt;
-import org.googolplex.devourer.reactions.ReactionBefore;
+import org.googolplex.devourer.configuration.reactions.ReactionAfter;
+import org.googolplex.devourer.configuration.reactions.ReactionAt;
+import org.googolplex.devourer.configuration.reactions.ReactionBefore;
 
 import java.util.HashMap;
 import java.util.List;

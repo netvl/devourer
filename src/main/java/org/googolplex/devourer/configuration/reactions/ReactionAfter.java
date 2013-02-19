@@ -1,4 +1,4 @@
-package org.googolplex.devourer.reactions;
+package org.googolplex.devourer.configuration.reactions;
 
 import org.googolplex.devourer.Stacks;
 import org.googolplex.devourer.contexts.AttributesContext;

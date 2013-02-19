@@ -4,9 +4,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>devourer</groupId>
+    <groupId>org.bitbucket.googolplex.devourer</groupId>
     <artifactId>devourer</artifactId>
     <version>0.1</version>
+    <packaging>jar</packaging>
+
+    <name>Devourer</name>
+    <description>Feeds on XML and produces objects</description>
+    <url>http://bitbucket.org/googolplex/devourer</url>
 
     <dependencies>
         <dependency>
