@@ -1,18 +1,14 @@
 package org.googolplex.devourer.configuration.modular.binders;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.ListMultimap;
+import org.googolplex.devourer.paths.Mappings;
 import org.googolplex.devourer.paths.Path;
 import org.googolplex.devourer.paths.PathMapping;
 import org.googolplex.devourer.configuration.reactions.ReactionAfter;
 import org.googolplex.devourer.configuration.reactions.ReactionAt;
 import org.googolplex.devourer.configuration.reactions.ReactionBefore;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -30,16 +26,7 @@ public class MappingBinderImpl implements MappingBinder {
     }
 
     public Map<Path, PathMapping> mappings() {
-        Map<Path, PathMapping> builder = new HashMap<Path, PathMapping>();
-        for (Path path : Iterables.concat(beforeMappings.keySet(), atMappings.keySet(), afterMappings.keySet())) {
-            // An order is implicit here
-            List<ReactionBefore> befores = ImmutableList.copyOf(beforeMappings.get(path));
-            List<ReactionAt> ats = ImmutableList.copyOf(atMappings.get(path));
-            List<ReactionAfter> afters = ImmutableList.copyOf(afterMappings.get(path));
-
-            PathMapping mapping = new PathMapping(befores, ats, afters);
-            builder.put(path, mapping);
-        }
-        return ImmutableMap.copyOf(ImmutableMap.copyOf(builder));
+        return Mappings.combineMappings(beforeMappings, atMappings, afterMappings);
     }
+
 }

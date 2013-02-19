@@ -1,6 +1,7 @@
 package org.googolplex.devourer;
 
 import org.googolplex.devourer.configuration.DevourerConfig;
+import org.googolplex.devourer.configuration.annotated.MappingReflector;
 import org.googolplex.devourer.configuration.modular.MappingModule;
 import org.googolplex.devourer.configuration.modular.binders.MappingBinder;
 import org.googolplex.devourer.configuration.modular.binders.MappingBinderImpl;
@@ -31,6 +32,17 @@ public class DevourerMaker {
         MappingBinder binder = new MappingBinderImpl();
         module.configure(binder);
         Map<Path, PathMapping> mappings = binder.mappings();
+
+        return new DevourerMaker(mappings, devourerConfig);
+    }
+
+    public static DevourerMaker create(Object configObject) {
+        return create(DevourerConfig.builder().build(), configObject);
+    }
+
+    public static DevourerMaker create(DevourerConfig devourerConfig, Object configObject) {
+        MappingReflector reflector = new MappingReflector();
+        Map<Path, PathMapping> mappings = reflector.collectMappings(configObject);
 
         return new DevourerMaker(mappings, devourerConfig);
     }
