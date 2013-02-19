@@ -16,6 +16,7 @@ import org.googolplex.devourer.reactions.ReactionBefore;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -26,8 +27,9 @@ import java.util.Deque;
 import java.util.Map;
 
 /**
- * Date: 18.02.13
- * Time: 14:52
+ * Devourer pulls and XML from the given source and performs a number of actions on it. These actions are configured
+ * via {@link MappingModule} instance. Devourer produces {@link Stacks} instance which will contain all output
+ * produced by actions.
  */
 public class Devourer {
     private final DevourerConfig config;
@@ -50,6 +52,14 @@ public class Devourer {
 
     public Stacks parse(String string) throws XMLStreamException {
         return parse(new StringReader(string));
+    }
+
+    public Stacks parse(byte[] bytes, Charset charset) throws XMLStreamException {
+        return parse(new ByteArrayInputStream(bytes), charset);
+    }
+
+    public Stacks parse(byte[] bytes) throws XMLStreamException {
+        return parse(bytes, Charset.defaultCharset());
     }
 
     public Stacks parse(InputStream inputStream) throws XMLStreamException {
