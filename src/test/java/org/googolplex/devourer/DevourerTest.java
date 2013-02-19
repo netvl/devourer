@@ -3,6 +3,7 @@ package org.googolplex.devourer;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.googolplex.devourer.configuration.DevourerConfig;
+import org.googolplex.devourer.sandbox.DevoConfig1;
 import org.googolplex.devourer.sandbox.ExampleDataModule;
 import org.googolplex.devourer.sandbox.ExampleData;
 import org.junit.Test;
@@ -31,10 +32,8 @@ public class DevourerTest {
         "</data>";
 
     @Test
-    public void testName() throws Exception {
-        Devourer devourer = DevourerMaker.create(DevourerConfig.builder()
-                                                               .setStripSpaces(true)
-                                                               .build(),
+    public void testModularConfig() throws Exception {
+        Devourer devourer = DevourerMaker.create(DevourerConfig.builder().setStripSpaces(true).build(),
                                                  new ExampleDataModule())
                                          .make();
         Stacks stacks = devourer.parse(EXAMPLE);
@@ -48,5 +47,24 @@ public class DevourerTest {
         assertEquals("Name", data.name);
         assertEquals(ImmutableList.of(0.3, 0.2), data.args);
         assertEquals(ImmutableMap.of("Header-1", "header 1 value", "Header-2", "Some bigger value"), data.headers);
+    }
+
+    @Test
+    public void testAnnotatedConfig() throws Exception {
+        Devourer devourer = DevourerMaker.create(DevourerConfig.builder().setStripSpaces(true).build(),
+                                                 new DevoConfig1())
+                                         .make();
+        Stacks stacks = devourer.parse(EXAMPLE);
+
+        List<ExampleData> dataList = stacks.pop();
+
+        assertEquals(1, dataList.size());
+
+        ExampleData data = dataList.get(0);
+        assertEquals(0, data.id);
+        assertEquals("Name", data.name);
+        assertEquals(ImmutableList.of(0.3, 0.2), data.args);
+        assertEquals(ImmutableMap.of("Header-1", "header 1 value", "Header-2", "Some bigger value"), data.headers);
+
     }
 }
