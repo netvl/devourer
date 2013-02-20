@@ -4,7 +4,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
-import org.googolplex.devourer.Constants;
 import org.googolplex.devourer.Stacks;
 import org.googolplex.devourer.configuration.annotated.annotations.After;
 import org.googolplex.devourer.configuration.annotated.annotations.At;
@@ -57,7 +56,7 @@ public class MappingReflector {
                 // Check whether the method returns something and try to get stack name where to push
                 Optional<String> stack = Optional.absent();
                 if (method.getReturnType() != void.class) {
-                    String stackName = Constants.Stacks.MAIN_STACK;
+                    String stackName = Stacks.DEFAULT_STACK;
                     if (method.isAnnotationPresent(PushTo.class)) {
                         stackName = method.getAnnotation(PushTo.class).value();
                     }
@@ -106,16 +105,16 @@ public class MappingReflector {
                             Annotation annotation = annotations[0];
                             if (annotation.annotationType() == Pop.class) {
                                 parameterInfos.add(new ParameterInfo(ParameterKind.POP,
-                                                                     Constants.Stacks.MAIN_STACK));
+                                                                     Stacks.DEFAULT_STACK));
                             } else if (annotation.annotationType() == PopFrom.class) {
                                 parameterInfos.add(new ParameterInfo(ParameterKind.POP,
                                                                      ((PopFrom) annotation).value()));
                             } else if (annotation.annotationType() == Peek.class) {
                                 parameterInfos.add(new ParameterInfo(ParameterKind.PEEK,
-                                                                     Constants.Stacks.MAIN_STACK));
+                                                                     Stacks.DEFAULT_STACK));
                             } else if (annotation.annotationType() == PeekFrom.class) {
                                 parameterInfos.add(new ParameterInfo(ParameterKind.PEEK,
-                                                                     Constants.Stacks.MAIN_STACK));
+                                                                     ((PeekFrom) annotation).value()));
                             } else {
                                 throw new MappingException(
                                     String.format(
