@@ -1,5 +1,6 @@
 package org.googolplex.devourer;
 
+import com.google.common.base.Preconditions;
 import org.googolplex.devourer.configuration.DevourerConfig;
 import org.googolplex.devourer.configuration.annotated.MappingReflector;
 import org.googolplex.devourer.configuration.modular.MappingModule;
@@ -7,6 +8,10 @@ import org.googolplex.devourer.configuration.modular.binders.MappingBinder;
 import org.googolplex.devourer.configuration.modular.binders.MappingBinderImpl;
 import org.googolplex.devourer.contexts.AttributesContext;
 import org.googolplex.devourer.contexts.DefaultAttributesContext;
+import org.googolplex.devourer.exceptions.DevourerException;
+import org.googolplex.devourer.exceptions.MappingException;
+import org.googolplex.devourer.exceptions.ParsingException;
+import org.googolplex.devourer.exceptions.ReactionException;
 import org.googolplex.devourer.paths.Path;
 import org.googolplex.devourer.paths.PathMapping;
 import org.googolplex.devourer.configuration.reactions.ReactionAfter;
@@ -35,10 +40,14 @@ import java.util.Map;
  * <p>Most implementations of StAX {@link XMLInputFactory} seem to be thread-safe after their configuration,
  * so it is possible to use Devourer instance across multiple threads simultaneously, that is,
  * Devourer should be thread-safe.</p>
+ *
+ * <p>See documentation of {@link org.googolplex.devourer.configuration.modular.AbstractMappingModule} and
+ * {@link MappingReflector} to find out about mapping configuration. </p>
  */
 public class Devourer {
     private final DevourerConfig config;
     private final XMLInputFactory inputFactory;
+    // TODO: maybe it makes sense to switch to a set of three multimaps, one for each of mapping types
     private final Map<Path, PathMapping> mappings;
 
     protected Devourer(DevourerConfig config, XMLInputFactory inputFactory, Map<Path, PathMapping> mappings) {
@@ -67,8 +76,15 @@ public class Devourer {
      * @return new Devourer instance
      */
     public static Devourer create(DevourerConfig devourerConfig, MappingModule module) {
+        Preconditions.checkNotNull(devourerConfig, "Devourer config is null");
+        Preconditions.checkNotNull(module, "Module object is null");
+
         MappingBinder binder = new MappingBinderImpl();
-        module.configure(binder);
+        try {
+            module.configure(binder);
+        } catch (RuntimeException e) {
+            throw new MappingException("An exception occured during mapping module configuration", e);
+        }
         Map<Path, PathMapping> mappings = binder.mappings();
 
         return new Devourer(devourerConfig, createXMLInputFactory(devourerConfig), mappings);
@@ -94,6 +110,9 @@ public class Devourer {
      * @return new Devourer instance
      */
     public static Devourer create(DevourerConfig devourerConfig, Object configObject) {
+        Preconditions.checkNotNull(devourerConfig, "Devourer config is null");
+        Preconditions.checkNotNull(configObject, "Config object is null");
+
         MappingReflector reflector = new MappingReflector();
         Map<Path, PathMapping> mappings = reflector.collectMappings(configObject);
 
@@ -115,9 +134,11 @@ public class Devourer {
      *
      * @param string a string with XML document
      * @return stacks object with parsing results
-     * @throws XMLStreamException in case of XML parsing errors
+     * @throws DevourerException in case of XML parsing errors or exceptions in reactions
      */
-    public Stacks parse(String string) throws XMLStreamException {
+    public Stacks parse(String string) throws DevourerException {
+        Preconditions.checkNotNull(string, "String is null");
+
         return parse(new StringReader(string));
     }
 
@@ -128,9 +149,12 @@ public class Devourer {
      * @param bytes byte array containing an XML document
      * @param charset an encoding of the of the text inside byte array
      * @return stacks object with parsing results
-     * @throws XMLStreamException in case of XML parsing errors
+     * @throws DevourerException in case of XML parsing errors or exceptions in reactions
      */
-    public Stacks parse(byte[] bytes, Charset charset) throws XMLStreamException {
+    public Stacks parse(byte[] bytes, Charset charset) throws DevourerException {
+        Preconditions.checkNotNull(bytes, "Byte array is null");
+        Preconditions.checkNotNull(charset, "Charset is null");
+
         return parse(new ByteArrayInputStream(bytes), charset);
     }
 
@@ -140,9 +164,9 @@ public class Devourer {
      *
      * @param bytes byte array containing an XML document
      * @return stacks object with parsing results
-     * @throws XMLStreamException in case of XML parsing errors
+     * @throws DevourerException in case of XML parsing errors or exceptions in reactions
      */
-    public Stacks parse(byte[] bytes) throws XMLStreamException {
+    public Stacks parse(byte[] bytes) throws DevourerException {
         return parse(bytes, Charset.defaultCharset());
     }
 
@@ -153,9 +177,12 @@ public class Devourer {
      * @param inputStream input stream containing an XML document
      * @param charset an encoding of the input stream
      * @return stacks object with parsing results
-     * @throws XMLStreamException in case of XML parsing errors
+     * @throws DevourerException in case of XML parsing errors or exceptions in reactions
      */
-    public Stacks parse(InputStream inputStream, Charset charset) throws XMLStreamException {
+    public Stacks parse(InputStream inputStream, Charset charset) throws DevourerException {
+        Preconditions.checkNotNull(inputStream, "Input stream is null");
+        Preconditions.checkNotNull(charset, "Charset is null");
+
         return parse(new InputStreamReader(inputStream, charset));
     }
 
@@ -165,9 +192,9 @@ public class Devourer {
      *
      * @param inputStream input stream containing an XML document
      * @return stacks object with parsing results
-     * @throws XMLStreamException in case of XML parsing errors
+     * @throws DevourerException in case of XML parsing errors or exceptions in reactions
      */
-    public Stacks parse(InputStream inputStream) throws XMLStreamException {
+    public Stacks parse(InputStream inputStream) throws DevourerException {
         return parse(inputStream, Charset.defaultCharset());
     }
 
@@ -176,60 +203,81 @@ public class Devourer {
      *
      * @param reader reader containing an XML document
      * @return stacks objects with parsing results
-     * @throws XMLStreamException in case of XML parsing errors
+     * @throws DevourerException in case of XML parsing errors or exceptions in reactions
      */
-    public Stacks parse(Reader reader) throws XMLStreamException {
-        XMLStreamReader streamReader = inputFactory.createXMLStreamReader(reader);
+    public Stacks parse(Reader reader) throws DevourerException {
+        Preconditions.checkNotNull(reader, "Reader is null");
 
-        Deque<AttributesContext> contextStack = new ArrayDeque<AttributesContext>();
-        Stacks stacks = new DefaultStacks();
-        Path currentPath = Path.fromString("/");
+        Stacks stacks = null;
+        XMLStreamReader streamReader = null;
+        try {
+            streamReader = inputFactory.createXMLStreamReader(reader);
 
-        while (streamReader.hasNext()) {
-            streamReader.next();  // We will ignore exact event value in favor of reader methods
+            Deque<AttributesContext> contextStack = new ArrayDeque<AttributesContext>();
+            stacks = new DefaultStacks();
+            Path currentPath = Path.fromString("");
 
-            if (streamReader.isStartElement()) {
-                currentPath = currentPath.resolve(streamReader.getLocalName());
+            while (streamReader.hasNext()) {
+                streamReader.next();  // We will ignore exact event value in favor of reader methods
 
-                AttributesContext context = collectAttributesContext(streamReader);
-                contextStack.push(context);
+                if (streamReader.isStartElement()) {
+                    currentPath = currentPath.resolve(streamReader.getLocalName());
 
-                PathMapping mapping = mappings.get(currentPath);
-                if (mapping != null) {
-                    for (ReactionBefore reaction : mapping.befores) {
-                        reaction.react(stacks, context);
+                    AttributesContext context = collectAttributesContext(streamReader);
+                    contextStack.push(context);
+
+                    PathMapping mapping = mappings.get(currentPath);
+                    if (mapping != null) {
+                        for (ReactionBefore reaction : mapping.befores) {
+                            reaction.react(stacks, context);
+                        }
                     }
-                }
 
-            } else if (streamReader.isCharacters() && !streamReader.isWhiteSpace()) {
-                String body = streamReader.getText();
-                if (config.stripSpaces) {
-                    body = body.trim();
-                }
-                AttributesContext context = contextStack.peek();
-
-                PathMapping mapping = mappings.get(currentPath);
-                if (mapping != null) {
-                    for (ReactionAt reaction : mapping.ats) {
-                        reaction.react(stacks, context, body);
+                } else if (streamReader.isCharacters() && !streamReader.isWhiteSpace()) {
+                    String body = streamReader.getText();
+                    if (config.stripSpaces) {
+                        body = body.trim();
                     }
-                }
+                    AttributesContext context = contextStack.peek();
 
-            } else if (streamReader.isEndElement()) {
-                AttributesContext context = contextStack.pop();
-
-                PathMapping mapping = mappings.get(currentPath);
-                if (mapping != null) {
-                    for (ReactionAfter reaction : mapping.afters) {
-                        reaction.react(stacks, context);
+                    PathMapping mapping = mappings.get(currentPath);
+                    if (mapping != null) {
+                        for (ReactionAt reaction : mapping.ats) {
+                            reaction.react(stacks, context, body);
+                        }
                     }
-                }
 
-                currentPath = currentPath.moveUp();
+                } else if (streamReader.isEndElement()) {
+                    AttributesContext context = contextStack.pop();
+
+                    PathMapping mapping = mappings.get(currentPath);
+                    if (mapping != null) {
+                        for (ReactionAfter reaction : mapping.afters) {
+                            reaction.react(stacks, context);
+                        }
+                    }
+
+                    currentPath = currentPath.moveUp();
+                }
+            }
+
+            streamReader.close();
+
+        } catch (XMLStreamException e) {
+            throw new ParsingException("Error while parsing XML document", e);
+
+        } catch (RuntimeException e) {  // TODO: maybe move to reaction loops
+            throw new ReactionException("An exception has occured in reaction", e);
+
+        } finally {
+            if (streamReader != null) {
+                try {
+                    streamReader.close();
+                } catch (XMLStreamException e) {
+                    // Do nothing
+                }
             }
         }
-
-        streamReader.close();
 
         return stacks;
     }

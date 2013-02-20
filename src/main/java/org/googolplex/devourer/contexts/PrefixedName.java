@@ -7,8 +7,8 @@ import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 
 /**
- * Date: 19.02.13
- * Time: 13:30
+ * Simple wrapper around XML element's local name and prefix. Has well-defined {@link #equals(Object)} and
+ * {@link #hashCode()} methods.
  */
 public class PrefixedName {
     public final Optional<String> prefix;
@@ -22,14 +22,33 @@ public class PrefixedName {
         this.name = name;
     }
 
+    /**
+     * Creates prefixed name from the given local name.
+     *
+     * @param name local name of the element
+     * @return prefixed name with no prefix
+     */
     public static PrefixedName simple(String name) {
         return new PrefixedName(Optional.<String>absent(), name);
     }
 
+    /**
+     * Creates prefixed name from the given prefix and local name.
+     *
+     * @param prefix prefix of the element name
+     * @param name local name of the element
+     * @return prefixed name with prefix
+     */
     public static PrefixedName withPrefix(String prefix, String name) {
         return new PrefixedName(Optional.of(prefix), name);
     }
 
+    /**
+     * Creates prefixed name from {@link QName} instance.
+     *
+     * @param qName qualified name of the element
+     * @return prefixed name
+     */
     public static PrefixedName fromQName(QName qName) {
         if (XMLConstants.NULL_NS_URI.equals(qName.getNamespaceURI()) &&
             XMLConstants.DEFAULT_NS_PREFIX.equals(qName.getPrefix())) {
@@ -38,7 +57,6 @@ public class PrefixedName {
             return PrefixedName.withPrefix(qName.getPrefix(), qName.getLocalPart());
         }
     }
-
 
     @Override
     public boolean equals(Object o) {

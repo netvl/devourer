@@ -11,10 +11,6 @@ import org.googolplex.devourer.configuration.reactions.ReactionBefore;
 
 import java.util.Map;
 
-/**
- * Date: 19.02.13
- * Time: 14:03
- */
 public class MappingBinderImpl implements MappingBinder {
     protected final ListMultimap<Path, ReactionBefore> beforeMappings = ArrayListMultimap.create();
     protected final ListMultimap<Path, ReactionAfter> afterMappings = ArrayListMultimap.create();

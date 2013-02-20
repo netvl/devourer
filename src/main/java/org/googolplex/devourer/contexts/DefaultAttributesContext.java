@@ -9,8 +9,8 @@ import java.util.Collection;
 import java.util.Map;
 
 /**
- * Date: 19.02.13
- * Time: 10:56
+ * Default implementation of {@link ElementContext} and {@link AttributesContext}. Can be constructed using
+ * {@link Builder}.
  */
 public class DefaultAttributesContext implements AttributesContext {
     private final PrefixedName name;
@@ -35,8 +35,13 @@ public class DefaultAttributesContext implements AttributesContext {
     }
 
     @Override
-    public Optional<String> attribute(String name, String namespace) {
-        return Optional.fromNullable(attributes.get(PrefixedName.withPrefix(namespace, name)));
+    public Optional<String> attribute(String name, String prefix) {
+        return Optional.fromNullable(attributes.get(PrefixedName.withPrefix(prefix, name)));
+    }
+
+    @Override
+    public Optional<String> attribute(PrefixedName name) {
+        return Optional.fromNullable(attributes.get(name));
     }
 
     @Override
@@ -45,7 +50,7 @@ public class DefaultAttributesContext implements AttributesContext {
     }
 
     @Override
-    public Optional<String> elementNamespace() {
+    public Optional<String> elementPrefix() {
         return name.prefix;
     }
 
