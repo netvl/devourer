@@ -13,15 +13,21 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Date: 19.02.13
- * Time: 19:14
- *
- * @author Vladimir Matveev
+ * Utility class with functions related to mappings management.
  */
 public final class Mappings {
     private Mappings() {
     }
 
+    /**
+     * Combines three multimaps from {@link Path}s to reactions into single map
+     * from {@link Path}s to {@link PathMapping}s. Used by mapping configuration parsers.
+     *
+     * @param beforeMappings a collection of before-reactions
+     * @param atMappings a collection of at-reactions
+     * @param afterMappings a collection of after-reactions
+     * @return combined collection of all reactions
+     */
     public static Map<Path, PathMapping> combineMappings(ListMultimap<Path, ReactionBefore> beforeMappings,
                                                          ListMultimap<Path, ReactionAt> atMappings,
                                                          ListMultimap<Path, ReactionAfter> afterMappings) {

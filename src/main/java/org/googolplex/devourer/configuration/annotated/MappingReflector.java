@@ -31,8 +31,19 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Date: 19.02.13
- * Time: 17:02
+ * {@link MappingReflector} class supports creation of mappings from a class annotated in a special way.
+ * The syntax and overall view of such class is heavily inspired by Spring controllers configuration.
+ *
+ * <p>A class of supplied object should contain methods annotated either with {@link Before}, {@link At} or
+ * {@link After} annotation, each of which designating either before-, at- or after-action. These annotations
+ * accept mandatory string parameter, a path to the element inside XML document this method will handle.</p>
+ *
+ * <p>Each method optionally can return a value. Such method can optionally be annotated with {@link PushTo}
+ * annotations, which accepts string argument, a stack name. If non-void method is not annotated with {@link PushTo},
+ * it is considered as being annotated with {@code @PushTo(Stacks.DEFAULT_STACK}. The return value of
+ * such method will be pushed onto the corresponding stack during parsing process.</p>
+ *
+ * <p>Each method can take variable number of arguments.</p>
  */
 public class MappingReflector {
     public Map<Path, PathMapping> collectMappings(Object object) {

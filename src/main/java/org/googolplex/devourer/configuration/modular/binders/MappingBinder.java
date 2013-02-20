@@ -6,10 +6,19 @@ import org.googolplex.devourer.paths.PathMapping;
 import java.util.Map;
 
 /**
- * Date: 19.02.13
- * Time: 13:51
+ * See DSL usage examples in {@link org.googolplex.devourer.configuration.modular.AbstractMappingModule}
+ * documentation.
  */
 public interface MappingBinder {
+    /**
+     * See DSL usage examples in {@link org.googolplex.devourer.configuration.modular.AbstractMappingModule}
+     * documentation.
+     */
     ReactionBindingBuilder on(String route);
+
+    /**
+     * See DSL usage examples in {@link org.googolplex.devourer.configuration.modular.AbstractMappingModule}
+     * documentation.
+     */
     Map<Path, PathMapping> mappings();
 }

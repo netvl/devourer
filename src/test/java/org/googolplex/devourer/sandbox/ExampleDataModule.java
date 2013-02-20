@@ -1,6 +1,7 @@
 package org.googolplex.devourer.sandbox;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import org.googolplex.devourer.Stacks;
 import org.googolplex.devourer.configuration.modular.AbstractMappingModule;
 import org.googolplex.devourer.contexts.AttributesContext;
@@ -74,5 +75,44 @@ public class ExampleDataModule extends AbstractMappingModule {
                     builder.addHeader(context.attribute("name").get(), body);
                 }
             });
+
+        on("/")
+            .doBefore(new ReactionBefore() {
+                @Override
+                public void react(Stacks stacks, AttributesContext context) {
+                    stacks.push(ImmutableMap.builder());
+                }
+            })
+            .doAfter(new ReactionAfter() {
+                @Override
+                public void react(Stacks stacks, AttributesContext context) {
+                    ImmutableMap.Builder<String, String> builder = stacks.pop();
+                    stacks.push(builder.build());
+                }
+            });
+
+        on("/header")
+            .doBefore(new ReactionBefore() {
+                @Override
+                public void react(Stacks stacks, AttributesContext context) {
+                    stacks.push(context.attribute("name").get());
+                }
+            })
+            .doAt(new ReactionAt() {
+                @Override
+                public void react(Stacks stacks, AttributesContext context, String body) {
+                    stacks.push(body);
+                }
+            })
+            .doAfter(new ReactionAfter() {
+                @Override
+                public void react(Stacks stacks, AttributesContext context) {
+                    String value = stacks.pop();
+                    String name = stacks.pop();
+                    ImmutableMap.Builder<String, String> builder = stacks.peek();
+                    builder.put(name, value);
+                }
+            });
+
     }
 }
