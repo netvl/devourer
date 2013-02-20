@@ -54,7 +54,7 @@ public class DevourerTest {
                                             new DevoConfig1());
         Stacks stacks = devourer.parse(EXAMPLE);
 
-        List<ExampleData> dataList = stacks.pop();
+        List<ExampleData> dataList = stacks.pop("results");
 
         assertEquals(1, dataList.size());
 
