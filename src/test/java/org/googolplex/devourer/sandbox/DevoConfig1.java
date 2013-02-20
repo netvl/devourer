@@ -53,7 +53,7 @@ public class DevoConfig1 {
     }
 
     @After("/data")
-    @PushTo(Stacks.DEFAULT_STACK)
+    @PushTo("results")
     public List<ExampleData> finishData(@Pop ImmutableList.Builder<ExampleData> dataBuilder) {
         return dataBuilder.build();
     }

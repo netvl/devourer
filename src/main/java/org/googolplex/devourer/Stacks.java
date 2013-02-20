@@ -5,6 +5,10 @@ import java.util.NoSuchElementException;
 /**
  * An interface to a set of named stacks. Also provides an access to some default stack.
  * A stack is created on the first write access to it.
+ *
+ * <p>The default implementation, {@link DefaultStacks}, is not thread-safe. It is not a problem for
+ * Devourer itself (it does not use threads during parsing process), but should be taken into account
+ * when you work with this object after parsing is done.</p>
  */
 public interface Stacks {
     /**
@@ -68,4 +72,19 @@ public interface Stacks {
      * @throws NoSuchElementException if stack is empty or does not exist
      */
     <T> T pop() throws NoSuchElementException;
+
+    /**
+     * Checks whether the given stack is empty.
+     *
+     * @param stack name of the stack
+     * @return {@code true} if stack is empty or does not exist, {@code false} otherwise
+     */
+    boolean isEmpty(String stack);
+
+    /**
+     * Checks whether the default stack is empty.
+     *
+     * @return {@code true} if stack is empty or does not exist, {@code false} otherwise
+     */
+    boolean isEmpty();
 }
