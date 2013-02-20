@@ -19,7 +19,7 @@ public class DefaultStacks implements Stacks {
 
     @Override
     public <T> void push(T object) {
-        push(Constants.Stacks.MAIN_STACK, object);
+        push(Stacks.DEFAULT_STACK, object);
     }
 
     @Override
@@ -29,7 +29,7 @@ public class DefaultStacks implements Stacks {
 
     @Override
     public <T> T peek() {
-        return peek(Constants.Stacks.MAIN_STACK);
+        return peek(Stacks.DEFAULT_STACK);
     }
 
     @Override
@@ -39,7 +39,7 @@ public class DefaultStacks implements Stacks {
 
     @Override
     public <T> T pop() {
-        return pop(Constants.Stacks.MAIN_STACK);
+        return pop(Stacks.DEFAULT_STACK);
     }
 
     private Deque<Object> getStack(String name) {

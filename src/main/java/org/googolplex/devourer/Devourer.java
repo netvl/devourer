@@ -1,7 +1,10 @@
 package org.googolplex.devourer;
 
 import org.googolplex.devourer.configuration.DevourerConfig;
+import org.googolplex.devourer.configuration.annotated.MappingReflector;
 import org.googolplex.devourer.configuration.modular.MappingModule;
+import org.googolplex.devourer.configuration.modular.binders.MappingBinder;
+import org.googolplex.devourer.configuration.modular.binders.MappingBinderImpl;
 import org.googolplex.devourer.contexts.AttributesContext;
 import org.googolplex.devourer.contexts.DefaultAttributesContext;
 import org.googolplex.devourer.paths.Path;
@@ -25,9 +28,13 @@ import java.util.Deque;
 import java.util.Map;
 
 /**
- * Devourer pulls and XML from the given source and performs a number of actions on it. These actions are configured
- * via {@link MappingModule} instance. Devourer produces {@link Stacks} instance which will contain all output
- * produced by actions.
+ * Devourer pulls XML from the given source and performs preconfigured actions on it. These actions are defined
+ * using either {@link MappingModule} instance or annotated configuration. Devourer produces {@link Stacks}
+ * instance which contains all output produced by actions.
+ *
+ * <p>Most implementations of StAX {@link XMLInputFactory} seem to be thread-safe after their configuration,
+ * so it is possible to use Devourer instance across multiple threads simultaneously, that is,
+ * Devourer should be thread-safe.</p>
  */
 public class Devourer {
     private final DevourerConfig config;
@@ -40,26 +47,137 @@ public class Devourer {
         this.mappings = mappings;
     }
 
+    /**
+     * Creates new {@link Devourer} with actions defined in the provided {@link MappingModule} using
+     * default configuration.
+     *
+     * @param module mapping module with configured actions
+     * @return new Devourer instance
+     */
+    public static Devourer create(MappingModule module) {
+        return create(DevourerConfig.builder().build(), module);
+    }
+
+    /**
+     * Creates new {@link Devourer} with actions defined in the provided {@link MappingModule} using
+     * specified configuration.
+     *
+     * @param devourerConfig configuration object
+     * @param module mapping module with configured actions
+     * @return new Devourer instance
+     */
+    public static Devourer create(DevourerConfig devourerConfig, MappingModule module) {
+        MappingBinder binder = new MappingBinderImpl();
+        module.configure(binder);
+        Map<Path, PathMapping> mappings = binder.mappings();
+
+        return new Devourer(devourerConfig, createXMLInputFactory(devourerConfig), mappings);
+    }
+
+    /**
+     * Creates new {@link Devourer} with actions defined in the annotated class of the provided object using
+     * default configuration.
+     *
+     * @param configObject object of a class with annotated configuration
+     * @return new Devourer instance
+     */
+    public static Devourer create(Object configObject) {
+        return create(DevourerConfig.builder().build(), configObject);
+    }
+
+    /**
+     * Creates new {@link Devourer} with actions defined in the annotated class of the provided object using
+     * default configuration.
+     *
+     * @param devourerConfig configuration object
+     * @param configObject object of a class with annotated configuration
+     * @return new Devourer instance
+     */
+    public static Devourer create(DevourerConfig devourerConfig, Object configObject) {
+        MappingReflector reflector = new MappingReflector();
+        Map<Path, PathMapping> mappings = reflector.collectMappings(configObject);
+
+        return new Devourer(devourerConfig, createXMLInputFactory(devourerConfig), mappings);
+    }
+
+    private static XMLInputFactory createXMLInputFactory(DevourerConfig devourerConfig) {
+        // Create input factory and configure it
+        XMLInputFactory inputFactory = XMLInputFactory.newFactory();
+        for (Map.Entry<String, String> entry : devourerConfig.staxConfig.entrySet()) {
+            inputFactory.setProperty(entry.getKey(), entry.getValue());
+        }
+
+        return inputFactory;
+    }
+
+    /**
+     * Parses an XML document contained inside the given string.
+     *
+     * @param string a string with XML document
+     * @return stacks object with parsing results
+     * @throws XMLStreamException in case of XML parsing errors
+     */
     public Stacks parse(String string) throws XMLStreamException {
         return parse(new StringReader(string));
     }
 
+    /**
+     * Parses an XML document contained inside the given array of bytes. The bytes are considered to contain a text
+     * encoded using {@code charset} encoding.
+     *
+     * @param bytes byte array containing an XML document
+     * @param charset an encoding of the of the text inside byte array
+     * @return stacks object with parsing results
+     * @throws XMLStreamException in case of XML parsing errors
+     */
     public Stacks parse(byte[] bytes, Charset charset) throws XMLStreamException {
         return parse(new ByteArrayInputStream(bytes), charset);
     }
 
+    /**
+     * Parses an XML document contained inside the given array of bytes. The bytes array is considered to contain
+     * a text encoded using default encoding.
+     *
+     * @param bytes byte array containing an XML document
+     * @return stacks object with parsing results
+     * @throws XMLStreamException in case of XML parsing errors
+     */
     public Stacks parse(byte[] bytes) throws XMLStreamException {
         return parse(bytes, Charset.defaultCharset());
     }
 
-    public Stacks parse(InputStream inputStream) throws XMLStreamException {
-        return parse(inputStream, Charset.defaultCharset());
-    }
-
+    /**
+     * Parses an XML document contained within the given input stream. The stream is considered to be encoded using
+     * {@code charset} encoding.
+     *
+     * @param inputStream input stream containing an XML document
+     * @param charset an encoding of the input stream
+     * @return stacks object with parsing results
+     * @throws XMLStreamException in case of XML parsing errors
+     */
     public Stacks parse(InputStream inputStream, Charset charset) throws XMLStreamException {
         return parse(new InputStreamReader(inputStream, charset));
     }
 
+    /**
+     * Parses an XML document contained within the given input stream. The stream is considered to be encoded using
+     * default encoding.
+     *
+     * @param inputStream input stream containing an XML document
+     * @return stacks object with parsing results
+     * @throws XMLStreamException in case of XML parsing errors
+     */
+    public Stacks parse(InputStream inputStream) throws XMLStreamException {
+        return parse(inputStream, Charset.defaultCharset());
+    }
+
+    /**
+     * Parses and XML document contained within the given reader.
+     *
+     * @param reader reader containing an XML document
+     * @return stacks objects with parsing results
+     * @throws XMLStreamException in case of XML parsing errors
+     */
     public Stacks parse(Reader reader) throws XMLStreamException {
         XMLStreamReader streamReader = inputFactory.createXMLStreamReader(reader);
 

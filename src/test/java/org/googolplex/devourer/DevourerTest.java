@@ -33,9 +33,8 @@ public class DevourerTest {
 
     @Test
     public void testModularConfig() throws Exception {
-        Devourer devourer = DevourerMaker.create(DevourerConfig.builder().setStripSpaces(true).build(),
-                                                 new ExampleDataModule())
-                                         .make();
+        Devourer devourer = Devourer.create(DevourerConfig.builder().setStripSpaces(true).build(),
+                                            new ExampleDataModule());
         Stacks stacks = devourer.parse(EXAMPLE);
 
         List<ExampleData> dataList = stacks.pop();
@@ -51,12 +50,11 @@ public class DevourerTest {
 
     @Test
     public void testAnnotatedConfig() throws Exception {
-        Devourer devourer = DevourerMaker.create(DevourerConfig.builder().setStripSpaces(true).build(),
-                                                 new DevoConfig1())
-                                         .make();
+        Devourer devourer = Devourer.create(DevourerConfig.builder().setStripSpaces(true).build(),
+                                            new DevoConfig1());
         Stacks stacks = devourer.parse(EXAMPLE);
 
-        List<ExampleData> dataList = stacks.pop(Constants.Stacks.RESULT_STACK);
+        List<ExampleData> dataList = stacks.pop();
 
         assertEquals(1, dataList.size());
 
