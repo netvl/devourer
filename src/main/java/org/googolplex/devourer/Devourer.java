@@ -41,8 +41,35 @@ import java.util.Map;
  * so it is possible to use Devourer instance across multiple threads simultaneously, that is,
  * Devourer should be thread-safe.</p>
  *
+ * <p>Devourer parses XML document and executes series of actions on each node it encounters. Concrete actions are
+ * configured by the user. Each action is set to execute on certain <i>path</i> inside the document. Path
+ * looks like very simple XPath expression or real path inside the filesystem: {@code /node/in/document}.
+ * Actions can be of three types: <i>before-actions</i>, <i>at-actions</i> and <i>after-actions</i>. Correspondingly,
+ * before-actions are executed before Devourer digs deeper into the insides of the current XML node (i.e. when
+ * start element is encountered), at-actions are executed when textual body of the current XML node is encountered,
+ * and after-actions are executed after whole node has been processed, i.e. when end element is encountered.</p>
+ *
+ * <p>Actions are represented by interfaces, {@link ReactionBefore}, {@link ReactionAt} and
+ * {@link ReactionAfter}. These are functional interfaces (in terms of Java 8 Lambda extension), that is,
+ * they consists of single method. In each type this method accepts {@link Stacks} object and {@link AttributesContext}
+ * object. {@link ReactionAt} interface also accepts additional {@link String} parameter.</p>
+ *
+ * <p>{@link Stacks} object is the main data container for the Devourer; it contains intermediate
+ * objects, e.g. builders, and it should contain results of the processing. This object is returned by
+ * {@code parse()} family of methods. {@link AttributesContext} object contains information about the element
+ * currently being processed: name and namespace of the element, as well as its attributes.
+ * {@link ReactionAt}'s additional {@link String} parameter is set to the body of the element.</p>
+ *
+ * <p>So, the overall picture of Devourer processing looks as follows. First, you configure a number
+ * of actions to be taken on the nodes of expected XML document. Then you ask Devourer to parse
+ * the document. Devourer walks through the document and executes the configured actions on each appropriate
+ * node. These actions modify {@link Stacks} object based on information provided by the Devourer
+ * by the means of {@link AttributesContext} object and {@link String} element content. When the whole document
+ * has been processed, Devourer returns the {@link Stacks} object used during the processing, which
+ * contains results of the actions.</p>
+ *
  * <p>See documentation of {@link org.googolplex.devourer.configuration.modular.AbstractMappingModule} and
- * {@link MappingReflector} to find out about mapping configuration. </p>
+ * {@link MappingReflector} to find out about mapping configuration details.</p>
  */
 public class Devourer {
     private final DevourerConfig config;

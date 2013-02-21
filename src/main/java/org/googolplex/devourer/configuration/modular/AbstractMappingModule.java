@@ -67,7 +67,13 @@ import org.googolplex.devourer.configuration.modular.binders.MappingBinder;
  * <p>Usually IDEs allow to fold anonymous class definitions. With this feature definitions of reactions
  * looks like Java 8 lambda constructions. In fact, since all {@code Reaction*} interfaces are
  * <i>functional interfaces</i> in terms of Java 8, it is possible to use short lambda syntax to define reactions
- * if you use Java 8.</p>
+ * if you use Java 8. This makes mapping definitions look nice and clean while retaining good performance
+ * characteristics.</p>
+ *
+ * <p>Instances of {@code Reaction*} interfaces are shared between threads when the Devourer is used from multiple
+ * threads, so it is inadvisable to hold any state inside these objects directly, as it ruins Devourer's thread safety.
+ * Use only {@link org.googolplex.devourer.Stacks} object provided to the reactions to hold state of the parsing
+ * process; in this case thread safety is guaranteed.</p>
  */
 public abstract class AbstractMappingModule implements MappingModule {
     private MappingBinder binder = null;
