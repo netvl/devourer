@@ -265,19 +265,24 @@ public class MappingReflector {
     }
 
     private static class AbstractReflectedReaction {
-        private static final ThreadLocal<Object[]> arguments = new ThreadLocal<Object[]>();
+        private final ThreadLocal<Object[]> arguments;
         private final Object object;
         private final Method method;
         private final Optional<String> stack;
         private final List<ParameterInfo> parameterInfos;
 
         private AbstractReflectedReaction(Object object, Method method, Optional<String> stack,
-                                          List<ParameterInfo> parameterInfos) {
+                                          final List<ParameterInfo> parameterInfos) {
             this.object = object;
             this.method = method;
             this.stack = stack;
             this.parameterInfos = parameterInfos;
-            arguments.set(new Object[parameterInfos.size()]);
+            this.arguments = new ThreadLocal<Object[]>() {
+                @Override
+                protected Object[] initialValue() {
+                    return new Object[parameterInfos.size()];
+                }
+            };
         }
 
         protected void fillArguments(Stacks stacks, AttributesContext context, Optional<String> body) {
