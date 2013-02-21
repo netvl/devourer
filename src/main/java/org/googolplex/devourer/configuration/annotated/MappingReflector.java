@@ -36,7 +36,8 @@ import java.util.Map;
  * Basic idea of such configuration is that each method of this class considered to be an action which Devourer
  * should perform during parsing, much like full-fledged actions (implementations of {@code Reaction*} interfaces),
  * which are configured in modular configuration (see
- * {@link org.googolplex.devourer.configuration.modular.AbstractMappingModule}).
+ * {@link org.googolplex.devourer.configuration.modular.AbstractMappingModule}). The actions are configured
+ * using annotations metadata.
  *
  * <p>A class of supplied object should contain methods annotated either with {@link Before}, {@link At} or
  * {@link After} annotation, each of which designating either before-, at- or after-action. These annotations
@@ -45,9 +46,82 @@ import java.util.Map;
  * <p>Each method optionally can return a value. Such method can optionally be annotated with {@link PushTo}
  * annotations, which accepts string argument, a stack name. If non-void method is not annotated with {@link PushTo},
  * it is considered as being annotated with {@code @PushTo(Stacks.DEFAULT_STACK}. The return value of
- * such method will be pushed onto the corresponding stack during parsing process.</p>
+ * such method will be pushed onto the corresponding stack during parsing process. It is an error to return
+ * instances of {@link AttributesContext}, {@link ElementContext} or {@link Stacks} interfaces.</p>
  *
- * <p>Each method can take variable number of arguments. Arguments can be of any type, however, the </p>
+ * <p>Each method can take variable number of arguments. Argument types and annotations are inspected in order
+ * to find out which values to inject into them. If argument type is {@link AttributesContext} or
+ * {@link ElementContext}, the element context will be injected into it. If argument type is {@link String},
+ * textual body of the currently processed element will be injected into it (only applicable to at-actions).
+ * If argument type is {@link Stacks}, the stacks object used in this processing will be injected into the
+ * it. However, the need for manual injection of {@link Stacks} is alleviated by {@link PushTo} annotation
+ * and {@link Peek} and {@link Pop} annotations, described in the next paragraph.</p>
+ *
+ * <p>If argument type is not {@link AttributesContext}, {@link ElementContext} or {@link Stacks},
+ * then the parameter must be annotated with one of the following annotations: {@link Peek}, {@link PeekFrom},
+ * {@link Pop}, {@link PopFrom}. {@link PeekFrom} and {@link PopFrom} accept a string parameter
+ * which should be the name of the stack. {@code @Peek} is considered equals to {@code @PeekFrom(Stacks.DEFAULT_STACK)},
+ * {@code @Pop} is considered equals to {@code @PopFrom(Stacks.DEFAULT_STACK}. These annotations allow implicit
+ * manipulation of stacks object. Essentialy, such annotated fields will be injected with the object from the
+ * top of the stack; if the field is annotated with {@code Pop*} annotation, the object being injected will
+ * be removed from the stack; if the field is annotated with {@code Peek*} annotation, the object will be
+ * retained on the top of the stack. Consequently, the number and the order of annotations matter.</p>
+ *
+ * <p>The arguments of the method are inspected in declaration order, and actions on the stacks object during the
+ * processing are taken exactly in this order too. So, if you have e.g. the following declaration:
+ * <pre>
+ *    {@literal @}After("/some/node")
+ *     public String someAction({@literal @}Pop String value1, {@literal @}Pop String value2,
+ *                              {@literal @}Peek String value3, {@literal @}Peek String value4,
+ *                              {@literal @}Pop value5) {
+ *         // Actions
+ *         return someResult;
+ *     }
+ * </pre>
+ * then it will be equivalent to the following explicit action bound inside
+ * {@link org.googolplex.devourer.configuration.modular.AbstractMappingModule}:
+ * <pre>
+ *     on("/some/node")
+ *         .doAfter(new ReactionAfter() {
+ *            {@literal @}Override
+ *             public void react(Stacks stacks, AttributeContext context) {
+ *                 String value1 = stacks.pop();
+ *                 String value2 = stacks.pop();
+ *                 String value3 = stacks.peek();
+ *                 String value4 = stacks.peek();
+ *                 String value5 = stacks.pop();
+ *                 // Actions
+ *                 stacks.push(someResult);
+ *             }
+ *         });
+ * </pre>
+ * Compare the order of parameters declaration of the annotated method and definition order of local variables bound
+ * to stack values directly inside the action code. The stack effect of actions will be exactly the same in both
+ * examples.</p>
+ *
+ * <p>Stacks object is updated just before and right after calling the annotated method; this means that if
+ * you inject {@link Stacks} object in the method, then it already will be updated according to parameters
+ * annotations; if your method returns some value, the stacks object will be updated after method invocation.</p>
+ *
+ * <p>An order of actions is undefined in this variant of mapping configuration, that is, it is not guaranteed
+ * that the actions will be invoked in some order during the parsing process. If you need well-defined ordering,
+ * use modular configuration instead.</p>
+ *
+ * <p>Internally annotated mapping creates a number of standard {@code Reaction*} instances which
+ * wrap configuration object methods invocation using reflection, which is significantly expensive,
+ * especially when used in tight loops. An attempt is made to make annotated actions invocations as cheap is possible.
+ * Configuration class inspection is done only at Devourer creation time. During the parsing only one reflection call
+ * is made for each action invocation. However, if you need as much performance as you can get, consider using
+ * modular configuration; it is done completely without reflection and should be as fast as it is possible at all.</p>
+ *
+ * <p>Single configuration object is used for all processings done by single Devourer, so is inadvisable to hold
+ * any state inside configuration object because this will ruin Devourer's thread safety. Use only {@link Stacks}
+ * object to hold the state of parsing process (either directly or via annotations and method return values);
+ * this way the parsing process is guaranteed to be thread-safe.</p>
+ *
+ * <p>Despite that action objects generated during annotated configuration processing contain some internal mutable
+ * state, it is wrapped into {@link ThreadLocal}, so it is not possible for different threads to interfere with
+ * each other.</p>
  */
 public class MappingReflector {
     public Map<Path, PathMapping> collectMappings(Object object) {
@@ -71,6 +145,17 @@ public class MappingReflector {
                 // Check whether the method returns something and try to get stack name where to push
                 Optional<String> stack = Optional.absent();
                 if (method.getReturnType() != void.class) {
+                    // Method cannot return stacks or element context
+                    if (method.getReturnType() == Stacks.class ||
+                        method.getReturnType() == ElementContext.class ||
+                        method.getReturnType() == AttributesContext.class) {
+                        throw new MappingException(
+                            String.format(
+                                "Invalid return type of method %s: %s",
+                                method.getName(), method.getReturnType().getSimpleName()
+                            )
+                        );
+                    }
                     String stackName = Stacks.DEFAULT_STACK;
                     if (method.isAnnotationPresent(PushTo.class)) {
                         stackName = method.getAnnotation(PushTo.class).value();
@@ -105,8 +190,13 @@ public class MappingReflector {
                     if (type == AttributesContext.class || type == ElementContext.class) {
                         parameterInfos.add(new ParameterInfo(ParameterKind.CONTEXT));
 
+                    // Parameter is of stacks type1
+                    } else if (type == Stacks.class) {
+                        parameterInfos.add(new ParameterInfo(ParameterKind.STACKS));
+
                     // Parameter is of string type -- body
-                    } else if (type == String.class) {
+                    } else if (type == String.class &&
+                               !anyPresent(annotations, Pop.class, PopFrom.class, Peek.class, PeekFrom.class)) {
                         if (!method.isAnnotationPresent(At.class)) {
                             throw new MappingException("Requested body not in @At method");
                         }
@@ -163,12 +253,23 @@ public class MappingReflector {
         return Mappings.combineMappings(beforeMappings, atMappings, afterMappings);
     }
 
+    private boolean anyPresent(Annotation[] annotations, Class... what) {
+        for (Annotation first : annotations) {
+            for (Class second : what) {
+                if (first.getClass() == second) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private static class AbstractReflectedReaction {
+        private static final ThreadLocal<Object[]> arguments = new ThreadLocal<Object[]>();
         private final Object object;
         private final Method method;
         private final Optional<String> stack;
         private final List<ParameterInfo> parameterInfos;
-        private final Object[] arguments;
 
         private AbstractReflectedReaction(Object object, Method method, Optional<String> stack,
                                           List<ParameterInfo> parameterInfos) {
@@ -176,7 +277,7 @@ public class MappingReflector {
             this.method = method;
             this.stack = stack;
             this.parameterInfos = parameterInfos;
-            this.arguments = new Object[parameterInfos.size()];
+            arguments.set(new Object[parameterInfos.size()]);
         }
 
         protected void fillArguments(Stacks stacks, AttributesContext context, Optional<String> body) {
@@ -185,20 +286,24 @@ public class MappingReflector {
                 switch (parameterInfo.kind) {
                     case POP: {
                         Object object = stacks.pop(parameterInfo.argument.get());
-                        arguments[i] = object;
+                        arguments.get()[i] = object;
                         break;
                     }
                     case PEEK: {
                         Object object = stacks.peek(parameterInfo.argument.get());
-                        arguments[i] = object;
+                        arguments.get()[i] = object;
                         break;
                     }
                     case BODY: {
-                        arguments[i] = body.get();
+                        arguments.get()[i] = body.get();
                         break;
                     }
                     case CONTEXT: {
-                        arguments[i] = context;
+                        arguments.get()[i] = context;
+                        break;
+                    }
+                    case STACKS: {
+                        arguments.get()[i] = stacks;
                         break;
                     }
                     default:
@@ -211,7 +316,7 @@ public class MappingReflector {
             fillArguments(stacks, context, body);
             Object result;
             try {
-                result = method.invoke(object, arguments);
+                result = method.invoke(object, arguments.get());
             } catch (Exception e) {
                 throw new DevourerException("Error invoking reaction method", e);
             }
@@ -258,7 +363,7 @@ public class MappingReflector {
     }
 
     private static enum ParameterKind {
-        POP, PEEK, BODY, CONTEXT
+        POP, PEEK, BODY, CONTEXT, STACKS
     }
 
     private static class ParameterInfo {
