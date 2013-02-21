@@ -6,12 +6,35 @@
 
     <groupId>org.bitbucket.googolplex.devourer</groupId>
     <artifactId>devourer</artifactId>
-    <version>0.1</version>
+    <version>0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Devourer</name>
     <description>Feeds on XML and produces objects</description>
     <url>http://bitbucket.org/googolplex/devourer</url>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <url>https://bitbucket.org/googolplex/devourer</url>
+        <connection>scm:hg:https://bitbucket.org/googolplex/devourer</connection>
+        <developerConnection>scm:hg:https://bitbucket.org/googolplex/devourer</developerConnection>
+    </scm>
+
+    <developers>
+        <developer>
+            <id>owner</id>
+            <name>Vladimir Matveev</name>
+            <email>dpx.infinity@gmail.com</email>
+            <timezone>UTC+4</timezone>
+        </developer>
+    </developers>
 
     <dependencies>
         <dependency>
@@ -27,5 +50,43 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>release-sign-artifacts</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.4</version>
+                        <configuration>
+                            <passphrase>${gpg.passphrase}</passphrase>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
     
 </project>
