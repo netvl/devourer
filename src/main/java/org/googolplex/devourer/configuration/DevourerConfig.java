@@ -46,7 +46,7 @@ public class DevourerConfig {
 
         /**
          * Sets whether Devourer should strip side spaces around element content before providing it to the
-         * reaction.
+         * reaction. True by default; it is usually what is expected from the XML parser.
          *
          * @return this object
          */
@@ -65,7 +65,7 @@ public class DevourerConfig {
          */
         public Builder setStaxProperty(String name, String value) {
             Preconditions.checkNotNull(name, "StAX property name is null");
-            Preconditions.checkNotNull(value, "StAX value name is null");
+            Preconditions.checkNotNull(value, "StAX property value is null");
 
             this.staxConfig.put(name, value);
             return this;

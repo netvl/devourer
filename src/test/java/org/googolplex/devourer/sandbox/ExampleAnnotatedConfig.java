@@ -18,7 +18,7 @@ import java.util.List;
  *
  * @author Vladimir Matveev
  */
-public class DevoConfig1 {
+public class ExampleAnnotatedConfig {
     @Before("/data")
     @PushTo(Stacks.DEFAULT_STACK)    // unnecessary
     public ImmutableList.Builder<ExampleData> initData() {
