@@ -25,8 +25,8 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Date: 19.02.13
- * Time: 10:25
+ * Simple wrapper around {@link List} of strings. Used to represent a path inside XML document
+ * during the parsing process.
  */
 public class Path {
     public final List<String> elements;

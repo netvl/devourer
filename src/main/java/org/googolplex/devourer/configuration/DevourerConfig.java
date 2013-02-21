@@ -22,8 +22,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Date: 19.02.13
- * Time: 15:12
+ * A container class for Devourer configuration. Currently the following parameters can be configured:
+ * <ul>
+ *     <li>an option whether the Devourer should trim side spaces of body content before providing it
+ *     to the reactions - {@code true} by default;</li>
+ *     <li>StAX parser parameters, as defined in {@link javax.xml.stream.XMLInputFactory} documentation.</li>
+ * </ul>
+ *
+ * <p>A {@link Builder} can be used to construct instances of this class.</p>
  */
 public class DevourerConfig {
     public final boolean stripSpaces;
@@ -41,24 +47,41 @@ public class DevourerConfig {
     }
 
     public static class Builder {
-        private boolean stripSpaces = false;
+        private boolean stripSpaces = true;
         private Map<String, String> staxConfig = new HashMap<String, String>();
 
         private Builder() {
         }
 
+        /**
+         * @return new configuration instance created from the accumulated values
+         */
         public DevourerConfig build() {
             return new DevourerConfig(stripSpaces, staxConfig);
         }
 
+        /**
+         * Sets whether Devourer should strip side spaces around element content before providing it to the
+         * reaction. True by default; it is usually what is expected from the XML parser.
+         *
+         * @return this object
+         */
         public Builder setStripSpaces(boolean stripSpaces) {
             this.stripSpaces = stripSpaces;
             return this;
         }
 
+        /**
+         * Sets StAX property given its name and value. See {@link javax.xml.stream.XMLInputFactory} documentation
+         * for the list of available properties.
+         *
+         * @param name property name
+         * @param value property value
+         * @return this object
+         */
         public Builder setStaxProperty(String name, String value) {
             Preconditions.checkNotNull(name, "StAX property name is null");
-            Preconditions.checkNotNull(value, "StAX value name is null");
+            Preconditions.checkNotNull(value, "StAX property value is null");
 
             this.staxConfig.put(name, value);
             return this;

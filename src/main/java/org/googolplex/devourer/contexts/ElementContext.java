@@ -19,10 +19,18 @@ package org.googolplex.devourer.contexts;
 import com.google.common.base.Optional;
 
 /**
- * Date: 18.02.13
- * Time: 15:03
+ * Element context contains information about the current element. It is provided to reactions configured
+ * in {@link org.googolplex.devourer.configuration.modular.MappingModule}s or to annotated methods in annotated
+ * configuration object.
  */
 public interface ElementContext {
+    /**
+     * @return local name of the currently processed element
+     */
     String elementName();
-    Optional<String> elementNamespace();
+
+    /**
+     * @return namespace prefix of the currently processed element, if present
+     */
+    Optional<String> elementPrefix();
 }

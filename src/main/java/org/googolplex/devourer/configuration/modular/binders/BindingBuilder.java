@@ -22,10 +22,6 @@ import org.googolplex.devourer.configuration.reactions.ReactionAfter;
 import org.googolplex.devourer.configuration.reactions.ReactionAt;
 import org.googolplex.devourer.configuration.reactions.ReactionBefore;
 
-/**
- * Date: 19.02.13
- * Time: 14:06
- */
 public class BindingBuilder implements ReactionBindingBuilder {
     private final MappingBinderImpl mappingBinder;
     private final String route;

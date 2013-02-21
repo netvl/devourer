@@ -22,8 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Date: 19.02.13
- * Time: 12:47
+ * Default implementation of {@link Stacks} interface based on {@link HashMap} of {@link Deque}s.
  */
 public class DefaultStacks implements Stacks {
     private final Map<String, Deque<Object>> stacks = new HashMap<String, Deque<Object>>();
@@ -35,7 +34,7 @@ public class DefaultStacks implements Stacks {
 
     @Override
     public <T> void push(T object) {
-        push(Constants.Stacks.MAIN_STACK, object);
+        push(Stacks.DEFAULT_STACK, object);
     }
 
     @Override
@@ -45,7 +44,7 @@ public class DefaultStacks implements Stacks {
 
     @Override
     public <T> T peek() {
-        return peek(Constants.Stacks.MAIN_STACK);
+        return peek(Stacks.DEFAULT_STACK);
     }
 
     @Override
@@ -55,7 +54,17 @@ public class DefaultStacks implements Stacks {
 
     @Override
     public <T> T pop() {
-        return pop(Constants.Stacks.MAIN_STACK);
+        return pop(Stacks.DEFAULT_STACK);
+    }
+
+    @Override
+    public boolean isEmpty(String stack) {
+        return getStack(stack).isEmpty();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return isEmpty(Stacks.DEFAULT_STACK);
     }
 
     private Deque<Object> getStack(String name) {
