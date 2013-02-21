@@ -33,6 +33,10 @@ import java.util.Map;
 /**
  * {@link MappingReflector} class supports creation of mappings from a class annotated in a special way.
  * The syntax and overall view of such class is heavily inspired by Spring controllers configuration.
+ * Basic idea of such configuration is that each method of this class considered to be an action which Devourer
+ * should perform during parsing, much like full-fledged actions (implementations of {@code Reaction*} interfaces),
+ * which are configured in modular configuration (see
+ * {@link org.googolplex.devourer.configuration.modular.AbstractMappingModule}).
  *
  * <p>A class of supplied object should contain methods annotated either with {@link Before}, {@link At} or
  * {@link After} annotation, each of which designating either before-, at- or after-action. These annotations
@@ -43,7 +47,7 @@ import java.util.Map;
  * it is considered as being annotated with {@code @PushTo(Stacks.DEFAULT_STACK}. The return value of
  * such method will be pushed onto the corresponding stack during parsing process.</p>
  *
- * <p>Each method can take variable number of arguments.</p>
+ * <p>Each method can take variable number of arguments. Arguments can be of any type, however, the </p>
  */
 public class MappingReflector {
     public Map<Path, PathMapping> collectMappings(Object object) {
