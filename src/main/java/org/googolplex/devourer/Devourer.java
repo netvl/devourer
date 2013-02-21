@@ -33,7 +33,7 @@ import java.util.Deque;
 import java.util.Map;
 
 /**
- * Devourer pulls XML from the given source and performs preconfigured actions on it. These actions are defined
+ * Devourer pulls XML from the given source and executes preconfigured actions on it. These actions are defined
  * using either {@link MappingModule} instance or annotated configuration. Devourer produces {@link Stacks}
  * instance which contains all output produced by actions.
  *
@@ -42,11 +42,11 @@ import java.util.Map;
  * Devourer should be thread-safe.</p>
  *
  * <p>Devourer parses XML document and executes series of actions on each node it encounters. Concrete actions are
- * configured by the user. Each action is set to execute on certain <i>path</i> inside the document. Path
- * looks like very simple XPath expression or real path inside the filesystem: {@code /node/in/document}.
+ * configured by the user. Each action is set to be executed on certain <i>path</i> inside the document. Path
+ * looks like very simple XPath expression or real path inside the filesystem, e.g. {@code /node/in/document}.
  * Actions can be of three types: <i>before-actions</i>, <i>at-actions</i> and <i>after-actions</i>. Correspondingly,
- * before-actions are executed before Devourer digs deeper into the insides of the current XML node (i.e. when
- * start element is encountered), at-actions are executed when textual body of the current XML node is encountered,
+ * before-actions are executed before Devourer digs deeper into the insides of the current XML node, i.e. when
+ * start element is encountered, at-actions are executed when textual body of the current XML node is encountered,
  * and after-actions are executed after whole node has been processed, i.e. when end element is encountered.</p>
  *
  * <p>Actions are represented by interfaces, {@link ReactionBefore}, {@link ReactionAt} and
@@ -54,7 +54,7 @@ import java.util.Map;
  * they consists of single method. In each type this method accepts {@link Stacks} object and {@link AttributesContext}
  * object. {@link ReactionAt} interface also accepts additional {@link String} parameter.</p>
  *
- * <p>{@link Stacks} object is the main data container for the Devourer; it contains intermediate
+ * <p>{@link Stacks} object is the main state container for the Devourer; it contains intermediate
  * objects, e.g. builders, and it should contain results of the processing. This object is returned by
  * {@code parse()} family of methods. {@link AttributesContext} object contains information about the element
  * currently being processed: name and namespace of the element, as well as its attributes.

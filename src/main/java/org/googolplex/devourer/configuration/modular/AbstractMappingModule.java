@@ -58,9 +58,54 @@ import org.googolplex.devourer.configuration.modular.binders.MappingBinder;
  * <p>That is, a configuration consists of series of {@code on()} clauses. Each clause defines a set of actions
  * which should be done either before, at or after corresponding XML node. Before-actions are invoked when
  * the start element is reached. At-actions are invoked when content of the element is reached. After-actions
- * are invoked when the end element is reached.</p>
+ * are invoked when the end element is reached. It is possible to have several {@code on()} clauses; this has
+ * the same effect as if you have written all action mappings sequentially inside one clause, i.e.
+ * <pre>
+ *     on("/node")
+ *         .doBefore(action1)
+ *         .doAt(action2)
+ *         .doAfter(action3);
  *
- * <p>Note, however, that at-actions are not invoked when the body is empty, that is, consists of whitespaces
+ *     on("/node")
+ *         .doBefore(action4)
+ *         .doAt(action5)
+ *         .doAfter(action6);
+ * </pre>
+ * is equivalent to
+ * <pre>
+ *     on("/node")
+ *         .doBefore(action1)
+ *         .doAt(action2)
+ *         .doAfter(action3)
+ *         .doBefore(action4)
+ *         .doAt(action5)
+ *         .doAfter(action6);
+ * </pre>
+ * or
+ * <pre>
+ *     on("/node")
+ *         .doBefore(action1)
+ *         .doBefore(action4)
+ *         .doAt(action2)
+ *         .doAt(action5)
+ *         .doAfter(action3)
+ *         .doAfter(action6);
+ * </pre>
+ * or even
+ * <pre>
+ *     on("/node")
+ *         .doAfter(action3)
+ *         .doAfter(action6)
+ *         .doBefore(action1)
+ *         .doBefore(action4)
+ *         .doAt(action2)
+ *         .doAt(action5);
+ * </pre>,
+ * because the ordering between different types of actions does not matter. However, ordering
+ * between the actions of the same type <i>does</i> matter: it is guaranteed that Devourer will execute these
+ * actions exactly in this order when it reaches corresponding node.</p>
+ *
+ * <p>Note that at-actions are not invoked when the body is empty, that is, consists of whitespaces
  * only. Whether the body consists of whitespaces is determined by
  * {@link javax.xml.stream.XMLStreamReader#isWhiteSpace()} method. This behavior should be taken into account.</p>
  *
