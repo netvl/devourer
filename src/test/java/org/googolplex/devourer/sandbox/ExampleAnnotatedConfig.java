@@ -17,7 +17,7 @@
 package org.googolplex.devourer.sandbox;
 
 import com.google.common.collect.ImmutableList;
-import org.googolplex.devourer.Constants;
+import org.googolplex.devourer.Stacks;
 import org.googolplex.devourer.configuration.annotated.annotations.After;
 import org.googolplex.devourer.configuration.annotated.annotations.At;
 import org.googolplex.devourer.configuration.annotated.annotations.Before;
@@ -34,9 +34,9 @@ import java.util.List;
  *
  * @author Vladimir Matveev
  */
-public class DevoConfig1 {
+public class ExampleAnnotatedConfig {
     @Before("/data")
-    @PushTo(Constants.Stacks.MAIN_STACK)    // unnecessary
+    @PushTo(Stacks.DEFAULT_STACK)    // unnecessary
     public ImmutableList.Builder<ExampleData> initData() {
         return ImmutableList.builder();
     }
@@ -69,6 +69,7 @@ public class DevoConfig1 {
     }
 
     @After("/data")
+    @PushTo("results")
     public List<ExampleData> finishData(@Pop ImmutableList.Builder<ExampleData> dataBuilder) {
         return dataBuilder.build();
     }

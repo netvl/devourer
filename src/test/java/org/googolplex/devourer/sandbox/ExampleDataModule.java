@@ -19,10 +19,10 @@ package org.googolplex.devourer.sandbox;
 import com.google.common.collect.ImmutableList;
 import org.googolplex.devourer.Stacks;
 import org.googolplex.devourer.configuration.modular.AbstractMappingModule;
-import org.googolplex.devourer.contexts.AttributesContext;
 import org.googolplex.devourer.configuration.reactions.ReactionAfter;
 import org.googolplex.devourer.configuration.reactions.ReactionAt;
 import org.googolplex.devourer.configuration.reactions.ReactionBefore;
+import org.googolplex.devourer.contexts.AttributesContext;
 
 /**
  * Date: 19.02.13
@@ -90,5 +90,6 @@ public class ExampleDataModule extends AbstractMappingModule {
                     builder.addHeader(context.attribute("name").get(), body);
                 }
             });
+
     }
 }
