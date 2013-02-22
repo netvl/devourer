@@ -265,42 +265,15 @@ public class Devourer {
 
                 if (streamReader.isStartElement()) {
                     currentPath = currentPath.resolve(streamReader.getLocalName());
-
-                    AttributesContext context = collectAttributesContext(streamReader);
-                    contextStack.push(context);
-
-                    PathMapping mapping = mappings.get(currentPath);
-                    if (mapping != null) {
-                        for (ReactionBefore reaction : mapping.befores) {
-                            reaction.react(stacks, context);
-                        }
-                    }
+                    handleStartElement(streamReader, currentPath, stacks, contextStack);
 
                 } else if (streamReader.isCharacters() && !streamReader.isWhiteSpace()) {
-                    String body = streamReader.getText();
-                    if (config.stripSpaces) {
-                        body = body.trim();
-                    }
-                    AttributesContext context = contextStack.peek();
-
-                    PathMapping mapping = mappings.get(currentPath);
-                    if (mapping != null) {
-                        for (ReactionAt reaction : mapping.ats) {
-                            reaction.react(stacks, context, body);
-                        }
-                    }
+                    handleContent(streamReader, currentPath, stacks, contextStack);
 
                 } else if (streamReader.isEndElement()) {
-                    AttributesContext context = contextStack.pop();
-
-                    PathMapping mapping = mappings.get(currentPath);
-                    if (mapping != null) {
-                        for (ReactionAfter reaction : mapping.afters) {
-                            reaction.react(stacks, context);
-                        }
-                    }
-
+                    handleEndElement(currentPath, stacks, contextStack);
                     currentPath = currentPath.moveUp();
+
                 }
             }
 
@@ -323,6 +296,46 @@ public class Devourer {
         }
 
         return stacks;
+    }
+
+    private void handleStartElement(XMLStreamReader streamReader, Path currentPath, Stacks stacks,
+                                    Deque<AttributesContext> contextStack) {
+        AttributesContext context = collectAttributesContext(streamReader);
+        contextStack.push(context);
+
+        PathMapping mapping = mappings.get(currentPath);
+        if (mapping != null) {
+            for (ReactionBefore reaction : mapping.befores) {
+                reaction.react(stacks, context);
+            }
+        }
+    }
+
+    private void handleContent(XMLStreamReader streamReader, Path currentPath, Stacks stacks,
+                               Deque<AttributesContext> contextStack) {
+        String body = streamReader.getText();
+        if (config.stripSpaces) {
+            body = body.trim();
+        }
+        AttributesContext context = contextStack.peek();
+
+        PathMapping mapping = mappings.get(currentPath);
+        if (mapping != null) {
+            for (ReactionAt reaction : mapping.ats) {
+                reaction.react(stacks, context, body);
+            }
+        }
+    }
+
+    private void handleEndElement(Path currentPath, Stacks stacks, Deque<AttributesContext> contextStack) {
+        AttributesContext context = contextStack.pop();
+
+        PathMapping mapping = mappings.get(currentPath);
+        if (mapping != null) {
+            for (ReactionAfter reaction : mapping.afters) {
+                reaction.react(stacks, context);
+            }
+        }
     }
 
     private AttributesContext collectAttributesContext(XMLStreamReader reader) {
