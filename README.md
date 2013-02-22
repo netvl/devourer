@@ -28,12 +28,16 @@ add it to your Maven dependency list:
 
 Usage
 -----
+
 See [here](TODO) for basic introduction to the library.
 
 Notes
 -----
+
 There are several points I think I should note about the library.
 
 * Namespace support is far from adequate. Currently all namespace filtering must be done inside
-  actions; also namespaces are mostly handled via prefixes. This should change in nearest future.
-* The library is not covered by automated tests.
+  actions; also namespaces are mostly handled via prefixes, not real namespace identifiers. This
+  should change in the nearest future.
+* The library is not covered by automatic tests. This is also likely to change soon.
+
