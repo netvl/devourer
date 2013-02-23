@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableMap;
 import org.googolplex.devourer.sandbox.ExampleAnnotatedConfig;
 import org.googolplex.devourer.sandbox.ExampleData;
 import org.googolplex.devourer.sandbox.ExampleDataModule;
+import org.googolplex.devourer.sandbox.ExampleDataModuleNamespaces;
 import org.junit.Test;
 
 import java.util.List;
@@ -52,7 +53,6 @@ public class DevourerTest {
         Stacks stacks = devourer.parse(EXAMPLE);
 
         List<ExampleData> dataList = stacks.pop();
-
         assertEquals(1, dataList.size());
 
         ExampleData data = dataList.get(0);
@@ -68,7 +68,6 @@ public class DevourerTest {
         Stacks stacks = devourer.parse(EXAMPLE);
 
         List<ExampleData> dataList = stacks.pop("results");
-
         assertEquals(1, dataList.size());
 
         ExampleData data = dataList.get(0);
@@ -77,4 +76,37 @@ public class DevourerTest {
         assertEquals(ImmutableList.of(0.3, 0.2), data.args);
         assertEquals(ImmutableMap.of("Header-1", "header 1 value", "Header-2", "Some bigger value"), data.headers);
     }
+
+    private static final String EXAMPLE_2 =
+        "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
+        "<p:data xmlns:p=\"urn:example:namespace\" xmlns:d=\"urn:example:double\" xmlns:h=\"urn:example:header\">\n" +
+        "  <p:datum id=\"34\">\n" +
+        "    <p:name>Name</p:name>\n" +
+        "    <d:name>Another name</d:name>\n" +
+        "    <d:arg>0.3</d:arg>\n" +
+        "    <d:arg>0.2</d:arg>\n" +
+        "    <p:arg>0.1</p:arg>\n" +
+        "    <p:arg>0.01</p:arg>\n" +
+        "    <h:header name=\"Header-1\">header 1 value</h:header>\n" +
+        "    <h:header name=\"Header-2\">\n" +
+        "      Some bigger value\n" +
+        "    </h:header>\n" +
+        "  </p:datum>\n" +
+        "</p:data>\n";
+
+    @Test
+    public void testNamespaces() throws Exception {
+        Devourer devourer = Devourer.create(new ExampleDataModuleNamespaces());
+        Stacks stacks = devourer.parse(EXAMPLE_2);
+
+        List<ExampleData> dataList = stacks.pop();
+        assertEquals(1, dataList.size());
+
+        ExampleData data = dataList.get(0);
+        assertEquals(34, data.id);
+        assertEquals("Name", data.name);
+        assertEquals(ImmutableList.of(0.3, 0.2), data.args);
+        assertEquals(ImmutableMap.of("Header-1", "header 1 value", "Header-2", "Some bigger value"), data.headers);
+    }
+
 }
