@@ -17,12 +17,12 @@
 package org.googolplex.devourer.configuration.modular.binders;
 
 import com.google.common.base.Preconditions;
+import org.googolplex.devourer.configuration.actions.ActionAt;
 import org.googolplex.devourer.paths.Path;
-import org.googolplex.devourer.configuration.reactions.ReactionAfter;
-import org.googolplex.devourer.configuration.reactions.ReactionAt;
-import org.googolplex.devourer.configuration.reactions.ReactionBefore;
+import org.googolplex.devourer.configuration.actions.ActionAfter;
+import org.googolplex.devourer.configuration.actions.ActionBefore;
 
-public class BindingBuilder implements ReactionBindingBuilder {
+public class BindingBuilder implements ActionBindingBuilder {
     private final MappingBinderImpl mappingBinder;
     private final String route;
 
@@ -32,23 +32,23 @@ public class BindingBuilder implements ReactionBindingBuilder {
     }
 
     @Override
-    public BindingBuilder doBefore(ReactionBefore reaction) {
-        Preconditions.checkNotNull(reaction, "Reaction is null");
-        mappingBinder.beforeMappings.put(Path.fromString(route), reaction);
+    public BindingBuilder doBefore(ActionBefore action) {
+        Preconditions.checkNotNull(action, "Action is null");
+        mappingBinder.beforeMappings.put(Path.fromString(route), action);
         return this;
     }
 
     @Override
-    public BindingBuilder doAt(ReactionAt reaction) {
-        Preconditions.checkNotNull(reaction, "Reaction is null");
-        mappingBinder.atMappings.put(Path.fromString(route), reaction);
+    public BindingBuilder doAt(ActionAt action) {
+        Preconditions.checkNotNull(action, "Action is null");
+        mappingBinder.atMappings.put(Path.fromString(route), action);
         return this;
     }
 
     @Override
-    public BindingBuilder doAfter(ReactionAfter reaction) {
-        Preconditions.checkNotNull(reaction, "Reaction is null");
-        mappingBinder.afterMappings.put(Path.fromString(route), reaction);
+    public BindingBuilder doAfter(ActionAfter action) {
+        Preconditions.checkNotNull(action, "Action is null");
+        mappingBinder.afterMappings.put(Path.fromString(route), action);
         return this;
     }
 }

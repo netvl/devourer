@@ -25,7 +25,7 @@ import java.util.Map;
  * A container class for Devourer configuration. Currently the following parameters can be configured:
  * <ul>
  *     <li>an option whether the Devourer should trim side spaces of body content before providing it
- *     to the reactions - {@code true} by default;</li>
+ *     to the actions - {@code true} by default;</li>
  *     <li>StAX parser parameters, as defined in {@link javax.xml.stream.XMLInputFactory} documentation.</li>
  * </ul>
  *
@@ -62,7 +62,7 @@ public class DevourerConfig {
 
         /**
          * Sets whether Devourer should strip side spaces around element content before providing it to the
-         * reaction. True by default; it is usually what is expected from the XML parser.
+         * action. True by default; it is usually what is expected from the XML parser.
          *
          * @return this object
          */

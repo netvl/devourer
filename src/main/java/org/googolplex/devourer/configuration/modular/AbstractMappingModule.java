@@ -17,7 +17,7 @@
 package org.googolplex.devourer.configuration.modular;
 
 import com.google.common.base.Preconditions;
-import org.googolplex.devourer.configuration.modular.binders.ReactionBindingBuilder;
+import org.googolplex.devourer.configuration.modular.binders.ActionBindingBuilder;
 import org.googolplex.devourer.configuration.modular.binders.MappingBinder;
 
 /**
@@ -30,36 +30,36 @@ import org.googolplex.devourer.configuration.modular.binders.MappingBinder;
  *        {@literal @}Override
  *         public void configure() {
  *             on("/")
- *                 .doBefore(new ReactionBefore() {
+ *                 .doBefore(new ActionBefore() {
  *                    {@literal @}Override
- *                     public void react(Stacks stacks, AttributesContext context) {
+ *                     public void act(Stacks stacks, AttributesContext context) {
  *                         stacks.push(ImmutableMap.builder());
  *                     }
  *                 })
- *                 .doAfter(new ReactionAfter() {
+ *                 .doAfter(new ActionAfter() {
  *                    {@literal @}Override
- *                     public void react(Stacks stacks, AttributesContext context) {
+ *                     public void act(Stacks stacks, AttributesContext context) {
  *                         ImmutableMap.Builder<String, String> builder = stacks.pop();
  *                         stacks.push(builder.build());
  *                     }
  *                 });
  *
  *             on("/header")
- *                 .doBefore(new ReactionBefore() {
+ *                 .doBefore(new ActionBefore() {
  *                    {@literal @}Override
- *                     public void react(Stacks stacks, AttributesContext context) {
+ *                     public void act(Stacks stacks, AttributesContext context) {
  *                         stacks.push(context.attribute("name").get());
  *                     }
  *                 })
- *                 .doAt(new ReactionAt() {
+ *                 .doAt(new ActionAt() {
  *                    {@literal @}Override
- *                     public void react(Stacks stacks, AttributesContext context, String body) {
+ *                     public void act(Stacks stacks, AttributesContext context, String body) {
  *                         stacks.push(body);
  *                     }
  *                 })
- *                 .doAfter(new ReactionAfter() {
+ *                 .doAfter(new ActionAfter() {
  *                    {@literal @}Override
- *                     public void react(Stacks stacks, AttributesContext context) {
+ *                     public void act(Stacks stacks, AttributesContext context) {
  *                         String value = stacks.pop();
  *                         String name = stacks.pop();
  *                         ImmutableMap.Builder<String, String> builder = stacks.peek();
@@ -125,21 +125,21 @@ import org.googolplex.devourer.configuration.modular.binders.MappingBinder;
  * only. Whether the body consists of whitespaces is determined by
  * {@link javax.xml.stream.XMLStreamReader#isWhiteSpace()} method. This behavior should be taken into account.</p>
  *
- * <p>Usually IDEs allow to fold anonymous class definitions. With this feature definitions of reactions
- * looks like Java 8 lambda constructions. In fact, since all {@code Reaction*} interfaces are
- * <i>functional interfaces</i> in terms of Java 8, it is possible to use short lambda syntax to define reactions
+ * <p>Usually IDEs allow to fold anonymous class definitions. With this feature definitions of actions
+ * looks like Java 8 lambda constructions. In fact, since all {@code Action*} interfaces are
+ * <i>functional interfaces</i> in terms of Java 8, it is possible to use short lambda syntax to define actions
  * if you use Java 8. This makes mapping definitions look nice and clean while retaining good performance
  * characteristics.</p>
  *
- * <p>Instances of {@code Reaction*} interfaces are shared between threads when the Devourer is used from multiple
+ * <p>Instances of {@code Action*} interfaces are shared between threads when the Devourer is used from multiple
  * threads, so it is inadvisable to hold any state inside these objects directly, as it ruins Devourer's thread safety.
- * Use only {@link org.googolplex.devourer.Stacks} object provided to the reactions to hold state of the parsing
+ * Use only the {@link org.googolplex.devourer.Stacks} object provided to the actions to hold state of the parsing
  * process; in this case thread safety is guaranteed.</p>
  */
 public abstract class AbstractMappingModule implements MappingModule {
     private MappingBinder binder = null;
 
-    protected final ReactionBindingBuilder on(String route) {
+    protected final ActionBindingBuilder on(String route) {
         return binder.on(route);
     }
 

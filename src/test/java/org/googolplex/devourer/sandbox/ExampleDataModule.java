@@ -18,10 +18,10 @@ package org.googolplex.devourer.sandbox;
 
 import com.google.common.collect.ImmutableList;
 import org.googolplex.devourer.Stacks;
+import org.googolplex.devourer.configuration.actions.ActionAt;
+import org.googolplex.devourer.configuration.actions.ActionBefore;
 import org.googolplex.devourer.configuration.modular.AbstractMappingModule;
-import org.googolplex.devourer.configuration.reactions.ReactionAfter;
-import org.googolplex.devourer.configuration.reactions.ReactionAt;
-import org.googolplex.devourer.configuration.reactions.ReactionBefore;
+import org.googolplex.devourer.configuration.actions.ActionAfter;
 import org.googolplex.devourer.contexts.AttributesContext;
 
 /**
@@ -32,32 +32,32 @@ public class ExampleDataModule extends AbstractMappingModule {
     @Override
     public void configure() {
         on("/data")
-            .doBefore(new ReactionBefore() {
+            .doBefore(new ActionBefore() {
                 @Override
-                public void react(Stacks stacks, AttributesContext context) {
+                public void act(Stacks stacks, AttributesContext context) {
                     stacks.push(ImmutableList.builder());
                 }
             })
-            .doAfter(new ReactionAfter() {
+            .doAfter(new ActionAfter() {
                 @Override
-                public void react(Stacks stacks, AttributesContext context) {
+                public void act(Stacks stacks, AttributesContext context) {
                     ImmutableList.Builder<ExampleData> dataBuilder = stacks.pop();
                     stacks.push(dataBuilder.build());
                 }
             });
 
         on("/data/datum")
-            .doBefore(new ReactionBefore() {
+            .doBefore(new ActionBefore() {
                 @Override
-                public void react(Stacks stacks, AttributesContext context) {
+                public void act(Stacks stacks, AttributesContext context) {
                     ExampleData.Builder builder = new ExampleData.Builder();
                     builder.setId(Integer.parseInt(context.attribute("id").or("0")));
                     stacks.push(builder);
                 }
             })
-            .doAfter(new ReactionAfter() {
+            .doAfter(new ActionAfter() {
                 @Override
-                public void react(Stacks stacks, AttributesContext context) {
+                public void act(Stacks stacks, AttributesContext context) {
                     ExampleData.Builder builder = stacks.pop();
                     ImmutableList.Builder<ExampleData> dataBuilder = stacks.peek();
                     dataBuilder.add(builder.build());
@@ -65,27 +65,27 @@ public class ExampleDataModule extends AbstractMappingModule {
             });
 
         on("/data/datum/name")
-            .doAt(new ReactionAt() {
+            .doAt(new ActionAt() {
                 @Override
-                public void react(Stacks stacks, AttributesContext context, String body) {
+                public void act(Stacks stacks, AttributesContext context, String body) {
                     ExampleData.Builder builder = stacks.peek();
                     builder.setName(body);
                 }
             });
 
         on("/data/datum/arg")
-            .doAt(new ReactionAt() {
+            .doAt(new ActionAt() {
                 @Override
-                public void react(Stacks stacks, AttributesContext context, String body) {
+                public void act(Stacks stacks, AttributesContext context, String body) {
                     ExampleData.Builder builder = stacks.peek();
                     builder.addArg(Double.parseDouble(body));
                 }
             });
 
         on("/data/datum/header")
-            .doAt(new ReactionAt() {
+            .doAt(new ActionAt() {
                 @Override
-                public void react(Stacks stacks, AttributesContext context, String body) {
+                public void act(Stacks stacks, AttributesContext context, String body) {
                     ExampleData.Builder builder = stacks.peek();
                     builder.addHeader(context.attribute("name").get(), body);
                 }

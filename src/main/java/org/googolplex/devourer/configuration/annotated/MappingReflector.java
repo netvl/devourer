@@ -21,6 +21,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import org.googolplex.devourer.Stacks;
+import org.googolplex.devourer.configuration.actions.ActionAt;
 import org.googolplex.devourer.configuration.annotated.annotations.After;
 import org.googolplex.devourer.configuration.annotated.annotations.At;
 import org.googolplex.devourer.configuration.annotated.annotations.Before;
@@ -29,9 +30,8 @@ import org.googolplex.devourer.configuration.annotated.annotations.PeekFrom;
 import org.googolplex.devourer.configuration.annotated.annotations.Pop;
 import org.googolplex.devourer.configuration.annotated.annotations.PopFrom;
 import org.googolplex.devourer.configuration.annotated.annotations.PushTo;
-import org.googolplex.devourer.configuration.reactions.ReactionAfter;
-import org.googolplex.devourer.configuration.reactions.ReactionAt;
-import org.googolplex.devourer.configuration.reactions.ReactionBefore;
+import org.googolplex.devourer.configuration.actions.ActionAfter;
+import org.googolplex.devourer.configuration.actions.ActionBefore;
 import org.googolplex.devourer.contexts.AttributesContext;
 import org.googolplex.devourer.contexts.ElementContext;
 import org.googolplex.devourer.exceptions.DevourerException;
@@ -98,9 +98,9 @@ import java.util.Map;
  * {@link org.googolplex.devourer.configuration.modular.AbstractMappingModule}:
  * <pre>
  *     on("/some/node")
- *         .doAfter(new ReactionAfter() {
+ *         .doAfter(new ActionAfter() {
  *            {@literal @}Override
- *             public void react(Stacks stacks, AttributeContext context) {
+ *             public void act(Stacks stacks, AttributeContext context) {
  *                 String value1 = stacks.pop();
  *                 String value2 = stacks.pop();
  *                 String value3 = stacks.peek();
@@ -147,9 +147,9 @@ public class MappingReflector {
         Class<?> clazz = object.getClass();
 
         // Prepare temporary collections
-        ListMultimap<Path, ReactionBefore> beforeMappings = ArrayListMultimap.create();
-        ListMultimap<Path, ReactionAfter> afterMappings = ArrayListMultimap.create();
-        ListMultimap<Path, ReactionAt> atMappings = ArrayListMultimap.create();
+        ListMultimap<Path, ActionBefore> beforeMappings = ArrayListMultimap.create();
+        ListMultimap<Path, ActionAfter> afterMappings = ArrayListMultimap.create();
+        ListMultimap<Path, ActionAt> atMappings = ArrayListMultimap.create();
 
         // Loop through all available methods
         for (Method method : clazz.getMethods()) {
@@ -255,11 +255,11 @@ public class MappingReflector {
 
                 // Add a mapping into one of the categories
                 if (method.isAnnotationPresent(Before.class)) {
-                    beforeMappings.put(path, new ReflectedReactionBefore(object, method, stack, parameterInfos));
+                    beforeMappings.put(path, new ReflectedActionBefore(object, method, stack, parameterInfos));
                 } else if (method.isAnnotationPresent(At.class)) {
-                    atMappings.put(path, new ReflectedReactionAt(object, method, stack, parameterInfos));
+                    atMappings.put(path, new ReflectedActionAt(object, method, stack, parameterInfos));
                 } else {
-                    afterMappings.put(path, new ReflectedReactionAfter(object, method, stack, parameterInfos));
+                    afterMappings.put(path, new ReflectedActionAfter(object, method, stack, parameterInfos));
                 }
             } else {
                 // TODO: warn about bogus method
@@ -280,15 +280,15 @@ public class MappingReflector {
         return false;
     }
 
-    private static class AbstractReflectedReaction {
+    private static class AbstractReflectedAction {
         private final ThreadLocal<Object[]> arguments;
         private final Object object;
         private final Method method;
         private final Optional<String> stack;
         private final List<ParameterInfo> parameterInfos;
 
-        private AbstractReflectedReaction(Object object, Method method, Optional<String> stack,
-                                          final List<ParameterInfo> parameterInfos) {
+        private AbstractReflectedAction(Object object, Method method, Optional<String> stack,
+                                        final List<ParameterInfo> parameterInfos) {
             this.object = object;
             this.method = method;
             this.stack = stack;
@@ -339,7 +339,7 @@ public class MappingReflector {
             try {
                 result = method.invoke(object, arguments.get());
             } catch (Exception e) {
-                throw new DevourerException("Error invoking reaction method", e);
+                throw new DevourerException("Error invoking action method", e);
             }
             if (stack.isPresent()) {
                 stacks.push(stack.get(), result);
@@ -347,38 +347,38 @@ public class MappingReflector {
         }
     }
 
-    private static class ReflectedReactionBefore extends AbstractReflectedReaction implements ReactionBefore {
-        private ReflectedReactionBefore(Object object, Method method, Optional<String> stack,
-                                       List<ParameterInfo> parameterInfos) {
+    private static class ReflectedActionBefore extends AbstractReflectedAction implements ActionBefore {
+        private ReflectedActionBefore(Object object, Method method, Optional<String> stack,
+                                      List<ParameterInfo> parameterInfos) {
             super(object, method, stack, parameterInfos);
         }
 
         @Override
-        public void react(Stacks stacks, AttributesContext context) {
+        public void act(Stacks stacks, AttributesContext context) {
             invokeMethod(stacks, context, Optional.<String>absent());
         }
     }
 
-    private static class ReflectedReactionAt extends AbstractReflectedReaction implements ReactionAt {
-        private ReflectedReactionAt(Object object, Method method, Optional<String> stack,
-                                    List<ParameterInfo> parameterInfos) {
+    private static class ReflectedActionAt extends AbstractReflectedAction implements ActionAt {
+        private ReflectedActionAt(Object object, Method method, Optional<String> stack,
+                                  List<ParameterInfo> parameterInfos) {
             super(object, method, stack, parameterInfos);
         }
 
         @Override
-        public void react(Stacks stacks, AttributesContext context, String body) {
+        public void act(Stacks stacks, AttributesContext context, String body) {
             invokeMethod(stacks, context, Optional.of(body));
         }
     }
 
-    private static class ReflectedReactionAfter extends AbstractReflectedReaction implements ReactionAfter {
-        private ReflectedReactionAfter(Object object, Method method, Optional<String> stack,
-                                       List<ParameterInfo> parameterInfos) {
+    private static class ReflectedActionAfter extends AbstractReflectedAction implements ActionAfter {
+        private ReflectedActionAfter(Object object, Method method, Optional<String> stack,
+                                     List<ParameterInfo> parameterInfos) {
             super(object, method, stack, parameterInfos);
         }
 
         @Override
-        public void react(Stacks stacks, AttributesContext context) {
+        public void act(Stacks stacks, AttributesContext context) {
             invokeMethod(stacks, context, Optional.<String>absent());
         }
     }

@@ -30,7 +30,7 @@ public interface MappingBinder {
      * See DSL usage examples in {@link org.googolplex.devourer.configuration.modular.AbstractMappingModule}
      * documentation.
      */
-    ReactionBindingBuilder on(String route);
+    ActionBindingBuilder on(String route);
 
     /**
      * See DSL usage examples in {@link org.googolplex.devourer.configuration.modular.AbstractMappingModule}

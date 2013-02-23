@@ -17,9 +17,9 @@
 package org.googolplex.devourer.paths;
 
 import com.google.common.base.Preconditions;
-import org.googolplex.devourer.configuration.reactions.ReactionAfter;
-import org.googolplex.devourer.configuration.reactions.ReactionAt;
-import org.googolplex.devourer.configuration.reactions.ReactionBefore;
+import org.googolplex.devourer.configuration.actions.ActionAfter;
+import org.googolplex.devourer.configuration.actions.ActionAt;
+import org.googolplex.devourer.configuration.actions.ActionBefore;
 
 import java.util.List;
 
@@ -28,14 +28,14 @@ import java.util.List;
  * Time: 10:53
  */
 public class PathMapping {
-    public final List<ReactionBefore> befores;
-    public final List<ReactionAt> ats;
-    public final List<ReactionAfter> afters;
+    public final List<ActionBefore> befores;
+    public final List<ActionAt> ats;
+    public final List<ActionAfter> afters;
 
-    public PathMapping(List<ReactionBefore> befores, List<ReactionAt> ats, List<ReactionAfter> afters) {
-        Preconditions.checkNotNull(befores, "ReactionBefore list is null");
-        Preconditions.checkNotNull(ats, "ReactionAt list is null");
-        Preconditions.checkNotNull(afters, "ReactionAfter list is null");
+    public PathMapping(List<ActionBefore> befores, List<ActionAt> ats, List<ActionAfter> afters) {
+        Preconditions.checkNotNull(befores, "ActionBefore list is null");
+        Preconditions.checkNotNull(ats, "ActionAt list is null");
+        Preconditions.checkNotNull(afters, "ActionAfter list is null");
 
         this.befores = befores;
         this.ats = ats;

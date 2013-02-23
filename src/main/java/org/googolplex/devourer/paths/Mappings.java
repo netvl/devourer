@@ -20,9 +20,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.ListMultimap;
-import org.googolplex.devourer.configuration.reactions.ReactionAfter;
-import org.googolplex.devourer.configuration.reactions.ReactionAt;
-import org.googolplex.devourer.configuration.reactions.ReactionBefore;
+import org.googolplex.devourer.configuration.actions.ActionAfter;
+import org.googolplex.devourer.configuration.actions.ActionAt;
+import org.googolplex.devourer.configuration.actions.ActionBefore;
 
 import java.util.HashMap;
 import java.util.List;
@@ -36,23 +36,23 @@ public final class Mappings {
     }
 
     /**
-     * Combines three multimaps from {@link Path}s to reactions into single map
+     * Combines three multimaps from {@link Path}s to actions into single map
      * from {@link Path}s to {@link PathMapping}s. Used by mapping configuration parsers.
      *
-     * @param beforeMappings a collection of before-reactions
-     * @param atMappings a collection of at-reactions
-     * @param afterMappings a collection of after-reactions
-     * @return combined collection of all reactions
+     * @param beforeMappings a collection of before-actions
+     * @param atMappings a collection of at-actions
+     * @param afterMappings a collection of after-actions
+     * @return combined collection of all actions
      */
-    public static Map<Path, PathMapping> combineMappings(ListMultimap<Path, ReactionBefore> beforeMappings,
-                                                         ListMultimap<Path, ReactionAt> atMappings,
-                                                         ListMultimap<Path, ReactionAfter> afterMappings) {
+    public static Map<Path, PathMapping> combineMappings(ListMultimap<Path, ActionBefore> beforeMappings,
+                                                         ListMultimap<Path, ActionAt> atMappings,
+                                                         ListMultimap<Path, ActionAfter> afterMappings) {
         Map<Path, PathMapping> builder = new HashMap<Path, PathMapping>();
         for (Path path : Iterables.concat(beforeMappings.keySet(), atMappings.keySet(), afterMappings.keySet())) {
             // An order is implicit here
-            List<ReactionBefore> befores = ImmutableList.copyOf(beforeMappings.get(path));
-            List<ReactionAt> ats = ImmutableList.copyOf(atMappings.get(path));
-            List<ReactionAfter> afters = ImmutableList.copyOf(afterMappings.get(path));
+            List<ActionBefore> befores = ImmutableList.copyOf(beforeMappings.get(path));
+            List<ActionAt> ats = ImmutableList.copyOf(atMappings.get(path));
+            List<ActionAfter> afters = ImmutableList.copyOf(afterMappings.get(path));
 
             PathMapping mapping = new PathMapping(befores, ats, afters);
             builder.put(path, mapping);
