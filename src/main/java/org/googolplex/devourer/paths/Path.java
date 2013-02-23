@@ -37,6 +37,14 @@ public class Path {
         this.elements = ImmutableList.copyOf(elements);
     }
 
+    /**
+     * Creates new {@link Path} instance from the given string. String must be in standard
+     * filename form: {@code /a/b/c}. Path parsing is very simple though; do not expect from this
+     * method to handle e.g. double slashes correctly.
+     *
+     * @param value string representation of the path
+     * @return new object representing the path in the string
+     */
     public static Path fromString(String value) {
         List<String> parts = new ArrayList<String>();
         for (int i = 0;;) {
@@ -57,6 +65,13 @@ public class Path {
         return new Path(parts);
     }
 
+    /**
+     * Resolves relative path specified as string against this object. The result is new combined {@link Path}
+     * instance.
+     *
+     * @param value relative path as a string
+     * @return combined path
+     */
     public Path resolve(String value) {
         Path newPart = fromString(value);
         ImmutableList.Builder<String> builder = ImmutableList.builder();
@@ -64,6 +79,12 @@ public class Path {
         return new Path(builder.build());
     }
 
+    /**
+     * Returns a new path representing a point one level upper than this object, that is, chops off
+     * the last component of the path.
+     *
+     * @return shorter path
+     */
     public Path moveUp() {
         return new Path(this.elements.subList(0, elements.size()-1));
     }

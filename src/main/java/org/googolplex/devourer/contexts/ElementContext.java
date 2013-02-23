@@ -22,6 +22,9 @@ import com.google.common.base.Optional;
  * Element context contains information about the current element. It is provided to reactions configured
  * in {@link org.googolplex.devourer.configuration.modular.MappingModule}s or to annotated methods in annotated
  * configuration object.
+ *
+ * <p>Element context is transient; you should not hold instances of this interface neither in
+ * {@link org.googolplex.devourer.Stacks} not somewhere else.</p>
  */
 public interface ElementContext {
     /**
@@ -33,4 +36,9 @@ public interface ElementContext {
      * @return namespace prefix of the currently processed element, if present
      */
     Optional<String> elementPrefix();
+
+    /**
+     * @return namespace of the currently processed element, if present
+     */
+    Optional<String> elementNamespace();
 }
