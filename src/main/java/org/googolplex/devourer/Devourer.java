@@ -341,6 +341,8 @@ public class Devourer {
     private AttributesContext collectAttributesContext(XMLStreamReader reader) {
         DefaultAttributesContext.Builder builder = new DefaultAttributesContext.Builder();
 
+        builder.setNamespaceContext(reader.getNamespaceContext());
+
         QName elementName = reader.getName();
         builder.setName(elementName);
 
