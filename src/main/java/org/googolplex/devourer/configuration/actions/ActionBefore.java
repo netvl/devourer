@@ -14,15 +14,17 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.googolplex.devourer.configuration.reactions;
+package org.googolplex.devourer.configuration.actions;
 
 import org.googolplex.devourer.Stacks;
 import org.googolplex.devourer.contexts.AttributesContext;
 
 /**
- * Date: 19.02.13
- * Time: 11:04
+ * Date: 18.02.13
+ * Time: 20:18
+ *
+ * @author Vladimir Matveev
  */
-public interface ReactionAt {
-    void react(Stacks stacks, AttributesContext context, String body);
+public interface ActionBefore {
+    void act(Stacks stacks, AttributesContext context);
 }

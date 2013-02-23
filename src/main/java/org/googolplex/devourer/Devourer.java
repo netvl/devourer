@@ -18,21 +18,21 @@ package org.googolplex.devourer;
 
 import com.google.common.base.Preconditions;
 import org.googolplex.devourer.configuration.DevourerConfig;
+import org.googolplex.devourer.configuration.actions.ActionAt;
 import org.googolplex.devourer.configuration.annotated.MappingReflector;
 import org.googolplex.devourer.configuration.modular.MappingModule;
 import org.googolplex.devourer.configuration.modular.binders.MappingBinder;
 import org.googolplex.devourer.configuration.modular.binders.MappingBinderImpl;
 import org.googolplex.devourer.contexts.AttributesContext;
 import org.googolplex.devourer.contexts.DefaultAttributesContext;
+import org.googolplex.devourer.exceptions.ActionException;
 import org.googolplex.devourer.exceptions.DevourerException;
 import org.googolplex.devourer.exceptions.MappingException;
 import org.googolplex.devourer.exceptions.ParsingException;
-import org.googolplex.devourer.exceptions.ReactionException;
 import org.googolplex.devourer.paths.Path;
 import org.googolplex.devourer.paths.PathMapping;
-import org.googolplex.devourer.configuration.reactions.ReactionAfter;
-import org.googolplex.devourer.configuration.reactions.ReactionAt;
-import org.googolplex.devourer.configuration.reactions.ReactionBefore;
+import org.googolplex.devourer.configuration.actions.ActionAfter;
+import org.googolplex.devourer.configuration.actions.ActionBefore;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
@@ -65,16 +65,16 @@ import java.util.Map;
  * start element is encountered, at-actions are executed when textual body of the current XML node is encountered,
  * and after-actions are executed after whole node has been processed, i.e. when end element is encountered.</p>
  *
- * <p>Actions are represented by interfaces, {@link ReactionBefore}, {@link ReactionAt} and
- * {@link ReactionAfter}. These are functional interfaces (in terms of Java 8 Lambda extension), that is,
+ * <p>Actions are represented by interfaces, {@link org.googolplex.devourer.configuration.actions.ActionBefore}, {@link org.googolplex.devourer.configuration.actions.ActionAt} and
+ * {@link org.googolplex.devourer.configuration.actions.ActionAfter}. These are functional interfaces (in terms of Java 8 Lambda extension), that is,
  * they consists of single method. In each type this method accepts {@link Stacks} object and {@link AttributesContext}
- * object. {@link ReactionAt} interface also accepts additional {@link String} parameter.</p>
+ * object. {@link org.googolplex.devourer.configuration.actions.ActionAt} interface also accepts additional {@link String} parameter.</p>
  *
  * <p>{@link Stacks} object is the main state container for the Devourer; it contains intermediate
  * objects, e.g. builders, and it should contain results of the processing. This object is returned by
  * {@code parse()} family of methods. {@link AttributesContext} object contains information about the element
  * currently being processed: name and namespace of the element, as well as its attributes.
- * {@link ReactionAt}'s additional {@link String} parameter is set to the body of the element.</p>
+ * {@link org.googolplex.devourer.configuration.actions.ActionAt}'s additional {@link String} parameter is set to the body of the element.</p>
  *
  * <p>So, the overall picture of Devourer processing looks as follows. First, you configure a number
  * of actions to be taken on the nodes of expected XML document. Then you ask Devourer to parse
@@ -177,7 +177,7 @@ public class Devourer {
      *
      * @param string a string with XML document
      * @return stacks object with parsing results
-     * @throws DevourerException in case of XML parsing errors or exceptions in reactions
+     * @throws DevourerException in case of XML parsing errors or exceptions in actions
      */
     public Stacks parse(String string) throws DevourerException {
         Preconditions.checkNotNull(string, "String is null");
@@ -192,7 +192,7 @@ public class Devourer {
      * @param bytes byte array containing an XML document
      * @param charset an encoding of the of the text inside byte array
      * @return stacks object with parsing results
-     * @throws DevourerException in case of XML parsing errors or exceptions in reactions
+     * @throws DevourerException in case of XML parsing errors or exceptions in actions
      */
     public Stacks parse(byte[] bytes, Charset charset) throws DevourerException {
         Preconditions.checkNotNull(bytes, "Byte array is null");
@@ -207,7 +207,7 @@ public class Devourer {
      *
      * @param bytes byte array containing an XML document
      * @return stacks object with parsing results
-     * @throws DevourerException in case of XML parsing errors or exceptions in reactions
+     * @throws DevourerException in case of XML parsing errors or exceptions in actions
      */
     public Stacks parse(byte[] bytes) throws DevourerException {
         return parse(bytes, Charset.defaultCharset());
@@ -220,7 +220,7 @@ public class Devourer {
      * @param inputStream input stream containing an XML document
      * @param charset an encoding of the input stream
      * @return stacks object with parsing results
-     * @throws DevourerException in case of XML parsing errors or exceptions in reactions
+     * @throws DevourerException in case of XML parsing errors or exceptions in actions
      */
     public Stacks parse(InputStream inputStream, Charset charset) throws DevourerException {
         Preconditions.checkNotNull(inputStream, "Input stream is null");
@@ -235,7 +235,7 @@ public class Devourer {
      *
      * @param inputStream input stream containing an XML document
      * @return stacks object with parsing results
-     * @throws DevourerException in case of XML parsing errors or exceptions in reactions
+     * @throws DevourerException in case of XML parsing errors or exceptions in actions
      */
     public Stacks parse(InputStream inputStream) throws DevourerException {
         return parse(inputStream, Charset.defaultCharset());
@@ -246,7 +246,7 @@ public class Devourer {
      *
      * @param reader reader containing an XML document
      * @return stacks objects with parsing results
-     * @throws DevourerException in case of XML parsing errors or exceptions in reactions
+     * @throws DevourerException in case of XML parsing errors or exceptions in actions
      */
     public Stacks parse(Reader reader) throws DevourerException {
         Preconditions.checkNotNull(reader, "Reader is null");
@@ -282,8 +282,8 @@ public class Devourer {
         } catch (XMLStreamException e) {
             throw new ParsingException("Error while parsing XML document", e);
 
-        } catch (RuntimeException e) {  // TODO: maybe move to reaction loops
-            throw new ReactionException("An exception has occured in reaction", e);
+        } catch (RuntimeException e) {  // TODO: maybe move to action loops
+            throw new ActionException("An exception has occured in action", e);
 
         } finally {
             if (streamReader != null) {
@@ -305,8 +305,8 @@ public class Devourer {
 
         PathMapping mapping = mappings.get(currentPath);
         if (mapping != null) {
-            for (ReactionBefore reaction : mapping.befores) {
-                reaction.react(stacks, context);
+            for (ActionBefore action : mapping.befores) {
+                action.act(stacks, context);
             }
         }
     }
@@ -321,8 +321,8 @@ public class Devourer {
 
         PathMapping mapping = mappings.get(currentPath);
         if (mapping != null) {
-            for (ReactionAt reaction : mapping.ats) {
-                reaction.react(stacks, context, body);
+            for (ActionAt action : mapping.ats) {
+                action.act(stacks, context, body);
             }
         }
     }
@@ -332,8 +332,8 @@ public class Devourer {
 
         PathMapping mapping = mappings.get(currentPath);
         if (mapping != null) {
-            for (ReactionAfter reaction : mapping.afters) {
-                reaction.react(stacks, context);
+            for (ActionAfter action : mapping.afters) {
+                action.act(stacks, context);
             }
         }
     }

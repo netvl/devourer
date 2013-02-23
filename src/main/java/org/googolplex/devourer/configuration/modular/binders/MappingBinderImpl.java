@@ -18,22 +18,22 @@ package org.googolplex.devourer.configuration.modular.binders;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import org.googolplex.devourer.configuration.actions.ActionAt;
 import org.googolplex.devourer.paths.Mappings;
 import org.googolplex.devourer.paths.Path;
 import org.googolplex.devourer.paths.PathMapping;
-import org.googolplex.devourer.configuration.reactions.ReactionAfter;
-import org.googolplex.devourer.configuration.reactions.ReactionAt;
-import org.googolplex.devourer.configuration.reactions.ReactionBefore;
+import org.googolplex.devourer.configuration.actions.ActionAfter;
+import org.googolplex.devourer.configuration.actions.ActionBefore;
 
 import java.util.Map;
 
 public class MappingBinderImpl implements MappingBinder {
-    protected final ListMultimap<Path, ReactionBefore> beforeMappings = ArrayListMultimap.create();
-    protected final ListMultimap<Path, ReactionAfter> afterMappings = ArrayListMultimap.create();
-    protected final ListMultimap<Path, ReactionAt> atMappings = ArrayListMultimap.create();
+    protected final ListMultimap<Path, ActionBefore> beforeMappings = ArrayListMultimap.create();
+    protected final ListMultimap<Path, ActionAfter> afterMappings = ArrayListMultimap.create();
+    protected final ListMultimap<Path, ActionAt> atMappings = ArrayListMultimap.create();
 
     @Override
-    public ReactionBindingBuilder on(String route) {
+    public ActionBindingBuilder on(String route) {
         return new BindingBuilder(this, route);
     }
 

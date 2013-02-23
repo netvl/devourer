@@ -16,30 +16,30 @@
 
 package org.googolplex.devourer.configuration.modular.binders;
 
-import org.googolplex.devourer.configuration.reactions.ReactionAfter;
-import org.googolplex.devourer.configuration.reactions.ReactionAt;
-import org.googolplex.devourer.configuration.reactions.ReactionBefore;
+import org.googolplex.devourer.configuration.actions.ActionAfter;
+import org.googolplex.devourer.configuration.actions.ActionAt;
+import org.googolplex.devourer.configuration.actions.ActionBefore;
 
 /**
  * See DSL usage examples in {@link org.googolplex.devourer.configuration.modular.AbstractMappingModule}
  * documentation.
  */
-public interface ReactionBindingBuilder {
+public interface ActionBindingBuilder {
     /**
      * See DSL usage examples in {@link org.googolplex.devourer.configuration.modular.AbstractMappingModule}
      * documentation.
      */
-    ReactionBindingBuilder doBefore(ReactionBefore reaction);
+    ActionBindingBuilder doBefore(ActionBefore action);
 
     /**
      * See DSL usage examples in {@link org.googolplex.devourer.configuration.modular.AbstractMappingModule}
      * documentation.
      */
-    ReactionBindingBuilder doAt(ReactionAt reaction);
+    ActionBindingBuilder doAt(ActionAt action);
 
     /**
      * See DSL usage examples in {@link org.googolplex.devourer.configuration.modular.AbstractMappingModule}
      * documentation.
      */
-    ReactionBindingBuilder doAfter(ReactionAfter reaction);
+    ActionBindingBuilder doAfter(ActionAfter action);
 }
