@@ -16,9 +16,17 @@
 
 package org.googolplex.devourer;
 
+import org.googolplex.devourer.sandbox2.Login;
+import org.googolplex.devourer.sandbox2.Person;
+import org.googolplex.devourer.sandbox2.PersonAnnotatedConfig;
 import org.googolplex.devourer.sandbox2.PersonModule;
 import org.googolplex.devourer.stacks.Stacks;
 import org.junit.Test;
+
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Date: 24.02.13
@@ -50,8 +58,45 @@ public class DevourerTest2 {
     @Test
     public void testModule() throws Exception {
         Devourer devourer = Devourer.create(new PersonModule());
-
         Stacks stacks = devourer.parse(EXAMPLE);
 
+        checkStacks(stacks);
+    }
+
+    @Test
+    public void testAnnotations() throws Exception {
+        Devourer devourer = Devourer.create(new PersonAnnotatedConfig());
+        Stacks stacks = devourer.parse(EXAMPLE);
+
+        checkStacks(stacks);
+    }
+
+    private void checkStacks(Stacks stacks) {
+        List<Person> persons = stacks.pop();
+        assertEquals(3, persons.size());
+
+        Person person = persons.get(0);
+        assertEquals(1, person.id);
+        assertEquals("Foo Bar", person.name);
+        assertEquals(2, person.logins.size());
+        Login login = person.logins.get(0);
+        assertEquals("example.com", login.site);
+        assertEquals("foobar", login.value);
+        login = person.logins.get(1);
+        assertEquals("example.org", login.site);
+        assertEquals("f.bar", login.value);
+
+        person = persons.get(1);
+        assertEquals(2, person.id);
+        assertEquals("Baz Boo", person.name);
+        assertEquals(1, person.logins.size());
+        login = person.logins.get(0);
+        assertEquals("uni.edu", login.site);
+        assertEquals("boo.baz", login.value);
+
+        person = persons.get(2);
+        assertEquals(4, person.id);
+        assertEquals("Fizz B. Jr", person.name);
+        assertTrue(person.logins.isEmpty());
     }
 }

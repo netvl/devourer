@@ -253,13 +253,12 @@ public class Devourer {
     public Stacks parse(Reader reader) throws DevourerException {
         Preconditions.checkNotNull(reader, "Reader is null");
 
-        Stacks stacks = null;
         XMLStreamReader streamReader = null;
         try {
             streamReader = inputFactory.createXMLStreamReader(reader);
 
             Deque<AttributesContext> contextStack = new ArrayDeque<AttributesContext>();
-            stacks = new DefaultStacks();
+            Stacks stacks = new DefaultStacks();
             Path currentPath = Path.fromString("");
 
             while (streamReader.hasNext()) {
@@ -281,6 +280,8 @@ public class Devourer {
 
             streamReader.close();
 
+            return stacks;
+
         } catch (XMLStreamException e) {
             throw new ParsingException("Error while parsing XML document", e);
 
@@ -296,8 +297,6 @@ public class Devourer {
                 }
             }
         }
-
-        return stacks;
     }
 
     private void handleStartElement(XMLStreamReader streamReader, Path currentPath, Stacks stacks,

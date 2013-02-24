@@ -29,7 +29,7 @@ add it to your Maven dependency list:
 Usage
 -----
 
-See [here](TODO) for basic introduction to the library.
+See [here](http://dpx-infinity.github.com/devourer/overview.html) for the user manual.
 
 Notes
 -----
@@ -40,4 +40,6 @@ There are several points I think I should note about the library.
   actions; also namespaces are mostly handled via prefixes, not real namespace identifiers. This
   should change in the nearest future.
 * The library is not covered by automatic tests. This is also likely to change soon.
+* Support for wildcards in element paths is completely absent. This would be very nice feature to
+  have, and I may add it one day.
 
