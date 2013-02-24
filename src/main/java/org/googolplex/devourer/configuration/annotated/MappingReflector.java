@@ -20,7 +20,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
-import org.googolplex.devourer.Stacks;
+import org.googolplex.devourer.stacks.Stacks;
 import org.googolplex.devourer.configuration.actions.ActionAt;
 import org.googolplex.devourer.configuration.annotated.annotations.After;
 import org.googolplex.devourer.configuration.annotated.annotations.At;
@@ -306,13 +306,11 @@ public class MappingReflector {
                 ParameterInfo parameterInfo = parameterInfos.get(i);
                 switch (parameterInfo.kind) {
                     case POP: {
-                        Object object = stacks.pop(parameterInfo.argument.get());
-                        arguments.get()[i] = object;
+                        arguments.get()[i] = stacks.get(parameterInfo.argument.get()).pop();
                         break;
                     }
                     case PEEK: {
-                        Object object = stacks.peek(parameterInfo.argument.get());
-                        arguments.get()[i] = object;
+                        arguments.get()[i] = stacks.get(parameterInfo.argument.get()).peek();
                         break;
                     }
                     case BODY: {
@@ -342,7 +340,7 @@ public class MappingReflector {
                 throw new DevourerException("Error invoking action method", e);
             }
             if (stack.isPresent()) {
-                stacks.push(stack.get(), result);
+                stacks.get(stack.get()).push(result);
             }
         }
     }

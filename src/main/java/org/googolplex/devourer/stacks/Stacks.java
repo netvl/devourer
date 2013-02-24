@@ -14,19 +14,21 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.googolplex.devourer;
+package org.googolplex.devourer.stacks;
+
+import com.google.common.base.Optional;
 
 import java.util.NoSuchElementException;
 
 /**
- * An interface to a set of named stacks. Also provides an access to some default stack.
- * A stack is created on the first write access to it.
+ * An collection of stacks identified by name. Being also an extension of {@link Stack} interface,
+ * provides access to some default stack.
  *
  * <p>The default implementation, {@link DefaultStacks}, is not thread-safe. It is not a problem for
  * Devourer itself (it does not use threads during parsing process), but should be taken into account
  * when you work with this object after parsing is done.</p>
  */
-public interface Stacks {
+public interface Stacks extends Stack {
     /**
      * A constant name of the default stack. {@code stacks.push(DEFAULT_STACK, object)} is
      * equivalent to {@code stacks.push(object)}; the same goes for {@code stacks.pop(...)}
@@ -35,31 +37,20 @@ public interface Stacks {
     public static final String DEFAULT_STACK = "main";
 
     /**
-     * Pushes new element to the specified stack. The stack will be created if it is not present.
+     * Returns {@link Stack} instance for the stack with given name. The stack will be created if needed.
      *
-     * @param stack name of the stack
-     * @param object object to push onto the stack
-     * @param <T> type of the object
+     * @param name name of the stack
+     * @return named stack
      */
-    <T> void push(String stack, T object);
+    Stack get(String name);
 
     /**
-     * Pushes new element to the default stack. The stack will be created if it is not present.
+     * Pushes new element to the default stack.
      *
      * @param object object to push onto the stack
      * @param <T> type of the object
      */
     <T> void push(T object);
-
-    /**
-     * Peeks an element from the top of the specified stack. The object will not be removed from the stack.
-     *
-     * @param stack name of the stack
-     * @param <T> type of the object
-     * @return an object from the top of the stack
-     * @throws NoSuchElementException if stack is empty or does not exist
-     */
-    <T> T peek(String stack) throws NoSuchElementException;
 
     /**
      * Peeks an element from the top of the default stack. The object will not be removed from the stack.
@@ -71,14 +62,13 @@ public interface Stacks {
     <T> T peek() throws NoSuchElementException;
 
     /**
-     * Pops an element from the top of the specified stack. The object will be removed from the stack.
+     * Safe version of {@link #peek()}, returns an element from the top of the default stack if it is not empty,
+     * absent value otherwise. The element will not be removed from the stack.
      *
-     * @param stack name of the stack
      * @param <T> type of the object
-     * @return an object from the top of the stack
-     * @throws NoSuchElementException if stack is empty or does not exist
+     * @return an object from the top of the stack, if it is present
      */
-    <T> T pop(String stack) throws NoSuchElementException;
+    <T> Optional<T> tryPeek();
 
     /**
      * Pops an element from the top of the default stack. The object will be removed from the stack.
@@ -90,12 +80,13 @@ public interface Stacks {
     <T> T pop() throws NoSuchElementException;
 
     /**
-     * Checks whether the given stack is empty.
+     * Safe version of {@link #pop()}, returns an element from the top of the default stack if it is not empty,
+     * absent value otherwise. The element will be removed from the stack.
      *
-     * @param stack name of the stack
-     * @return {@code true} if stack is empty or does not exist, {@code false} otherwise
+     * @param <T> type of the object
+     * @return an object from the top of the stack, if it is present
      */
-    boolean isEmpty(String stack);
+    <T> Optional<T> tryPop();
 
     /**
      * Checks whether the default stack is empty.
@@ -103,4 +94,9 @@ public interface Stacks {
      * @return {@code true} if stack is empty or does not exist, {@code false} otherwise
      */
     boolean isEmpty();
+
+    /**
+     * @return number of elements in the default stack
+     */
+    int size();
 }

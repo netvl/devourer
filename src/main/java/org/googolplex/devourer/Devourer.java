@@ -33,6 +33,8 @@ import org.googolplex.devourer.paths.Path;
 import org.googolplex.devourer.paths.PathMapping;
 import org.googolplex.devourer.configuration.actions.ActionAfter;
 import org.googolplex.devourer.configuration.actions.ActionBefore;
+import org.googolplex.devourer.stacks.DefaultStacks;
+import org.googolplex.devourer.stacks.Stacks;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
@@ -65,16 +67,16 @@ import java.util.Map;
  * start element is encountered, at-actions are executed when textual body of the current XML node is encountered,
  * and after-actions are executed after whole node has been processed, i.e. when end element is encountered.</p>
  *
- * <p>Actions are represented by interfaces, {@link org.googolplex.devourer.configuration.actions.ActionBefore}, {@link org.googolplex.devourer.configuration.actions.ActionAt} and
- * {@link org.googolplex.devourer.configuration.actions.ActionAfter}. These are functional interfaces (in terms of Java 8 Lambda extension), that is,
+ * <p>Actions are represented by interfaces, {@link ActionBefore}, {@link ActionAt} and
+ * {@link ActionAfter}. These are functional interfaces (in terms of Java 8 Lambda extension), that is,
  * they consists of single method. In each type this method accepts {@link Stacks} object and {@link AttributesContext}
- * object. {@link org.googolplex.devourer.configuration.actions.ActionAt} interface also accepts additional {@link String} parameter.</p>
+ * object. {@link ActionAt} interface also accepts additional {@link String} parameter.</p>
  *
  * <p>{@link Stacks} object is the main state container for the Devourer; it contains intermediate
  * objects, e.g. builders, and it should contain results of the processing. This object is returned by
  * {@code parse()} family of methods. {@link AttributesContext} object contains information about the element
  * currently being processed: name and namespace of the element, as well as its attributes.
- * {@link org.googolplex.devourer.configuration.actions.ActionAt}'s additional {@link String} parameter is set to the body of the element.</p>
+ * {@link ActionAt}'s additional {@link String} parameter is set to the body of the element.</p>
  *
  * <p>So, the overall picture of Devourer processing looks as follows. First, you configure a number
  * of actions to be taken on the nodes of expected XML document. Then you ask Devourer to parse

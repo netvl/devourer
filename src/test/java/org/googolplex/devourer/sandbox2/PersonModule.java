@@ -1,12 +1,14 @@
 package org.googolplex.devourer.sandbox2;
 
 import com.google.common.collect.ImmutableList;
-import org.googolplex.devourer.Stacks;
+import org.googolplex.devourer.stacks.Stacks;
 import org.googolplex.devourer.configuration.actions.ActionAfter;
 import org.googolplex.devourer.configuration.actions.ActionBefore;
 import org.googolplex.devourer.configuration.modular.AbstractMappingModule;
 import org.googolplex.devourer.configuration.actions.ActionAt;
 import org.googolplex.devourer.contexts.AttributesContext;
+
+import java.util.List;
 
 /**
  * Date: 22.02.13
@@ -34,17 +36,18 @@ public class PersonModule extends AbstractMappingModule {
             .doBefore(new ActionBefore() {
                 @Override
                 public void act(Stacks stacks, AttributesContext context) {
-                    stacks.push("person", context.attribute("id").get());
+                    stacks.get("person").push(context.attribute("id").get());
                 }
             })
             .doAfter(new ActionAfter() {
                 @Override
                 public void act(Stacks stacks, AttributesContext context) {
-                    String name = stacks.pop("person");
-                    int id = Integer.parseInt(stacks.<String>pop("person"));
-                    ImmutableList.Builder<Login> loginsBuilder = stacks.pop("logins");
+                    String name = stacks.get("person").pop();
+                    int id = Integer.parseInt(stacks.get("person").<String>pop());
+                    List<Login> logins = stacks.get("logins").<List<Login>>tryPop().or(ImmutableList.<Login>of());
+
                     ImmutableList.Builder<Person> personsBuilder = stacks.peek();
-                    personsBuilder.add(new Person(id, name, loginsBuilder.build()));
+                    personsBuilder.add(new Person(id, name, logins));
                 }
             });
 
@@ -52,7 +55,7 @@ public class PersonModule extends AbstractMappingModule {
             .doAt(new ActionAt() {
                 @Override
                 public void act(Stacks stacks, AttributesContext context, String body) {
-                    stacks.push("person", body);
+                    stacks.get("person").push(body);
                 }
             });
 
@@ -60,15 +63,14 @@ public class PersonModule extends AbstractMappingModule {
             .doBefore(new ActionBefore() {
                 @Override
                 public void act(Stacks stacks, AttributesContext context) {
-                    stacks.push("logins", ImmutableList.builder());
+                    stacks.get("logins").push(ImmutableList.builder());
                 }
             })
             .doAfter(new ActionAfter() {
                 @Override
                 public void act(Stacks stacks, AttributesContext context) {
-                    stacks.push(
-                        "logins",
-                        stacks.<ImmutableList.Builder<Login>>pop("logins").build()
+                    stacks.get("logins").push(
+                        stacks.get("logins").<ImmutableList.Builder<Login>>pop().build()
                     );
                 }
             });
@@ -77,7 +79,7 @@ public class PersonModule extends AbstractMappingModule {
             .doAt(new ActionAt() {
                 @Override
                 public void act(Stacks stacks, AttributesContext context, String body) {
-                    stacks.<ImmutableList.Builder<Login>>peek("logins")
+                    stacks.get("logins").<ImmutableList.Builder<Login>>peek()
                           .add(new Login(context.attribute("site").get(), body));
                 }
             });
