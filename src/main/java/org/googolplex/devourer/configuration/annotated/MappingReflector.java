@@ -224,18 +224,36 @@ public class MappingReflector {
                         if (annotations.length > 0) {
                             // We will analyze only the first one
                             Annotation annotation = annotations[0];
+                            ParameterKind kind;
+                            String parameterStack;
                             if (annotation.annotationType() == Pop.class) {
-                                parameterInfos.add(new ParameterInfo(ParameterKind.POP,
-                                                                     Stacks.DEFAULT_STACK));
+                                parameterStack = Stacks.DEFAULT_STACK;
+                                if (Optional.class.equals(type)) {
+                                    kind = ParameterKind.TRY_POP;
+                                } else {
+                                    kind = ParameterKind.POP;
+                                }
                             } else if (annotation.annotationType() == PopFrom.class) {
-                                parameterInfos.add(new ParameterInfo(ParameterKind.POP,
-                                                                     ((PopFrom) annotation).value()));
+                                parameterStack = ((PopFrom) annotation).value();
+                                if (Optional.class.equals(type)) {
+                                    kind = ParameterKind.TRY_POP;
+                                } else {
+                                    kind = ParameterKind.POP;
+                                }
                             } else if (annotation.annotationType() == Peek.class) {
-                                parameterInfos.add(new ParameterInfo(ParameterKind.PEEK,
-                                                                     Stacks.DEFAULT_STACK));
+                                parameterStack = Stacks.DEFAULT_STACK;
+                                if (Optional.class.equals(type)) {
+                                    kind = ParameterKind.TRY_PEEK;
+                                } else {
+                                    kind = ParameterKind.PEEK;
+                                }
                             } else if (annotation.annotationType() == PeekFrom.class) {
-                                parameterInfos.add(new ParameterInfo(ParameterKind.PEEK,
-                                                                     ((PeekFrom) annotation).value()));
+                                parameterStack = ((PeekFrom) annotation).value();
+                                if (Optional.class.equals(type)) {
+                                    kind = ParameterKind.TRY_PEEK;
+                                } else {
+                                    kind = ParameterKind.PEEK;
+                                }
                             } else {
                                 throw new MappingException(
                                     String.format(
@@ -244,6 +262,8 @@ public class MappingReflector {
                                     )
                                 );
                             }
+                            parameterInfos.add(new ParameterInfo(kind, parameterStack));
+
                         // If there are no annotations, throw an exception
                         } else {
                             throw new MappingException(
@@ -272,7 +292,7 @@ public class MappingReflector {
     private boolean anyPresent(Annotation[] annotations, Class... what) {
         for (Annotation first : annotations) {
             for (Class second : what) {
-                if (first.getClass() == second) {
+                if (second.isAssignableFrom(first.getClass())) {
                     return true;
                 }
             }
@@ -305,28 +325,29 @@ public class MappingReflector {
             for (int i = 0; i < parameterInfos.size(); ++i) {
                 ParameterInfo parameterInfo = parameterInfos.get(i);
                 switch (parameterInfo.kind) {
-                    case POP: {
+                    case POP:
                         arguments.get()[i] = stacks.get(parameterInfo.argument.get()).pop();
                         break;
-                    }
-                    case PEEK: {
+                    case TRY_POP:
+                        arguments.get()[i] = stacks.get(parameterInfo.argument.get()).tryPop();
+                        break;
+                    case PEEK:
                         arguments.get()[i] = stacks.get(parameterInfo.argument.get()).peek();
                         break;
-                    }
-                    case BODY: {
+                    case TRY_PEEK:
+                        arguments.get()[i] = stacks.get(parameterInfo.argument.get()).tryPeek();
+                        break;
+                    case BODY:
                         arguments.get()[i] = body.get();
                         break;
-                    }
-                    case CONTEXT: {
+                    case CONTEXT:
                         arguments.get()[i] = context;
                         break;
-                    }
-                    case STACKS: {
+                    case STACKS:
                         arguments.get()[i] = stacks;
                         break;
-                    }
                     default:
-                        throw new IllegalStateException("Invalid enumeration value: " + parameterInfo.kind);
+                        throw new DevourerException("Invalid enumeration value: " + parameterInfo.kind);
                 }
             }
         }
@@ -382,7 +403,7 @@ public class MappingReflector {
     }
 
     private static enum ParameterKind {
-        POP, PEEK, BODY, CONTEXT, STACKS
+        POP, TRY_POP, PEEK, TRY_PEEK, BODY, CONTEXT, STACKS
     }
 
     private static class ParameterInfo {

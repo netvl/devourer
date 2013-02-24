@@ -1,5 +1,6 @@
 package org.googolplex.devourer.sandbox2;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.googolplex.devourer.configuration.annotated.annotations.*;
 import org.googolplex.devourer.contexts.AttributesContext;
@@ -44,20 +45,19 @@ public class PersonAnnotatedConfig {
 
     @After("/persons/person/logins")
     @PushTo("logins")
-    public List<Login> afterLogins(@PeekFrom("logins") ImmutableList.Builder<Login> loginsBuilder) {
+    public List<Login> afterLogins(@PopFrom("logins") ImmutableList.Builder<Login> loginsBuilder) {
         return loginsBuilder.build();
     }
 
     @After("/persons/person")
     public void afterPerson(@PopFrom("person") String name, @PopFrom("person") String id,
-                            @PopFrom("logins") List<Login> logins,
+                            @PopFrom("logins") Optional<List<Login>> logins,
                             @Peek ImmutableList.Builder<Person> personsBuilder) {
-        personsBuilder.add(new Person(Integer.parseInt(id), name, logins));
+        personsBuilder.add(new Person(Integer.parseInt(id), name, logins.or(ImmutableList.<Login>of())));
     }
 
     @After("/persons")
     public List<Person> afterPersons(@Pop ImmutableList.Builder<Person> personsBuilder) {
         return personsBuilder.build();
     }
-
 }
