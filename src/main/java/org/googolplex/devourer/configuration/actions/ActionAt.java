@@ -16,7 +16,7 @@
 
 package org.googolplex.devourer.configuration.actions;
 
-import org.googolplex.devourer.Stacks;
+import org.googolplex.devourer.stacks.Stacks;
 import org.googolplex.devourer.contexts.AttributesContext;
 
 /**

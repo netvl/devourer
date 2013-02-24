@@ -22,6 +22,7 @@ import org.googolplex.devourer.sandbox.ExampleAnnotatedConfig;
 import org.googolplex.devourer.sandbox.ExampleData;
 import org.googolplex.devourer.sandbox.ExampleDataModule;
 import org.googolplex.devourer.sandbox.ExampleDataModuleNamespaces;
+import org.googolplex.devourer.stacks.Stacks;
 import org.junit.Test;
 
 import java.util.List;
@@ -67,7 +68,7 @@ public class DevourerTest {
         Devourer devourer = Devourer.create(new ExampleAnnotatedConfig());
         Stacks stacks = devourer.parse(EXAMPLE);
 
-        List<ExampleData> dataList = stacks.pop("results");
+        List<ExampleData> dataList = stacks.get("results").pop();
         assertEquals(1, dataList.size());
 
         ExampleData data = dataList.get(0);

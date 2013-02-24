@@ -24,7 +24,7 @@ import com.google.common.base.Optional;
  * configuration object.
  *
  * <p>Element context is transient; you should not hold instances of this interface neither in
- * {@link org.googolplex.devourer.Stacks} not somewhere else.</p>
+ * {@link org.googolplex.devourer.stacks.Stacks} not somewhere else.</p>
  */
 public interface ElementContext {
     /**

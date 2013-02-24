@@ -1,5 +1,7 @@
 package org.googolplex.devourer;
 
+import org.googolplex.devourer.stacks.DefaultStacks;
+import org.googolplex.devourer.stacks.Stacks;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -26,15 +28,15 @@ public class DefaultStacksTest {
     public void testPushStack() throws Exception {
         Stacks stacks = new DefaultStacks();
 
-        stacks.push("stack1", 123);
-        stacks.push("stack1", "abcd");
-        stacks.push("stack2", 945);
-        stacks.push("stack2", 234.2);
+        stacks.get("stack1").push(123);
+        stacks.get("stack1").push("abcd");
+        stacks.get("stack2").push(945);
+        stacks.get("stack2").push(234.2);
 
-        assertEquals(234.2, stacks.pop("stack2"));
-        assertEquals("abcd", stacks.pop("stack1"));
-        assertEquals(945, stacks.pop("stack2"));
-        assertEquals(123, stacks.pop("stack1"));
+        assertEquals(234.2, stacks.get("stack2").pop());
+        assertEquals("abcd", stacks.get("stack1").pop());
+        assertEquals(945, stacks.get("stack2").pop());
+        assertEquals(123, stacks.get("stack1").pop());
     }
 
     @Test
@@ -55,18 +57,18 @@ public class DefaultStacksTest {
     public void testPeekStack() throws Exception {
         Stacks stacks = new DefaultStacks();
 
-        stacks.push("stack1", 123);
-        stacks.push("stack1", 345);
-        stacks.push("stack2", 753);
-        stacks.push("stack2", 356);
+        stacks.get("stack1").push(123);
+        stacks.get("stack1").push(345);
+        stacks.get("stack2").push(753);
+        stacks.get("stack2").push(356);
 
-        assertEquals(345, stacks.peek("stack1"));
-        assertEquals(345, stacks.peek("stack1"));
-        assertEquals(356, stacks.peek("stack2"));
-        assertEquals(356, stacks.peek("stack2"));
-        assertEquals(345, stacks.pop("stack1"));
-        assertEquals(356, stacks.pop("stack2"));
-        assertEquals(123, stacks.peek("stack1"));
-        assertEquals(753, stacks.pop("stack2"));
+        assertEquals(345, stacks.get("stack1").peek());
+        assertEquals(345, stacks.get("stack1").peek());
+        assertEquals(356, stacks.get("stack2").peek());
+        assertEquals(356, stacks.get("stack2").peek());
+        assertEquals(345, stacks.get("stack1").pop());
+        assertEquals(356, stacks.get("stack2").pop());
+        assertEquals(123, stacks.get("stack1").peek());
+        assertEquals(753, stacks.get("stack2").pop());
     }
 }

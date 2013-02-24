@@ -133,8 +133,8 @@ import org.googolplex.devourer.configuration.modular.binders.MappingBinder;
  *
  * <p>Instances of {@code Action*} interfaces are shared between threads when the Devourer is used from multiple
  * threads, so it is inadvisable to hold any state inside these objects directly, as it ruins Devourer's thread safety.
- * Use only the {@link org.googolplex.devourer.Stacks} object provided to the actions to hold state of the parsing
- * process; in this case thread safety is guaranteed.</p>
+ * Use only the {@link org.googolplex.devourer.stacks.Stacks} object provided to the actions to hold state of the
+ * parsing process; in this case thread safety is guaranteed.</p>
  */
 public abstract class AbstractMappingModule implements MappingModule {
     private MappingBinder binder = null;

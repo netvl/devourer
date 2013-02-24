@@ -17,7 +17,7 @@
 package org.googolplex.devourer.sandbox;
 
 import com.google.common.collect.ImmutableList;
-import org.googolplex.devourer.Stacks;
+import org.googolplex.devourer.stacks.Stacks;
 import org.googolplex.devourer.configuration.annotated.annotations.After;
 import org.googolplex.devourer.configuration.annotated.annotations.At;
 import org.googolplex.devourer.configuration.annotated.annotations.Before;
