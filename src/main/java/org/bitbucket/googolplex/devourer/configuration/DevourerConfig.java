@@ -33,22 +33,27 @@ import java.util.Map;
  */
 public class DevourerConfig {
     public final boolean stripSpaces;
-    public final Map<String, String> staxConfig;
+    public final Map<String, Object> staxConfig;
 
-    public DevourerConfig(boolean stripSpaces, Map<String, String> staxConfig) {
+    public DevourerConfig(boolean stripSpaces, Map<String, Object> staxConfig) {
         Preconditions.checkNotNull(staxConfig, "StAX config map is null");
 
         this.stripSpaces = stripSpaces;
         this.staxConfig = staxConfig;
     }
 
+    /**
+     * Creates a new {@link Builder} with default values.
+     *
+     * @return new {@link Builder} instance
+     */
     public static Builder builder() {
         return new Builder();
     }
 
     public static class Builder {
         private boolean stripSpaces = true;
-        private Map<String, String> staxConfig = new HashMap<String, String>();
+        private Map<String, Object> staxConfig = new HashMap<String, Object>();
 
         private Builder() {
         }
@@ -79,7 +84,7 @@ public class DevourerConfig {
          * @param value property value
          * @return this object
          */
-        public Builder setStaxProperty(String name, String value) {
+        public Builder setStaxProperty(String name, Object value) {
             Preconditions.checkNotNull(name, "StAX property name is null");
             Preconditions.checkNotNull(value, "StAX property value is null");
 
