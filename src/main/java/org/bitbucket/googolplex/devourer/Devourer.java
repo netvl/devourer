@@ -167,7 +167,7 @@ public class Devourer {
     private static XMLInputFactory createXMLInputFactory(DevourerConfig devourerConfig) {
         // Create input factory and configure it
         XMLInputFactory inputFactory = XMLInputFactory.newFactory();
-        for (Map.Entry<String, String> entry : devourerConfig.staxConfig.entrySet()) {
+        for (Map.Entry<String, Object> entry : devourerConfig.staxConfig.entrySet()) {
             inputFactory.setProperty(entry.getKey(), entry.getValue());
         }
 
