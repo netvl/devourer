@@ -30,7 +30,7 @@
     <scm>
         <url>https://bitbucket.org/googolplex/devourer</url>
         <connection>scm:hg:https://bitbucket.org/googolplex/devourer</connection>
-        <developerConnection>scm:hg:https://bitbucket.org/googolplex/devourer</developerConnection>
+        <developerConnection>scm:hg:ssh://hg@bitbucket.org/googolplex/devourer</developerConnection>
     </scm>
 
     <developers>
