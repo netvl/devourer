@@ -15,8 +15,7 @@ safety. Devourer also has minimal amount of runtime dependencies (only
 Installation
 ------------
 
-Devourer is in process of being published to Maven Central. When it gets there, you would be able to
-add it to your Maven dependency list:
+Devourer is present in Maven Central. You can add it to your Maven dependency list:
 
 ```xml
     <dependency>
