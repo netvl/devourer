@@ -20,8 +20,8 @@ import com.google.common.base.Optional;
 
 /**
  * Element context contains information about the current element. It is provided to actions configured
- * in {@link org.bitbucket.googolplex.devourer.configuration.modular.MappingModule}s or to annotated methods in annotated
- * configuration object.
+ * in {@link org.bitbucket.googolplex.devourer.configuration.modular.MappingModule}s or to annotated methods in
+ * annotated configuration object.
  *
  * <p>Element context is transient; you should not hold instances of this interface neither in
  * {@link org.bitbucket.googolplex.devourer.stacks.Stacks} not somewhere else.</p>

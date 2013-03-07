@@ -36,19 +36,19 @@ public final class Mappings {
     }
 
     /**
-     * Combines three multimaps from {@link Path}s to actions into single map
-     * from {@link Path}s to {@link PathMapping}s. Used by mapping configuration parsers.
+     * Combines three multimaps from {@link SimplePath}s to actions into single map
+     * from {@link SimplePath}s to {@link PathMapping}s. Used by mapping configuration parsers.
      *
      * @param beforeMappings a collection of before-actions
      * @param atMappings a collection of at-actions
      * @param afterMappings a collection of after-actions
      * @return combined collection of all actions
      */
-    public static Map<Path, PathMapping> combineMappings(ListMultimap<Path, ActionBefore> beforeMappings,
-                                                         ListMultimap<Path, ActionAt> atMappings,
-                                                         ListMultimap<Path, ActionAfter> afterMappings) {
-        Map<Path, PathMapping> builder = new HashMap<Path, PathMapping>();
-        for (Path path : Iterables.concat(beforeMappings.keySet(), atMappings.keySet(), afterMappings.keySet())) {
+    public static Map<SimplePath, PathMapping> combineMappings(ListMultimap<SimplePath, ActionBefore> beforeMappings,
+                                                         ListMultimap<SimplePath, ActionAt> atMappings,
+                                                         ListMultimap<SimplePath, ActionAfter> afterMappings) {
+        Map<SimplePath, PathMapping> builder = new HashMap<SimplePath, PathMapping>();
+        for (SimplePath path : Iterables.concat(beforeMappings.keySet(), atMappings.keySet(), afterMappings.keySet())) {
             // An order is implicit here
             List<ActionBefore> befores = ImmutableList.copyOf(beforeMappings.get(path));
             List<ActionAt> ats = ImmutableList.copyOf(atMappings.get(path));

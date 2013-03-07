@@ -29,7 +29,7 @@ import org.bitbucket.googolplex.devourer.exceptions.ActionException;
 import org.bitbucket.googolplex.devourer.exceptions.DevourerException;
 import org.bitbucket.googolplex.devourer.exceptions.MappingException;
 import org.bitbucket.googolplex.devourer.exceptions.ParsingException;
-import org.bitbucket.googolplex.devourer.paths.Path;
+import org.bitbucket.googolplex.devourer.paths.SimplePath;
 import org.bitbucket.googolplex.devourer.paths.PathMapping;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionAfter;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionBefore;
@@ -60,7 +60,7 @@ import java.util.Map;
  * Devourer should be thread-safe.</p>
  *
  * <p>Devourer parses XML document and executes series of actions on each node it encounters. Concrete actions are
- * configured by the user. Each action is set to be executed on certain <i>path</i> inside the document. Path
+ * configured by the user. Each action is set to be executed on certain <i>path</i> inside the document. SimplePath
  * looks like very simple XPath expression or real path inside the filesystem, e.g. {@code /node/in/document}.
  * Actions can be of three types: <i>before-actions</i>, <i>at-actions</i> and <i>after-actions</i>. Correspondingly,
  * before-actions are executed before Devourer digs deeper into the insides of the current XML node, i.e. when
@@ -93,9 +93,9 @@ public class Devourer {
     private final DevourerConfig config;
     private final XMLInputFactory inputFactory;
     // TODO: maybe it makes sense to switch to a set of three multimaps, one for each of mapping types
-    private final Map<Path, PathMapping> mappings;
+    private final Map<SimplePath, PathMapping> mappings;
 
-    protected Devourer(DevourerConfig config, XMLInputFactory inputFactory, Map<Path, PathMapping> mappings) {
+    protected Devourer(DevourerConfig config, XMLInputFactory inputFactory, Map<SimplePath, PathMapping> mappings) {
         this.config = config;
         this.inputFactory = inputFactory;
         this.mappings = mappings;
@@ -130,7 +130,7 @@ public class Devourer {
         } catch (RuntimeException e) {
             throw new MappingException("An exception occured during mapping module configuration", e);
         }
-        Map<Path, PathMapping> mappings = binder.mappings();
+        Map<SimplePath, PathMapping> mappings = binder.mappings();
 
         return new Devourer(devourerConfig, createXMLInputFactory(devourerConfig), mappings);
     }
@@ -159,7 +159,7 @@ public class Devourer {
         Preconditions.checkNotNull(configObject, "Config object is null");
 
         MappingReflector reflector = new MappingReflector();
-        Map<Path, PathMapping> mappings = reflector.collectMappings(configObject);
+        Map<SimplePath, PathMapping> mappings = reflector.collectMappings(configObject);
 
         return new Devourer(devourerConfig, createXMLInputFactory(devourerConfig), mappings);
     }
@@ -259,7 +259,7 @@ public class Devourer {
 
             Deque<AttributesContext> contextStack = new ArrayDeque<AttributesContext>();
             Stacks stacks = new DefaultStacks();
-            Path currentPath = Path.fromString("");
+            SimplePath currentPath = SimplePath.fromString("");
 
             while (streamReader.hasNext()) {
                 streamReader.next();  // We will ignore exact event value in favor of reader methods
@@ -299,7 +299,7 @@ public class Devourer {
         }
     }
 
-    private void handleStartElement(XMLStreamReader streamReader, Path currentPath, Stacks stacks,
+    private void handleStartElement(XMLStreamReader streamReader, SimplePath currentPath, Stacks stacks,
                                     Deque<AttributesContext> contextStack) {
         AttributesContext context = collectAttributesContext(streamReader);
         contextStack.push(context);
@@ -312,7 +312,7 @@ public class Devourer {
         }
     }
 
-    private void handleContent(XMLStreamReader streamReader, Path currentPath, Stacks stacks,
+    private void handleContent(XMLStreamReader streamReader, SimplePath currentPath, Stacks stacks,
                                Deque<AttributesContext> contextStack) {
         String body = streamReader.getText();
         if (config.stripSpaces) {
@@ -328,7 +328,7 @@ public class Devourer {
         }
     }
 
-    private void handleEndElement(Path currentPath, Stacks stacks, Deque<AttributesContext> contextStack) {
+    private void handleEndElement(SimplePath currentPath, Stacks stacks, Deque<AttributesContext> contextStack) {
         AttributesContext context = contextStack.pop();
 
         PathMapping mapping = mappings.get(currentPath);

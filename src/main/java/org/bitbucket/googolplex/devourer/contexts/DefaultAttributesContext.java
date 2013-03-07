@@ -20,7 +20,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
-import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
 import java.util.Collection;
@@ -31,11 +30,12 @@ import java.util.Map;
  * {@link Builder}.
  */
 public class DefaultAttributesContext implements AttributesContext {
-    private final QName name;
+    private final QualifiedName name;
     private final NamespaceContext namespaceContext;
-    private final Map<QName, String> attributes;
+    private final Map<QualifiedName, String> attributes;
 
-    private DefaultAttributesContext(QName name, NamespaceContext namespaceContext, Map<QName, String> attributes) {
+    private DefaultAttributesContext(QualifiedName name, NamespaceContext namespaceContext,
+                                     Map<QualifiedName, String> attributes) {
         Preconditions.checkNotNull(name, "Name is null");
         Preconditions.checkNotNull(namespaceContext, "Namespace context is null");
         Preconditions.checkNotNull(attributes, "Attributes are null");
@@ -46,47 +46,49 @@ public class DefaultAttributesContext implements AttributesContext {
     }
 
     @Override
-    public Collection<QName> attributeNames() {
+    public NamespaceContext namespaceContext() {
+        return namespaceContext;
+    }
+
+    @Override
+    public Collection<QualifiedName> attributeNames() {
         return attributes.keySet();
     }
 
     @Override
     public Optional<String> attribute(String localName) {
-        return Optional.fromNullable(attributes.get(new QName(localName)));
+        return Optional.fromNullable(attributes.get(QualifiedNames.localOnly(localName)));
     }
 
     @Override
-    public Optional<String> attribute(String localName, String prefix) {
+    public Optional<String> attribute(String localName, String namespace) {
+        return Optional.fromNullable(attributes.get(QualifiedNames.withNamespace(localName, namespace)));
+    }
+
+    @Override
+    public Optional<String> attributeWithPrefix(String localName, String prefix) {
         String namespace = namespaceContext.getNamespaceURI(prefix);
-        return Optional.fromNullable(attributes.get(new QName(namespace, localName, prefix)));
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public Optional<String> attribute(QName name) {
+    public Optional<String> attribute(QualifiedName name) {
         return Optional.fromNullable(attributes.get(name));
     }
 
     @Override
     public String elementName() {
-        return name.getLocalPart();
+        return name.localName;
     }
 
     @Override
     public Optional<String> elementPrefix() {
-        if (XMLConstants.DEFAULT_NS_PREFIX.equals(name.getPrefix())) {
-            return Optional.absent();
-        } else {
-            return Optional.of(name.getPrefix());
-        }
+        return name.prefix;
     }
 
     @Override
     public Optional<String> elementNamespace() {
-        if (XMLConstants.NULL_NS_URI.equals(name.getNamespaceURI())) {
-            return Optional.absent();
-        } else {
-            return Optional.of(name.getNamespaceURI());
-        }
+        return name.namespace;
     }
 
     public static class Builder {
@@ -168,7 +170,7 @@ public class DefaultAttributesContext implements AttributesContext {
         }
 
         public DefaultAttributesContext build() {
-            return new DefaultAttributesContext(name, namespaceContext, attributesBuilder.build());
+            return null;
         }
     }
 }

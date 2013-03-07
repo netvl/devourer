@@ -20,6 +20,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import org.bitbucket.googolplex.devourer.paths.SimplePath;
 import org.bitbucket.googolplex.devourer.stacks.Stacks;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionAt;
 import org.bitbucket.googolplex.devourer.configuration.annotated.annotations.After;
@@ -37,7 +38,6 @@ import org.bitbucket.googolplex.devourer.contexts.ElementContext;
 import org.bitbucket.googolplex.devourer.exceptions.DevourerException;
 import org.bitbucket.googolplex.devourer.exceptions.MappingException;
 import org.bitbucket.googolplex.devourer.paths.Mappings;
-import org.bitbucket.googolplex.devourer.paths.Path;
 import org.bitbucket.googolplex.devourer.paths.PathMapping;
 
 import java.lang.annotation.Annotation;
@@ -140,16 +140,16 @@ import java.util.Map;
  * each other.</p>
  */
 public class MappingReflector {
-    public Map<Path, PathMapping> collectMappings(Object object) {
+    public Map<SimplePath, PathMapping> collectMappings(Object object) {
         Preconditions.checkNotNull(object, "Object is null");
 
         // Extract object class
         Class<?> clazz = object.getClass();
 
         // Prepare temporary collections
-        ListMultimap<Path, ActionBefore> beforeMappings = ArrayListMultimap.create();
-        ListMultimap<Path, ActionAfter> afterMappings = ArrayListMultimap.create();
-        ListMultimap<Path, ActionAt> atMappings = ArrayListMultimap.create();
+        ListMultimap<SimplePath, ActionBefore> beforeMappings = ArrayListMultimap.create();
+        ListMultimap<SimplePath, ActionAfter> afterMappings = ArrayListMultimap.create();
+        ListMultimap<SimplePath, ActionAt> atMappings = ArrayListMultimap.create();
 
         // Loop through all available methods
         for (Method method : clazz.getMethods()) {
@@ -188,7 +188,7 @@ public class MappingReflector {
                 } else {
                     route = method.getAnnotation(After.class).value();
                 }
-                Path path = Path.fromString(route);
+                SimplePath path = SimplePath.fromString(route);
 
                 // Inspect parameters and construct a list of parameter information pieces
                 List<ParameterInfo> parameterInfos = new ArrayList<ParameterInfo>();

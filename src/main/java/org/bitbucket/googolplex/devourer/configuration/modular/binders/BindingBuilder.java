@@ -18,7 +18,7 @@ package org.bitbucket.googolplex.devourer.configuration.modular.binders;
 
 import com.google.common.base.Preconditions;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionAt;
-import org.bitbucket.googolplex.devourer.paths.Path;
+import org.bitbucket.googolplex.devourer.paths.SimplePath;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionAfter;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionBefore;
 
@@ -34,21 +34,21 @@ public class BindingBuilder implements ActionBindingBuilder {
     @Override
     public BindingBuilder doBefore(ActionBefore action) {
         Preconditions.checkNotNull(action, "Action is null");
-        mappingBinder.beforeMappings.put(Path.fromString(route), action);
+        mappingBinder.beforeMappings.put(SimplePath.fromString(route), action);
         return this;
     }
 
     @Override
     public BindingBuilder doAt(ActionAt action) {
         Preconditions.checkNotNull(action, "Action is null");
-        mappingBinder.atMappings.put(Path.fromString(route), action);
+        mappingBinder.atMappings.put(SimplePath.fromString(route), action);
         return this;
     }
 
     @Override
     public BindingBuilder doAfter(ActionAfter action) {
         Preconditions.checkNotNull(action, "Action is null");
-        mappingBinder.afterMappings.put(Path.fromString(route), action);
+        mappingBinder.afterMappings.put(SimplePath.fromString(route), action);
         return this;
     }
 }
