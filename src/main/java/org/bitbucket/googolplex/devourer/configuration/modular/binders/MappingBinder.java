@@ -16,7 +16,7 @@
 
 package org.bitbucket.googolplex.devourer.configuration.modular.binders;
 
-import org.bitbucket.googolplex.devourer.paths.Path;
+import org.bitbucket.googolplex.devourer.paths.SimplePath;
 import org.bitbucket.googolplex.devourer.paths.PathMapping;
 
 import java.util.Map;
@@ -36,5 +36,5 @@ public interface MappingBinder {
      * See DSL usage examples in {@link org.bitbucket.googolplex.devourer.configuration.modular.AbstractMappingModule}
      * documentation.
      */
-    Map<Path, PathMapping> mappings();
+    Map<SimplePath, PathMapping> mappings();
 }

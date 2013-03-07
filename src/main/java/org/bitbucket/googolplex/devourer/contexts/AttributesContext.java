@@ -18,7 +18,7 @@ package org.bitbucket.googolplex.devourer.contexts;
 
 import com.google.common.base.Optional;
 
-import javax.xml.namespace.QName;
+import javax.xml.namespace.NamespaceContext;
 import java.util.Collection;
 
 /**
@@ -26,9 +26,14 @@ import java.util.Collection;
  */
 public interface AttributesContext extends ElementContext {
     /**
+     * @return current namespace context
+     */
+    NamespaceContext namespaceContext();
+
+    /**
      * @return a collection of all available attribute names
      */
-    Collection<QName> attributeNames();
+    Collection<QualifiedName> attributeNames();
 
     /**
      * Returns an attribute with given local name and no namespace.
@@ -42,10 +47,20 @@ public interface AttributesContext extends ElementContext {
      * Returns an attribute with given local name and namespace.
      *
      * @param localName local name of the attribute
-     * @param prefix namespace prefix of the attribute
+     * @param namespace namespace of the attribute
+     * @return an attribute with {@code name} local name and {@code prefix} namespace, if present
+     */
+    Optional<String> attribute(String localName, String namespace);
+
+    /**
+     * Returns an attribute with given local name and namespace prefix. The prefix is resolved against
+     * current {@link NamespaceContext}.
+     *
+     * @param localName local name of the attribute
+     * @param prefix namespace of the attribute
      * @return an attribute with {@code name} local name and {@code prefix} namespace prefix, if present
      */
-    Optional<String> attribute(String localName, String prefix);
+    Optional<String> attributeWithPrefix(String localName, String prefix);
 
     /**
      * Returns an attribute with given qualified name.
@@ -53,5 +68,5 @@ public interface AttributesContext extends ElementContext {
      * @param name qualified name of the attribute
      * @return an attribute with {@code name} full name, if present
      */
-    Optional<String> attribute(QName name);
+    Optional<String> attribute(QualifiedName name);
 }

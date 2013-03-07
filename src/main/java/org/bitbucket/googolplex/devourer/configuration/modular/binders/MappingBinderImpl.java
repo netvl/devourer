@@ -20,7 +20,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionAt;
 import org.bitbucket.googolplex.devourer.paths.Mappings;
-import org.bitbucket.googolplex.devourer.paths.Path;
+import org.bitbucket.googolplex.devourer.paths.SimplePath;
 import org.bitbucket.googolplex.devourer.paths.PathMapping;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionAfter;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionBefore;
@@ -28,16 +28,16 @@ import org.bitbucket.googolplex.devourer.configuration.actions.ActionBefore;
 import java.util.Map;
 
 public class MappingBinderImpl implements MappingBinder {
-    protected final ListMultimap<Path, ActionBefore> beforeMappings = ArrayListMultimap.create();
-    protected final ListMultimap<Path, ActionAfter> afterMappings = ArrayListMultimap.create();
-    protected final ListMultimap<Path, ActionAt> atMappings = ArrayListMultimap.create();
+    protected final ListMultimap<SimplePath, ActionBefore> beforeMappings = ArrayListMultimap.create();
+    protected final ListMultimap<SimplePath, ActionAfter> afterMappings = ArrayListMultimap.create();
+    protected final ListMultimap<SimplePath, ActionAt> atMappings = ArrayListMultimap.create();
 
     @Override
     public ActionBindingBuilder on(String route) {
         return new BindingBuilder(this, route);
     }
 
-    public Map<Path, PathMapping> mappings() {
+    public Map<SimplePath, PathMapping> mappings() {
         return Mappings.combineMappings(beforeMappings, atMappings, afterMappings);
     }
 
