@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.bitbucket.googolplex.devourer.contexts;
+package org.bitbucket.googolplex.devourer.contexts.namespaces;
 
 import com.google.common.base.Optional;
 
@@ -22,10 +22,12 @@ import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 
 /**
- * Date: 07.03.13
- * Time: 22:06
+ * Represents qualified name used in XML documents. Qualified name consists of local name, namespace and prefix.
+ * Namespace is optional, as well as prefix, but prefix cannot be present without a namespace.
  *
- * @author Vladimir Matveev
+ * <p>This class is very similar to {@link QName} from standard library but provides more convenient interface.
+ * It also does not support empty local names, and absence of namespace and prefix is modelled using
+ * {@link Optional}s.</p>
  */
 public class QualifiedName {
     public final String localName;

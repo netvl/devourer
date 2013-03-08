@@ -19,9 +19,9 @@ package org.bitbucket.googolplex.devourer.configuration.modular.binders;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionAt;
-import org.bitbucket.googolplex.devourer.paths.Mappings;
+import org.bitbucket.googolplex.devourer.paths.mappings.Mappings;
 import org.bitbucket.googolplex.devourer.paths.SimplePath;
-import org.bitbucket.googolplex.devourer.paths.PathMapping;
+import org.bitbucket.googolplex.devourer.paths.mappings.PathMapping;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionAfter;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionBefore;
 

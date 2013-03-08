@@ -19,10 +19,14 @@ package org.bitbucket.googolplex.devourer.contexts;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+import org.bitbucket.googolplex.devourer.contexts.namespaces.QualifiedName;
+import org.bitbucket.googolplex.devourer.contexts.namespaces.QualifiedNames;
 
+import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
-import javax.xml.namespace.QName;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -42,7 +46,12 @@ public class DefaultAttributesContext implements AttributesContext {
 
         this.name = name;
         this.namespaceContext = namespaceContext;
-        this.attributes = attributes;
+        this.attributes = ImmutableMap.copyOf(attributes);
+    }
+
+    @Override
+    public QualifiedName elementName() {
+        return name;
     }
 
     @Override
@@ -57,44 +66,43 @@ public class DefaultAttributesContext implements AttributesContext {
 
     @Override
     public Optional<String> attribute(String localName) {
+        Preconditions.checkNotNull(localName, "Local name is null");
+
         return Optional.fromNullable(attributes.get(QualifiedNames.localOnly(localName)));
     }
 
     @Override
     public Optional<String> attribute(String localName, String namespace) {
+        Preconditions.checkNotNull(localName, "Local name is null");
+        Preconditions.checkNotNull(namespace, "Namespace is null");
+
         return Optional.fromNullable(attributes.get(QualifiedNames.withNamespace(localName, namespace)));
     }
 
     @Override
     public Optional<String> attributeWithPrefix(String localName, String prefix) {
+        Preconditions.checkNotNull(localName, "Local name is null");
+        Preconditions.checkNotNull(prefix, "Prefix is null");
+
         String namespace = namespaceContext.getNamespaceURI(prefix);
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        if (XMLConstants.NULL_NS_URI.equals(namespace)) {
+            return Optional.absent();
+        } else {
+            return Optional.fromNullable(attributes.get(QualifiedNames.withNamespace(localName, namespace)));
+        }
     }
 
     @Override
     public Optional<String> attribute(QualifiedName name) {
+        Preconditions.checkNotNull(name, "Name is null");
+
         return Optional.fromNullable(attributes.get(name));
     }
 
-    @Override
-    public String elementName() {
-        return name.localName;
-    }
-
-    @Override
-    public Optional<String> elementPrefix() {
-        return name.prefix;
-    }
-
-    @Override
-    public Optional<String> elementNamespace() {
-        return name.namespace;
-    }
-
     public static class Builder {
-        private final ImmutableMap.Builder<QName, String> attributesBuilder = ImmutableMap.builder();
+        private final HashMap<QualifiedName, String> attributes = Maps.newHashMap();
         private NamespaceContext namespaceContext;
-        private QName name;
+        private QualifiedName name;
 
         public Builder setNamespaceContext(NamespaceContext namespaceContext) {
             Preconditions.checkNotNull(namespaceContext, "Namespace context is null");
@@ -103,7 +111,7 @@ public class DefaultAttributesContext implements AttributesContext {
             return this;
         }
 
-        public Builder setName(QName name) {
+        public Builder setName(QualifiedName name) {
             Preconditions.checkNotNull(name, "Name is null");
 
             this.name = name;
@@ -113,7 +121,7 @@ public class DefaultAttributesContext implements AttributesContext {
         public Builder setName(String name) {
             Preconditions.checkNotNull(name, "Name is null");
 
-            this.name = new QName(name);
+            this.name = QualifiedNames.localOnly(name);
             return this;
         }
 
@@ -121,7 +129,7 @@ public class DefaultAttributesContext implements AttributesContext {
             Preconditions.checkNotNull(name, "Name is null");
             Preconditions.checkNotNull(namespace, "Namespace is null");
 
-            this.name = new QName(namespace, name);
+            this.name = QualifiedNames.withNamespace(name, namespace);
             return this;
         }
 
@@ -130,7 +138,7 @@ public class DefaultAttributesContext implements AttributesContext {
             Preconditions.checkNotNull(namespace, "Namespace is null");
             Preconditions.checkNotNull(prefix, "Prefix is null");
 
-            this.name = new QName(namespace, name, prefix);
+            this.name = QualifiedNames.full(name, namespace, prefix);
             return this;
         }
 
@@ -138,7 +146,7 @@ public class DefaultAttributesContext implements AttributesContext {
             Preconditions.checkNotNull(name, "Attribute name is null");
             Preconditions.checkNotNull(value, "Attribute value is null");
 
-            this.attributesBuilder.put(new QName(name), value);
+            this.attributes.put(QualifiedNames.localOnly(name), value);
             return this;
         }
 
@@ -147,7 +155,7 @@ public class DefaultAttributesContext implements AttributesContext {
             Preconditions.checkNotNull(namespace, "Attribute namespace is null");
             Preconditions.checkNotNull(value, "Attribute value is null");
 
-            this.attributesBuilder.put(new QName(namespace, name), value);
+            this.attributes.put(QualifiedNames.withNamespace(name, namespace), value);
             return this;
         }
 
@@ -157,20 +165,20 @@ public class DefaultAttributesContext implements AttributesContext {
             Preconditions.checkNotNull(prefix, "Attribute prefix is null");
             Preconditions.checkNotNull(value, "Attribute value is null");
 
-            this.attributesBuilder.put(new QName(namespace, name, prefix), value);
+            this.attributes.put(QualifiedNames.full(name, namespace, prefix), value);
             return this;
         }
 
-        public Builder addAttribute(QName name, String value) {
+        public Builder addAttribute(QualifiedName name, String value) {
             Preconditions.checkNotNull(name, "Attribute name is null");
             Preconditions.checkNotNull(value, "Attribute value is null");
 
-            this.attributesBuilder.put(name, value);
+            this.attributes.put(name, value);
             return this;
         }
 
         public DefaultAttributesContext build() {
-            return null;
+            return new DefaultAttributesContext(name, namespaceContext, attributes);
         }
     }
 }

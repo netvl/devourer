@@ -17,6 +17,7 @@
 package org.bitbucket.googolplex.devourer.contexts;
 
 import com.google.common.base.Optional;
+import org.bitbucket.googolplex.devourer.contexts.namespaces.QualifiedName;
 
 import javax.xml.namespace.NamespaceContext;
 import java.util.Collection;
@@ -36,7 +37,11 @@ public interface AttributesContext extends ElementContext {
     Collection<QualifiedName> attributeNames();
 
     /**
-     * Returns an attribute with given local name and no namespace.
+     * Returns an attribute with given local name and no namespace. Note that this method will return
+     * absent value if there is some default namespace is set; use either {@link #attribute(String, String)} or
+     * {@link #attribute(QualifiedName)} method or {@link #attributeWithPrefix(String, String)}
+     * method with its second argument equal to {@link javax.xml.XMLConstants#DEFAULT_NS_PREFIX} to retrieve
+     * an attribute with no prefix within the default namespace.
      *
      * @param localName local name of the attribute
      * @return an attribute with {@code name} local name and without a namespace, if present
@@ -54,7 +59,8 @@ public interface AttributesContext extends ElementContext {
 
     /**
      * Returns an attribute with given local name and namespace prefix. The prefix is resolved against
-     * current {@link NamespaceContext}.
+     * current {@link NamespaceContext}. You can specify {@link javax.xml.XMLConstants#DEFAULT_NS_PREFIX}
+     * as the second argument if you need to retrieve an attribute within the default namespace.
      *
      * @param localName local name of the attribute
      * @param prefix namespace of the attribute

@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.bitbucket.googolplex.devourer.paths;
+package org.bitbucket.googolplex.devourer.paths.mappings;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -23,6 +23,7 @@ import com.google.common.collect.ListMultimap;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionAfter;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionAt;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionBefore;
+import org.bitbucket.googolplex.devourer.paths.SimplePath;
 
 import java.util.HashMap;
 import java.util.List;
@@ -36,8 +37,8 @@ public final class Mappings {
     }
 
     /**
-     * Combines three multimaps from {@link SimplePath}s to actions into single map
-     * from {@link SimplePath}s to {@link PathMapping}s. Used by mapping configuration parsers.
+     * Combines three multimaps from {@link org.bitbucket.googolplex.devourer.paths.SimplePath}s to actions into single map
+     * from {@link org.bitbucket.googolplex.devourer.paths.SimplePath}s to {@link PathMapping}s. Used by mapping configuration parsers.
      *
      * @param beforeMappings a collection of before-actions
      * @param atMappings a collection of at-actions
