@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.bitbucket.googolplex.devourer.paths;
+package org.bitbucket.googolplex.devourer.paths.mappings;
 
 import com.google.common.base.Preconditions;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionAfter;

@@ -16,6 +16,8 @@
 
 package org.bitbucket.googolplex.devourer.contexts;
 
+import org.bitbucket.googolplex.devourer.contexts.namespaces.QualifiedName;
+import org.bitbucket.googolplex.devourer.contexts.namespaces.QualifiedNames;
 import org.junit.Test;
 
 import javax.xml.XMLConstants;

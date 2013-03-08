@@ -16,29 +16,19 @@
 
 package org.bitbucket.googolplex.devourer.contexts;
 
-import com.google.common.base.Optional;
+import org.bitbucket.googolplex.devourer.contexts.namespaces.QualifiedName;
 
 /**
  * Element context contains information about the current element. It is provided to actions configured
  * in {@link org.bitbucket.googolplex.devourer.configuration.modular.MappingModule}s or to annotated methods in
  * annotated configuration object.
  *
- * <p>Element context is transient; you should not hold instances of this interface neither in
- * {@link org.bitbucket.googolplex.devourer.stacks.Stacks} not somewhere else.</p>
+ * <p>Element context is transient; you should never hold instances of this interface neither in
+ * {@link org.bitbucket.googolplex.devourer.stacks.Stacks} nor somewhere else.</p>
  */
 public interface ElementContext {
     /**
-     * @return local name of the currently processed element
+     * @return qualified name of the current element
      */
-    String elementName();
-
-    /**
-     * @return namespace prefix of the currently processed element, if present
-     */
-    Optional<String> elementPrefix();
-
-    /**
-     * @return namespace of the currently processed element, if present
-     */
-    Optional<String> elementNamespace();
+    QualifiedName elementName();
 }

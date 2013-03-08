@@ -70,8 +70,8 @@ public class ExampleDataModuleNamespaces extends AbstractMappingModule {
             .doAt(new ActionAt() {
                 @Override
                 public void act(Stacks stacks, AttributesContext context, String body) {
-                    if (context.elementNamespace().isPresent() &&
-                        "urn:example:namespace".equals(context.elementNamespace().get())) {
+                    if (context.elementName().namespace.isPresent() &&
+                        "urn:example:namespace".equals(context.elementName().namespace.get())) {
                         ExampleData.Builder builder = stacks.peek();
                         builder.setName(body);
                     }
@@ -82,8 +82,8 @@ public class ExampleDataModuleNamespaces extends AbstractMappingModule {
             .doAt(new ActionAt() {
                 @Override
                 public void act(Stacks stacks, AttributesContext context, String body) {
-                    if (context.elementNamespace().isPresent() &&
-                        "urn:example:double".equals(context.elementNamespace().get())) {
+                    if (context.elementName().namespace.isPresent() &&
+                        "urn:example:double".equals(context.elementName().namespace.get())) {
                         ExampleData.Builder builder = stacks.peek();
                         builder.addArg(Double.parseDouble(body));
                     }

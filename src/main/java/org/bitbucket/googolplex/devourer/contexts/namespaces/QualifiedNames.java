@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.bitbucket.googolplex.devourer.contexts;
+package org.bitbucket.googolplex.devourer.contexts.namespaces;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -32,12 +32,26 @@ public final class QualifiedNames {
     private QualifiedNames() {
     }
 
+    /**
+     * Creates new {@link QualifiedName} without a namespace.
+     *
+     * @param localName local name, cannot be null or empty
+     * @return new qualified name
+     */
     public static QualifiedName localOnly(String localName) {
         Preconditions.checkNotNull(localName, "Local name is null");
+        Preconditions.checkArgument(!localName.isEmpty(), "Local name is empty");
 
         return new QualifiedName(localName, Optional.<String>absent(), Optional.<String>absent());
     }
 
+    /**
+     * Creates new {@link QualifiedName} with the given namespace and without prefix.
+     *
+     * @param localName local name, cannot be null or empty
+     * @param namespace namespace, cannot be null or empty; namespace URI is not validated as a proper URI
+     * @return new qualified name
+     */
     public static QualifiedName withNamespace(String localName, String namespace) {
         Preconditions.checkNotNull(localName, "Local name is null");
         Preconditions.checkNotNull(namespace, "Namespace is null");
@@ -47,6 +61,14 @@ public final class QualifiedNames {
         return new QualifiedName(localName, Optional.of(namespace), Optional.<String>absent());
     }
 
+    /**
+     * Creates new {@link QualifiedName} with the given namespace and with prefix.
+     *
+     * @param localName local name, cannot be null or empty
+     * @param namespace namespace, cannot be null or empty; namespace URI is not validated as a proper URI
+     * @param prefix prefix, cannot be null or empty
+     * @return new qualified name
+     */
     public static QualifiedName full(String localName, String namespace, String prefix) {
         Preconditions.checkNotNull(localName, "Local name is null");
         Preconditions.checkNotNull(namespace, "Namespace is null");
@@ -58,18 +80,42 @@ public final class QualifiedNames {
         return new QualifiedName(localName, Optional.of(namespace), Optional.of(prefix));
     }
 
+    /**
+     * Creates new {@link QualifiedName} based on the given {@link QName}. The resulting {@link QualifiedName}
+     * namespace and prefix properties will be correctly retrieved from the {@link QName}.
+     *
+     * @param qName standard qualified name object
+     * @return new qualified name
+     */
     public static QualifiedName fromQName(QName qName) {
         Preconditions.checkNotNull(qName, "Qualified name is null");
 
-        if (qName.getNamespaceURI().equals(XMLConstants.NULL_NS_URI)) {
+        if (XMLConstants.NULL_NS_URI.equals(qName.getNamespaceURI())) {
             return localOnly(qName.getLocalPart());
-        } else if (qName.getPrefix().equals(XMLConstants.DEFAULT_NS_PREFIX)) {
+        } else if (XMLConstants.DEFAULT_NS_PREFIX.equals(qName.getPrefix())) {
             return withNamespace(qName.getLocalPart(), qName.getNamespaceURI());
         } else {
             return full(qName.getLocalPart(), qName.getNamespaceURI(), qName.getPrefix());
         }
     }
 
+    /**
+     * Creates new qualified name from a string. The string pattern is as follows:
+     * <pre>
+     *     ['{' namespace '}'][prefix ':']local-name
+     * </pre>
+     * Square brackets denote optional parts, quoted characters mean literal values, {@code namespace},
+     * {@code prefix} and {@code local-name} mean non-empty strings. There is also a condition: prefix cannot
+     * be present without namespace being present too. For example, the following are all valid names:
+     * <pre>
+     *     local-name
+     *     {urn:namespace}local-name
+     *     {urn:namespace}n:local-name
+     * </pre>
+     *
+     * @param string a string representing qualified name
+     * @return new qualified name
+     */
     public static QualifiedName fromString(String string) {
         Preconditions.checkNotNull(string, "String is null");
         Preconditions.checkArgument(!string.isEmpty(), "String is empty");

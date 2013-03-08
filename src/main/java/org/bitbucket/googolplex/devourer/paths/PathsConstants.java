@@ -14,29 +14,21 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.bitbucket.googolplex.devourer.paths.groups;
+package org.bitbucket.googolplex.devourer.paths;
 
-import com.google.common.base.Optional;
-import org.bitbucket.googolplex.devourer.paths.patterns.ExtendedPathPattern;
-
-import java.util.Set;
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 
 /**
- * Date: 07.03.13
- * Time: 21:56
+ * Date: 09.03.13
+ * Time: 1:00
  *
  * @author Vladimir Matveev
  */
-public class SetPathGroup implements PathGroup {
-    private final Set<ExtendedPathPattern> paths;
+public class PathsConstants {
+    public static final Splitter PATH_SPLITTER = Splitter.on('/').omitEmptyStrings().trimResults();
+    public static final Joiner PATH_JOINER = Joiner.on('/');
 
-    public SetPathGroup(Set<ExtendedPathPattern> paths) {
-        this.paths = paths;
-    }
-
-
-    @Override
-    public Optional<ExtendedPathPattern> lookup(ExtendedPathPattern path) {
-        return Optional.fromNullable(path);
-    }
+    public static final String WILDCARD = "*";
+    public static final String MULTIWILDCARD = "**";
 }

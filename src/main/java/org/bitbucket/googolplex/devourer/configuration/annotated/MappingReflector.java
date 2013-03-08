@@ -37,8 +37,8 @@ import org.bitbucket.googolplex.devourer.contexts.AttributesContext;
 import org.bitbucket.googolplex.devourer.contexts.ElementContext;
 import org.bitbucket.googolplex.devourer.exceptions.DevourerException;
 import org.bitbucket.googolplex.devourer.exceptions.MappingException;
-import org.bitbucket.googolplex.devourer.paths.Mappings;
-import org.bitbucket.googolplex.devourer.paths.PathMapping;
+import org.bitbucket.googolplex.devourer.paths.mappings.Mappings;
+import org.bitbucket.googolplex.devourer.paths.mappings.PathMapping;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;

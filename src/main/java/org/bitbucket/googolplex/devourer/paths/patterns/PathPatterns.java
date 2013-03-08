@@ -14,27 +14,27 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.bitbucket.googolplex.devourer.configuration.modular.binders;
-
-import org.bitbucket.googolplex.devourer.paths.SimplePath;
-import org.bitbucket.googolplex.devourer.paths.mappings.PathMapping;
-
-import java.util.Map;
+package org.bitbucket.googolplex.devourer.paths.patterns;
 
 /**
- * See DSL usage examples in {@link org.bitbucket.googolplex.devourer.configuration.modular.AbstractMappingModule}
- * documentation.
+ * Date: 09.03.13
+ * Time: 1:42
+ *
+ * @author Vladimir Matveev
  */
-public interface MappingBinder {
-    /**
-     * See DSL usage examples in {@link org.bitbucket.googolplex.devourer.configuration.modular.AbstractMappingModule}
-     * documentation.
-     */
-    ActionBindingBuilder on(String route);
+public final class PathPatterns {
+    private PathPatterns() {
+    }
 
     /**
-     * See DSL usage examples in {@link org.bitbucket.googolplex.devourer.configuration.modular.AbstractMappingModule}
-     * documentation.
+     * Returns the most appropriate path pattern which the given string denotes, i.e. if the string contains
+     * only simple path elements, then {@link LiteralPathPattern} is returned; if it contains multi-wildcards,
+     * {@link ExtendedPathPattern} is returned.
+     *
+     * @param string a string representing path pattern
+     * @return path pattern for the given string
      */
-    Map<SimplePath, PathMapping> mappings();
+    public final PathPattern parsePattern(String string) {
+        return null;
+    }
 }

@@ -18,7 +18,7 @@ package org.bitbucket.googolplex.devourer.paths.groups;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import org.bitbucket.googolplex.devourer.paths.Path;
+import org.bitbucket.googolplex.devourer.paths.patterns.ExtendedPathPattern;
 
 import java.util.Arrays;
 
@@ -57,9 +57,9 @@ public final class PathGroups {
         }
 
         @Override
-        public Optional<Path> lookup(Path path) {
+        public Optional<ExtendedPathPattern> lookup(ExtendedPathPattern path) {
             for (PathGroup group : groups) {
-                Optional<Path> result = group.lookup(path);
+                Optional<ExtendedPathPattern> result = group.lookup(path);
                 if (result.isPresent()) {
                     return result;
                 }

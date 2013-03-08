@@ -25,18 +25,19 @@ import org.bitbucket.googolplex.devourer.configuration.modular.binders.MappingBi
 import org.bitbucket.googolplex.devourer.configuration.modular.binders.MappingBinderImpl;
 import org.bitbucket.googolplex.devourer.contexts.AttributesContext;
 import org.bitbucket.googolplex.devourer.contexts.DefaultAttributesContext;
+import org.bitbucket.googolplex.devourer.contexts.namespaces.QualifiedName;
+import org.bitbucket.googolplex.devourer.contexts.namespaces.QualifiedNames;
 import org.bitbucket.googolplex.devourer.exceptions.ActionException;
 import org.bitbucket.googolplex.devourer.exceptions.DevourerException;
 import org.bitbucket.googolplex.devourer.exceptions.MappingException;
 import org.bitbucket.googolplex.devourer.exceptions.ParsingException;
 import org.bitbucket.googolplex.devourer.paths.SimplePath;
-import org.bitbucket.googolplex.devourer.paths.PathMapping;
+import org.bitbucket.googolplex.devourer.paths.mappings.PathMapping;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionAfter;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionBefore;
 import org.bitbucket.googolplex.devourer.stacks.DefaultStacks;
 import org.bitbucket.googolplex.devourer.stacks.Stacks;
 
-import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -344,11 +345,11 @@ public class Devourer {
 
         builder.setNamespaceContext(reader.getNamespaceContext());
 
-        QName elementName = reader.getName();
+        QualifiedName elementName = QualifiedNames.fromQName(reader.getName());
         builder.setName(elementName);
 
         for (int i = 0; i < reader.getAttributeCount(); ++i) {
-            QName attributeName = reader.getAttributeName(i);
+            QualifiedName attributeName = QualifiedNames.fromQName(reader.getAttributeName(i));
             builder.addAttribute(attributeName, reader.getAttributeValue(i));
         }
 
