@@ -23,15 +23,22 @@ import org.bitbucket.googolplex.devourer.paths.PathsConstants;
 import java.util.List;
 
 /**
- * Date: 09.03.13
- * Time: 14:35
- *
- * @author Vladimir Matveev
+ * Represents global wildcard pattern element, i.e. a wildcard which may match multiple levels of XML element
+ * names. Essentially this class is singleton.
  */
-class GlobalWildcard extends PatternElement {
+public class GlobalWildcard extends PatternElement {
+    private static GlobalWildcard INSTANCE = new GlobalWildcard();
+
     private GlobalWildcard() {
     }
 
+    /**
+     * Global wildcard matches any path, so this method always returns {@code true}.
+     *
+     * @param names a list of qualified names which designates a path inside an XML document
+     * @param context namespace context used for prefixes resolution
+     * @return {@code true}
+     */
     @Override
     public boolean matches(List<QualifiedName> names, NamespaceContext context) {
         return true;  // Global wildcard matches everything
@@ -47,12 +54,6 @@ class GlobalWildcard extends PatternElement {
         return PathsConstants.GLOBAL_WILDCARD;
     }
 
-    private static GlobalWildcard INSTANCE = new GlobalWildcard();
-
-    static GlobalWildcard create() {
-        return INSTANCE;
-    }
-
     @Override
     public int hashCode() {
         return 1;
@@ -62,5 +63,14 @@ class GlobalWildcard extends PatternElement {
     @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
     public boolean equals(Object obj) {
         return obj == this;
+    }
+
+    /**
+     * Returns an instance of {@link GlobalWildcard}. The instance is the same on each call of this method.
+     *
+     * @return {@link GlobalWildcard} instance
+     */
+    static GlobalWildcard get() {
+        return INSTANCE;
     }
 }

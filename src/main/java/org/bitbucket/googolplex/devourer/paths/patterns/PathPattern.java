@@ -22,11 +22,19 @@ import org.bitbucket.googolplex.devourer.contexts.namespaces.QualifiedName;
 import java.util.List;
 
 /**
- * Date: 09.03.13
- * Time: 0:12
- *
- * @author Vladimir Matveev
+ * A pattern against which a path inside an XML document can be matched. The path in this interface is
+ * represented by a list of {@link QualifiedName}s, but such paths are usually handled through
+ * {@link org.bitbucket.googolplex.devourer.paths.ExactPath} class.
  */
 public interface PathPattern {
+    /**
+     * Checks whether given path inside an XML document (represented by a list of {@link QualifiedName}s)
+     * matches this pattern. {@link NamespaceContext} instance is used to resolve prefixes specified in the
+     * pattern against namespaces in the path.
+     *
+     * @param names a list of qualified names which designates a path inside an XML document
+     * @param context namespace context used for prefixes resolution
+     * @return {@code true} if given path matches this pattern, {@code false} otherwise
+     */
     boolean matches(List<QualifiedName> names, NamespaceContext context);
 }

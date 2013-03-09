@@ -25,12 +25,12 @@ import org.bitbucket.googolplex.devourer.paths.PathsConstants;
 import java.util.List;
 
 /**
- * Date: 09.03.13
- * Time: 0:08
- *
- * @author Vladimir Matveev
+ * Literal name represents exactly one part of a pattern, possibly a single (non-global) wildcard.
+ * <p>
+ *     TODO: change name of this class to something more appropriate
+ * </p>
  */
-class LiteralName extends PatternElement {
+public class LiteralName extends PatternElement {
     public final String name;
     public final Optional<String> prefix;
 
@@ -106,14 +106,27 @@ class LiteralName extends PatternElement {
         return name.hashCode() ^ prefix.hashCode();
     }
 
-    public static LiteralName localOnly(String name) {
+    /**
+     * Returns new literal name with local part of the name only.
+     *
+     * @param name local name
+     * @return new literal name
+     */
+    static LiteralName localOnly(String name) {
         Preconditions.checkNotNull(name, "Name is null");
         Preconditions.checkArgument(!name.isEmpty(), "Name is empty");
 
         return new LiteralName(name, Optional.<String>absent());
     }
 
-    public static LiteralName withPrefix(String name, String prefix) {
+    /**
+     * Returns new literal name with local part and the prefix.
+     *
+     * @param name local name
+     * @param prefix prefix
+     * @return new literal name
+     */
+    static LiteralName withPrefix(String name, String prefix) {
         Preconditions.checkNotNull(name, "Name is null");
         Preconditions.checkNotNull(prefix, "Prefix is null");
         Preconditions.checkArgument(!name.isEmpty(), "Name is empty");
@@ -122,6 +135,14 @@ class LiteralName extends PatternElement {
         return new LiteralName(name, Optional.of(prefix));
     }
 
+    /**
+     * Parses a string and returns literal name written in it. String must be of the following pattern:
+     * {@code [prefix ':']local-name}, where square brackets mean optional part, single quotes mean literal character
+     * and {@code prefix} and {@code local-name} mean non-empty strings.
+     *
+     * @param string a string with literal name.
+     * @return new literal name
+     */
     static LiteralName fromString(String string) {
         Preconditions.checkNotNull(string, "String is null");
 

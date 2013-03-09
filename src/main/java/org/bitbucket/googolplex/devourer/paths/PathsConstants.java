@@ -20,10 +20,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 
 /**
- * Date: 09.03.13
- * Time: 1:00
- *
- * @author Vladimir Matveev
+ * Contains several useful constants used in paths code.
  */
 public class PathsConstants {
     public static final Splitter PATH_SPLITTER = Splitter.on('/').omitEmptyStrings().trimResults();

@@ -23,19 +23,28 @@ import org.bitbucket.googolplex.devourer.paths.patterns.elements.PatternElement;
 import org.bitbucket.googolplex.devourer.paths.patterns.elements.PatternElements;
 
 /**
- * Date: 09.03.13
- * Time: 1:42
- *
- * @author Vladimir Matveev
+ * Contains factory methods for creating instances of {@link PathPattern} interface.
  */
 public final class PathPatterns {
     private PathPatterns() {
     }
 
     /**
-     * Returns the most appropriate path pattern which the given string denotes, i.e. if the string contains
-     * only simple path elements, then {@link LiteralPathPattern} is returned; if it contains multi-wildcards,
-     * {@link ExtendedPathPattern} is returned.
+     * Returns an implementation of {@link PathPattern} interface which will match
+     * {@link org.bitbucket.googolplex.devourer.paths.ExactPath}s against a pattern defined by the given string.
+     * <p>The string must conform to the following pattern: <code>'/' | ('/' ([prefix ':']local-name | '**'))+</code>,
+     * that is, the following strings are possible:
+     * <ul>
+     *     <li><code>/</code></li>
+     *     <li><code>/**</code></li>
+     *     <li><code>/a/b/c</code></li>
+     *     <li><code>/a/p:b/*:c</code></li>
+     *     <li><code>/n:a/*:*&#47;*</code></li>
+     *     <li><code>/a/**&#47;b</code></li>
+     * </ul>
+     * The parser is liberal, however, it will ignore several sequential slashes and it also allows
+     * leaving out the leading or putting in the trailing slash. All leading and trailing whitespace characters
+     * in each element will be ignored.</p>
      *
      * @param string a string representing path pattern
      * @return path pattern for the given string
@@ -46,17 +55,11 @@ public final class PathPatterns {
         ImmutableList.Builder<PatternElement> result = ImmutableList.builder();
 
         Iterable<String> parts = PathsConstants.PATH_SPLITTER.split(string);
-        boolean allLiterals = true;
         for (String part : parts) {
             PatternElement element = PatternElements.fromString(part);
-            allLiterals = allLiterals && element.isLiteral();
             result.add(element);
         }
 
-        if (allLiterals) {
-            return LiteralPathPattern.fromList(result.build());
-        } else {
-            return ExtendedPathPattern.fromList(result.build());
-        }
+        return AdvancedPathPattern.fromList(result.build());
     }
 }
