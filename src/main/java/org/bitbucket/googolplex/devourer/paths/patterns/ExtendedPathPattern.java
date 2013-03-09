@@ -17,18 +17,17 @@
 package org.bitbucket.googolplex.devourer.paths.patterns;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import org.bitbucket.googolplex.devourer.contexts.namespaces.NamespaceContext;
 import org.bitbucket.googolplex.devourer.contexts.namespaces.QualifiedName;
 import org.bitbucket.googolplex.devourer.paths.PathsConstants;
-import org.bitbucket.googolplex.devourer.paths.patterns.parts.PatternElement;
+import org.bitbucket.googolplex.devourer.paths.patterns.elements.PatternElement;
 
 import java.util.List;
 
 /**
  * Represents some path inside tree structure, including patterns.
  */
-public class ExtendedPathPattern implements PathPattern {
+class ExtendedPathPattern implements PathPattern {
     private final List<PatternElement> elements;
 
     private ExtendedPathPattern(List<PatternElement> elements) {
@@ -45,23 +44,28 @@ public class ExtendedPathPattern implements PathPattern {
         return false;
     }
 
-    public static ExtendedPathPattern fromList(List<PatternElement> parts) {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        ExtendedPathPattern that = (ExtendedPathPattern) o;
+
+        return elements.equals(that.elements);
+    }
+
+    @Override
+    public int hashCode() {
+        return elements.hashCode();
+    }
+
+    static ExtendedPathPattern fromList(List<PatternElement> parts) {
         Preconditions.checkNotNull(parts, "Parts are null");
 
         return new ExtendedPathPattern(parts);
-    }
-
-    public static ExtendedPathPattern fromString(String string) {
-        Preconditions.checkNotNull(string, "String is null");
-
-        ImmutableList.Builder<PatternElement> result = ImmutableList.builder();
-
-        Iterable<String> parts = PathsConstants.PATH_SPLITTER.split(string);
-        for (String part : parts) {
-            PatternElement element = PatternElement.fromString(part);
-            result.add(element);
-        }
-
-        return new ExtendedPathPattern(result.build());
     }
 }

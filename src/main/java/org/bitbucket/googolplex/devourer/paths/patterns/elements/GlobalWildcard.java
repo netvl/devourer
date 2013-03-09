@@ -14,19 +14,53 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.bitbucket.googolplex.devourer.paths.patterns;
+package org.bitbucket.googolplex.devourer.paths.patterns.elements;
 
 import org.bitbucket.googolplex.devourer.contexts.namespaces.NamespaceContext;
 import org.bitbucket.googolplex.devourer.contexts.namespaces.QualifiedName;
+import org.bitbucket.googolplex.devourer.paths.PathsConstants;
 
 import java.util.List;
 
 /**
  * Date: 09.03.13
- * Time: 0:12
+ * Time: 14:35
  *
  * @author Vladimir Matveev
  */
-public interface PathPattern {
-    boolean matches(List<QualifiedName> names, NamespaceContext context);
+class GlobalWildcard extends PatternElement {
+    private GlobalWildcard() {
+    }
+
+    @Override
+    public boolean matches(List<QualifiedName> names, NamespaceContext context) {
+        return true;  // Global wildcard matches everything
+    }
+
+    @Override
+    public boolean isGlobalWildcard() {
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return PathsConstants.GLOBAL_WILDCARD;
+    }
+
+    private static GlobalWildcard INSTANCE = new GlobalWildcard();
+
+    static GlobalWildcard create() {
+        return INSTANCE;
+    }
+
+    @Override
+    public int hashCode() {
+        return 1;
+    }
+
+    @Override
+    @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
+    public boolean equals(Object obj) {
+        return obj == this;
+    }
 }

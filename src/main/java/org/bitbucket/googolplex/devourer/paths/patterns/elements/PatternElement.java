@@ -14,19 +14,22 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.bitbucket.googolplex.devourer.paths.patterns;
+package org.bitbucket.googolplex.devourer.paths.patterns.elements;
 
-import org.bitbucket.googolplex.devourer.contexts.namespaces.NamespaceContext;
-import org.bitbucket.googolplex.devourer.contexts.namespaces.QualifiedName;
-
-import java.util.List;
+import org.bitbucket.googolplex.devourer.paths.patterns.PathPattern;
 
 /**
  * Date: 09.03.13
- * Time: 0:12
+ * Time: 0:06
  *
  * @author Vladimir Matveev
  */
-public interface PathPattern {
-    boolean matches(List<QualifiedName> names, NamespaceContext context);
+public abstract class PatternElement implements PathPattern {
+    public boolean isLiteral() {
+        return false;
+    }
+
+    public boolean isGlobalWildcard() {
+        return false;
+    }
 }

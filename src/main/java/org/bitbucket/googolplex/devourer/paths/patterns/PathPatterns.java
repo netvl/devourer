@@ -16,6 +16,12 @@
 
 package org.bitbucket.googolplex.devourer.paths.patterns;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import org.bitbucket.googolplex.devourer.paths.PathsConstants;
+import org.bitbucket.googolplex.devourer.paths.patterns.elements.PatternElement;
+import org.bitbucket.googolplex.devourer.paths.patterns.elements.PatternElements;
+
 /**
  * Date: 09.03.13
  * Time: 1:42
@@ -34,7 +40,23 @@ public final class PathPatterns {
      * @param string a string representing path pattern
      * @return path pattern for the given string
      */
-    public final PathPattern parsePattern(String string) {
-        return null;
+    public static PathPattern fromString(String string) {
+        Preconditions.checkNotNull(string, "String is null");
+
+        ImmutableList.Builder<PatternElement> result = ImmutableList.builder();
+
+        Iterable<String> parts = PathsConstants.PATH_SPLITTER.split(string);
+        boolean allLiterals = true;
+        for (String part : parts) {
+            PatternElement element = PatternElements.fromString(part);
+            allLiterals = allLiterals && element.isLiteral();
+            result.add(element);
+        }
+
+        if (allLiterals) {
+            return LiteralPathPattern.fromList(result.build());
+        } else {
+            return ExtendedPathPattern.fromList(result.build());
+        }
     }
 }

@@ -16,17 +16,23 @@
 
 package org.bitbucket.googolplex.devourer.paths.patterns;
 
-import org.bitbucket.googolplex.devourer.contexts.namespaces.NamespaceContext;
-import org.bitbucket.googolplex.devourer.contexts.namespaces.QualifiedName;
+import org.junit.Test;
 
-import java.util.List;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Date: 09.03.13
- * Time: 0:12
+ * Time: 15:00
  *
  * @author Vladimir Matveev
  */
-public interface PathPattern {
-    boolean matches(List<QualifiedName> names, NamespaceContext context);
+public class PathPatternsTest {
+    @Test
+    public void testParsePattern() throws Exception {
+        PathPattern pattern = PathPatterns.fromString("/*:some/p:simple/pattern/*/*:*");
+        assertTrue(pattern instanceof LiteralPathPattern);
+
+        pattern = PathPatterns.fromString("/extended/**/pattern/**");
+        assertTrue(pattern instanceof ExtendedPathPattern);
+    }
 }

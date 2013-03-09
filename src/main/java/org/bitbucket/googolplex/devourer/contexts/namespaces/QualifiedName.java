@@ -52,10 +52,10 @@ public class QualifiedName {
     public String toString() {
         String result = localName;
         if (prefix.isPresent()) {
-            result = prefix + ":" + result;
+            result = prefix.get() + ":" + result;
         }
         if (namespace.isPresent()) {
-            result = "{" + namespace + "}" + result;
+            result = "{" + namespace.get() + "}" + result;
         }
         return result;
     }

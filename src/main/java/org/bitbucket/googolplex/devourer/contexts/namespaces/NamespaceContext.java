@@ -130,7 +130,7 @@ public class NamespaceContext {
      */
     public static NamespaceContext fromItems(String... items) {
         Preconditions.checkNotNull(items, "Items are null");
-        Preconditions.checkArgument((items.length & 1) == 1, "Items length is odd");
+        Preconditions.checkArgument((items.length & 1) == 0, "Items length is odd");
 
         BiMap<String, String> namespaceMap = HashBiMap.create();
         for (int i = 0; i + 1 < items.length; i += 2) {
@@ -150,5 +150,14 @@ public class NamespaceContext {
         Preconditions.checkNotNull(namespaceMap, "Namespace map is null");
 
         return new NamespaceContext(ImmutableBiMap.copyOf(namespaceMap));
+    }
+
+    /**
+     * Creates new empty namespace context.
+     *
+     * @return new namespace context
+     */
+    public static NamespaceContext empty() {
+        return new NamespaceContext(ImmutableBiMap.<String, String>of());
     }
 }
