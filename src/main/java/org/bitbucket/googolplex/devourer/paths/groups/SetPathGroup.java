@@ -17,7 +17,7 @@
 package org.bitbucket.googolplex.devourer.paths.groups;
 
 import com.google.common.base.Optional;
-import org.bitbucket.googolplex.devourer.paths.patterns.ExtendedPathPattern;
+import org.bitbucket.googolplex.devourer.paths.patterns.PathPattern;
 
 import java.util.Set;
 
@@ -28,15 +28,15 @@ import java.util.Set;
  * @author Vladimir Matveev
  */
 public class SetPathGroup implements PathGroup {
-    private final Set<ExtendedPathPattern> paths;
+    private final Set<PathPattern> paths;
 
-    public SetPathGroup(Set<ExtendedPathPattern> paths) {
+    public SetPathGroup(Set<PathPattern> paths) {
         this.paths = paths;
     }
 
 
     @Override
-    public Optional<ExtendedPathPattern> lookup(ExtendedPathPattern path) {
+    public Optional<PathPattern> lookup(PathPattern path) {
         return Optional.fromNullable(path);
     }
 }

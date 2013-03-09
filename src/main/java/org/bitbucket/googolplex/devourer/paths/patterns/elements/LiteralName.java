@@ -14,13 +14,12 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.bitbucket.googolplex.devourer.paths.patterns.parts;
+package org.bitbucket.googolplex.devourer.paths.patterns.elements;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import org.bitbucket.googolplex.devourer.contexts.namespaces.NamespaceContext;
 import org.bitbucket.googolplex.devourer.contexts.namespaces.QualifiedName;
-import org.bitbucket.googolplex.devourer.paths.patterns.PathPattern;
 import org.bitbucket.googolplex.devourer.paths.PathsConstants;
 
 import java.util.List;
@@ -31,7 +30,7 @@ import java.util.List;
  *
  * @author Vladimir Matveev
  */
-public class LiteralName implements PathPattern {
+class LiteralName extends PatternElement {
     public final String name;
     public final Optional<String> prefix;
 
@@ -40,31 +39,9 @@ public class LiteralName implements PathPattern {
         this.prefix = prefix;
     }
 
-    public static LiteralName localOnly(String name) {
-        Preconditions.checkNotNull(name, "Name is null");
-        Preconditions.checkArgument(!name.isEmpty(), "Name is empty");
-
-        return new LiteralName(name, Optional.<String>absent());
-    }
-
-    public static LiteralName withPrefix(String name, String prefix) {
-        Preconditions.checkNotNull(name, "Name is null");
-        Preconditions.checkNotNull(prefix, "Prefix is null");
-        Preconditions.checkArgument(!name.isEmpty(), "Name is empty");
-        Preconditions.checkArgument(!prefix.isEmpty(), "Prefix is empty");
-
-        return new LiteralName(name, Optional.of(prefix));
-    }
-
-    public static LiteralName fromString(String string) {
-        Preconditions.checkNotNull(string, "String is null");
-
-        int idx = string.indexOf('/');
-        if (idx < 0) {
-            return localOnly(string);
-        } else {
-            return withPrefix(string.substring(idx+1), string.substring(0, idx));
-        }
+    @Override
+    public boolean isLiteral() {
+        return true;
     }
 
     @Override
@@ -96,7 +73,7 @@ public class LiteralName implements PathPattern {
 
         // This literal name's local name is wildcard or is equal to the qualified name's local name
         if (PathsConstants.WILDCARD.equals(this.name) || this.name.equals(name.localName)) {
-            // Cases when literal name's prefix is present
+            // When literal name's prefix is present
             if (this.prefix.isPresent()) {
                 // Prefix is wildcard or is equal to the prefix of qualified name's namespace in the context
                 return PathsConstants.WILDCARD.equals(this.prefix.get()) || this.prefix.equals(context.prefixOf(name));
@@ -107,6 +84,52 @@ public class LiteralName implements PathPattern {
         } else {
             // Local names do no match
             return false;
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        LiteralName name1 = (LiteralName) o;
+
+        return name.equals(name1.name) && prefix.equals(name1.prefix);
+    }
+
+    @Override
+    public int hashCode() {
+        return name.hashCode() ^ prefix.hashCode();
+    }
+
+    public static LiteralName localOnly(String name) {
+        Preconditions.checkNotNull(name, "Name is null");
+        Preconditions.checkArgument(!name.isEmpty(), "Name is empty");
+
+        return new LiteralName(name, Optional.<String>absent());
+    }
+
+    public static LiteralName withPrefix(String name, String prefix) {
+        Preconditions.checkNotNull(name, "Name is null");
+        Preconditions.checkNotNull(prefix, "Prefix is null");
+        Preconditions.checkArgument(!name.isEmpty(), "Name is empty");
+        Preconditions.checkArgument(!prefix.isEmpty(), "Prefix is empty");
+
+        return new LiteralName(name, Optional.of(prefix));
+    }
+
+    static LiteralName fromString(String string) {
+        Preconditions.checkNotNull(string, "String is null");
+
+        int idx = string.indexOf(':');
+        if (idx < 0) {
+            return localOnly(string);
+        } else {
+            return withPrefix(string.substring(idx+1), string.substring(0, idx));
         }
     }
 }

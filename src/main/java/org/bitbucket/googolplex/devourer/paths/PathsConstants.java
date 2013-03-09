@@ -30,5 +30,5 @@ public class PathsConstants {
     public static final Joiner PATH_JOINER = Joiner.on('/');
 
     public static final String WILDCARD = "*";
-    public static final String MULTIWILDCARD = "**";
+    public static final String GLOBAL_WILDCARD = "**";
 }

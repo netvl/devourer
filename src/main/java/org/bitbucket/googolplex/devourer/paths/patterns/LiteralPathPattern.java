@@ -21,19 +21,20 @@ import com.google.common.collect.ImmutableList;
 import org.bitbucket.googolplex.devourer.contexts.namespaces.NamespaceContext;
 import org.bitbucket.googolplex.devourer.contexts.namespaces.QualifiedName;
 import org.bitbucket.googolplex.devourer.paths.PathsConstants;
-import org.bitbucket.googolplex.devourer.paths.patterns.parts.LiteralName;
+import org.bitbucket.googolplex.devourer.paths.patterns.elements.PatternElement;
 
 import java.util.Iterator;
 import java.util.List;
 
 /**
  * Path pattern consisting only of literal names. This pattern's matching speed is better than the one of
- * {@link ExtendedPathPattern}.
+ * {@link ExtendedPathPattern}. Note that no check is done in this class on actual contents of the list
+ * of path elements; it is assumed that it is already constructed correctly.
  */
-public class LiteralPathPattern implements PathPattern {
-    private final List<LiteralName> parts;
+class LiteralPathPattern implements PathPattern {
+    private final List<PatternElement> parts;
 
-    private LiteralPathPattern(List<LiteralName> parts) {
+    private LiteralPathPattern(List<PatternElement> parts) {
         this.parts = parts;
     }
 
@@ -44,16 +45,19 @@ public class LiteralPathPattern implements PathPattern {
 
     @Override
     public boolean matches(List<QualifiedName> names, NamespaceContext context) {
+        Preconditions.checkNotNull(names, "Names are null");
+        Preconditions.checkNotNull(context, "Context is null");
+
         // Must be of the same length
         if (names.size() != parts.size()) {
             return false;
         }
 
         Iterator<QualifiedName> ni = names.iterator();
-        Iterator<LiteralName> li = parts.iterator();
+        Iterator<PatternElement> li = parts.iterator();
         while (ni.hasNext() && li.hasNext()) {
             QualifiedName name = ni.next();
-            LiteralName part = li.next();
+            PatternElement part = li.next();
 
             if (!part.matches(ImmutableList.of(name), context)) {
                 return false;
@@ -63,7 +67,26 @@ public class LiteralPathPattern implements PathPattern {
         return true;
     }
 
-    public static LiteralPathPattern fromList(List<LiteralName> parts) {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        LiteralPathPattern that = (LiteralPathPattern) o;
+
+        return parts.equals(that.parts);
+    }
+
+    @Override
+    public int hashCode() {
+        return parts.hashCode();
+    }
+
+    static LiteralPathPattern fromList(List<PatternElement> parts) {
         Preconditions.checkNotNull(parts, "Parts are null");
 
         return new LiteralPathPattern(parts);
