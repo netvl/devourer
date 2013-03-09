@@ -36,7 +36,7 @@ import static org.junit.Assert.assertTrue;
 public class GlobalWildcardTest {
     @Test
     public void testMatches() throws Exception {
-        GlobalWildcard wildcard = GlobalWildcard.create();
+        GlobalWildcard wildcard = GlobalWildcard.get();
 
         assertTrue(
             "Global wildcard must match empty list",
@@ -60,14 +60,14 @@ public class GlobalWildcardTest {
 
     @Test
     public void testType() throws Exception {
-        GlobalWildcard wildcard = GlobalWildcard.create();
+        GlobalWildcard wildcard = GlobalWildcard.get();
         assertTrue(wildcard.isGlobalWildcard());
         assertFalse(wildcard.isLiteral());
     }
 
     @Test
     public void testToString() throws Exception {
-        GlobalWildcard wildcard = GlobalWildcard.create();
+        GlobalWildcard wildcard = GlobalWildcard.get();
         assertEquals(PathsConstants.GLOBAL_WILDCARD, wildcard.toString());
     }
 }

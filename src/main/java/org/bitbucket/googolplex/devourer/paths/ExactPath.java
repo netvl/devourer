@@ -24,10 +24,7 @@ import org.bitbucket.googolplex.devourer.contexts.namespaces.QualifiedNames;
 import java.util.List;
 
 /**
- * Date: 07.03.13
- * Time: 22:04
- *
- * @author Vladimir Matveev
+ * Represents a path inside XML document. Essentially this is a list of {@link QualifiedName}s of XML nodes.
  */
 public class ExactPath {
     public final List<QualifiedName> parts;
@@ -36,6 +33,12 @@ public class ExactPath {
         this.parts = parts;
     }
 
+    /**
+     * Returns a copy of this instance with the given name appended to the end of the names list.
+     *
+     * @param name qualified name
+     * @return new exact path which is one element longer than this object
+     */
     public ExactPath resolve(QualifiedName name) {
         Preconditions.checkNotNull(name, "Name is null");
 
@@ -43,6 +46,12 @@ public class ExactPath {
         return new ExactPath(result.addAll(this.parts).add(name).build());
     }
 
+    /**
+     * Returns a copy of this instance with the last element chopped off. When there are no elements in the path,
+     * returns this instance.
+     *
+     * @return new exact path which is one element shorter than this object, if it is possible
+     */
     public ExactPath moveUp() {
         if (parts.isEmpty()) {
             return this;
@@ -75,10 +84,19 @@ public class ExactPath {
         return parts.hashCode();
     }
 
+    /**
+     * @return a path representing root node, i.e. {@code "/"}.
+     */
     public static ExactPath root() {
         return new ExactPath(ImmutableList.<QualifiedName>of());
     }
 
+    /**
+     * Parses given string and returns exact path which is represented by it. TODO: description of the grammar
+     *
+     * @param string a string representing path inside XML tree
+     * @return new exact path
+     */
     public static ExactPath fromString(String string) {
         Preconditions.checkNotNull(string, "String is null");
 

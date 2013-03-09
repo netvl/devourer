@@ -19,16 +19,22 @@ package org.bitbucket.googolplex.devourer.paths.patterns.elements;
 import org.bitbucket.googolplex.devourer.paths.patterns.PathPattern;
 
 /**
- * Date: 09.03.13
- * Time: 0:06
- *
- * @author Vladimir Matveev
+ * Base class for pattern element. Defines methods which can differentiate between global wildcard and literal name.
+ * <p>
+ *     TODO: consider removal of this class
+ * </p>
  */
 public abstract class PatternElement implements PathPattern {
+    /**
+     * @return {@code true} if this object is literal name, {@code false} otherwise
+     */
     public boolean isLiteral() {
         return false;
     }
 
+    /**
+     * @return {@code true} if this object is global wildcard, {@code false} otherwise
+     */
     public boolean isGlobalWildcard() {
         return false;
     }
