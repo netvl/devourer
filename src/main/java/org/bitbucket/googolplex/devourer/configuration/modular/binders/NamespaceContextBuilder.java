@@ -17,32 +17,14 @@
 package org.bitbucket.googolplex.devourer.configuration.modular.binders;
 
 import org.bitbucket.googolplex.devourer.contexts.namespaces.NamespaceContext;
-import org.bitbucket.googolplex.devourer.paths.mappings.PathMapping;
 
 /**
- * See DSL usage examples in {@link org.bitbucket.googolplex.devourer.configuration.modular.AbstractMappingModule}
- * documentation.
+ * Date: 10.03.13
+ * Time: 18:46
+ *
+ * @author Vladimir Matveev
  */
-public interface MappingBinder {
-    /**
-     * See DSL usage examples in {@link org.bitbucket.googolplex.devourer.configuration.modular.AbstractMappingModule}
-     * documentation.
-     */
-    ActionBindingBuilder on(String route);
-
-    /**
-     * See DSL usage examples in {@link org.bitbucket.googolplex.devourer.configuration.modular.AbstractMappingModule}
-     * documentation.
-     */
-    NamespaceContextBuilder namespaceContext();
-
-    /**
-     * A method for internal usage. Returns accumulated path mapping.
-     */
-    PathMapping getMapping();
-
-    /**
-     * A method for internal usage. Returns accumulated namespace context.
-     */
-    NamespaceContext getNamespaceContext();
+public interface NamespaceContextBuilder {
+    NamespaceContextMappingBuilder map(String namespace);
+    NamespaceContextBuilder useAllFrom(NamespaceContext context);
 }

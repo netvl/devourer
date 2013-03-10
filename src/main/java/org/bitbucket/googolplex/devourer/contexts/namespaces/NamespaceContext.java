@@ -160,4 +160,61 @@ public class NamespaceContext {
     public static NamespaceContext empty() {
         return new NamespaceContext(ImmutableBiMap.<String, String>of());
     }
+
+    /**
+     * Creates new builder for the namespace context.
+     *
+     * @return new namespace context
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /**
+     * A builder class that constructs {@link NamespaceContext}s incrementally.
+     */
+    public static class Builder {
+        private final HashBiMap<String, String> namespaceMap = HashBiMap.create();
+
+        /**
+         * Adds new namespace to prefix mapping to this builder.
+         *
+         * @param namespace namespace
+         * @param prefix prefix
+         * @return this object
+         */
+        public Builder add(String namespace, String prefix) {
+            Preconditions.checkNotNull(namespace, "Namespace is null");
+            Preconditions.checkNotNull(prefix, "Prefix is null");
+            Preconditions.checkArgument(!namespace.isEmpty(), "Namespace is empty");
+            Preconditions.checkArgument(!prefix.isEmpty(), "Prefix is empty");
+
+            this.namespaceMap.put(namespace, prefix);
+
+            return this;
+        }
+
+        /**
+         * Adds all mappings from the given namespace context to this builder.
+         *
+         * @param context namespace context
+         * @return this object
+         */
+        public Builder addFrom(NamespaceContext context) {
+            Preconditions.checkNotNull(context, "Context is null");
+
+            for (String namespace : context.namespaces()) {
+                this.namespaceMap.put(namespace, context.prefix(namespace).get());
+            }
+
+            return this;
+        }
+
+        /**
+         * Creates new {@link NamespaceContext} with all accumulated mappings.
+         */
+        public NamespaceContext build() {
+            return new NamespaceContext(namespaceMap);
+        }
+    }
 }

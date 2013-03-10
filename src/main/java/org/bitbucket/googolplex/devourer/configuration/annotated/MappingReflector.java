@@ -18,33 +18,25 @@ package org.bitbucket.googolplex.devourer.configuration.annotated;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
-import org.bitbucket.googolplex.devourer.paths.SimplePath;
-import org.bitbucket.googolplex.devourer.stacks.Stacks;
-import org.bitbucket.googolplex.devourer.configuration.actions.ActionAt;
-import org.bitbucket.googolplex.devourer.configuration.annotated.annotations.After;
-import org.bitbucket.googolplex.devourer.configuration.annotated.annotations.At;
-import org.bitbucket.googolplex.devourer.configuration.annotated.annotations.Before;
-import org.bitbucket.googolplex.devourer.configuration.annotated.annotations.Peek;
-import org.bitbucket.googolplex.devourer.configuration.annotated.annotations.PeekFrom;
-import org.bitbucket.googolplex.devourer.configuration.annotated.annotations.Pop;
-import org.bitbucket.googolplex.devourer.configuration.annotated.annotations.PopFrom;
-import org.bitbucket.googolplex.devourer.configuration.annotated.annotations.PushTo;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionAfter;
+import org.bitbucket.googolplex.devourer.configuration.actions.ActionAt;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionBefore;
+import org.bitbucket.googolplex.devourer.configuration.annotated.annotations.*;
 import org.bitbucket.googolplex.devourer.contexts.AttributesContext;
 import org.bitbucket.googolplex.devourer.contexts.ElementContext;
+import org.bitbucket.googolplex.devourer.contexts.namespaces.NamespaceContext;
 import org.bitbucket.googolplex.devourer.exceptions.DevourerException;
 import org.bitbucket.googolplex.devourer.exceptions.MappingException;
-import org.bitbucket.googolplex.devourer.paths.mappings.Mappings;
+import org.bitbucket.googolplex.devourer.paths.mappings.MappingBuilder;
 import org.bitbucket.googolplex.devourer.paths.mappings.PathMapping;
+import org.bitbucket.googolplex.devourer.paths.patterns.PathPattern;
+import org.bitbucket.googolplex.devourer.paths.patterns.PathPatterns;
+import org.bitbucket.googolplex.devourer.stacks.Stacks;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * {@link MappingReflector} class supports creation of mappings from a class annotated in a special way.
@@ -140,16 +132,31 @@ import java.util.Map;
  * each other.</p>
  */
 public class MappingReflector {
-    public Map<SimplePath, PathMapping> collectMappings(Object object) {
+    private Optional<PathMapping> mapping = Optional.absent();
+    private NamespaceContext namespaceContext = NamespaceContext.empty();
+
+    public PathMapping getMapping() {
+        return mapping.get();
+    }
+
+    public NamespaceContext getNamespaceContext() {
+        return namespaceContext;
+    }
+
+    public void collectMappings(Object object) {
         Preconditions.checkNotNull(object, "Object is null");
 
         // Extract object class
         Class<?> clazz = object.getClass();
 
-        // Prepare temporary collections
-        ListMultimap<SimplePath, ActionBefore> beforeMappings = ArrayListMultimap.create();
-        ListMultimap<SimplePath, ActionAfter> afterMappings = ArrayListMultimap.create();
-        ListMultimap<SimplePath, ActionAt> atMappings = ArrayListMultimap.create();
+        // Prepare mapping builder
+        MappingBuilder mappingBuilder = MappingBuilder.create();
+
+        // Retrieve namespace context annotation, if it is present
+        if (clazz.isAnnotationPresent(CustomNamespaceContext.class)) {
+            String[] args = clazz.getAnnotation(CustomNamespaceContext.class).value();
+            this.namespaceContext = NamespaceContext.fromItems(args);
+        }
 
         // Loop through all available methods
         for (Method method : clazz.getMethods()) {
@@ -188,7 +195,7 @@ public class MappingReflector {
                 } else {
                     route = method.getAnnotation(After.class).value();
                 }
-                SimplePath path = SimplePath.fromString(route);
+                PathPattern pattern = PathPatterns.fromString(route);
 
                 // Inspect parameters and construct a list of parameter information pieces
                 List<ParameterInfo> parameterInfos = new ArrayList<ParameterInfo>();
@@ -275,18 +282,18 @@ public class MappingReflector {
 
                 // Add a mapping into one of the categories
                 if (method.isAnnotationPresent(Before.class)) {
-                    beforeMappings.put(path, new ReflectedActionBefore(object, method, stack, parameterInfos));
+                    mappingBuilder.add(pattern, new ReflectedActionBefore(object, method, stack, parameterInfos));
                 } else if (method.isAnnotationPresent(At.class)) {
-                    atMappings.put(path, new ReflectedActionAt(object, method, stack, parameterInfos));
+                    mappingBuilder.add(pattern, new ReflectedActionAt(object, method, stack, parameterInfos));
                 } else {
-                    afterMappings.put(path, new ReflectedActionAfter(object, method, stack, parameterInfos));
+                    mappingBuilder.add(pattern, new ReflectedActionAfter(object, method, stack, parameterInfos));
                 }
             } else {
                 // TODO: warn about bogus method
             }
         }
 
-        return Mappings.combineMappings(beforeMappings, atMappings, afterMappings);
+        this.mapping = Optional.of(mappingBuilder.build());
     }
 
     private boolean anyPresent(Annotation[] annotations, Class... what) {

@@ -14,29 +14,16 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.bitbucket.googolplex.devourer.paths.groups;
+package org.bitbucket.googolplex.devourer.paths.patterns.groups;
 
-import com.google.common.base.Optional;
 import org.bitbucket.googolplex.devourer.paths.patterns.PathPattern;
 
-import java.util.Set;
-
 /**
- * Date: 07.03.13
- * Time: 21:56
+ * Date: 10.03.13
+ * Time: 22:36
  *
  * @author Vladimir Matveev
  */
-public class SetPathGroup implements PathGroup {
-    private final Set<PathPattern> paths;
-
-    public SetPathGroup(Set<PathPattern> paths) {
-        this.paths = paths;
-    }
-
-
-    @Override
-    public Optional<PathPattern> lookup(PathPattern path) {
-        return Optional.fromNullable(path);
-    }
+public interface PatternGroupProvider {
+    PatternGroup create(Iterable<? extends PathPattern> patterns);
 }

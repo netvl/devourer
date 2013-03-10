@@ -14,41 +14,47 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.bitbucket.googolplex.devourer.configuration.modular.binders;
+package org.bitbucket.googolplex.devourer.configuration.modular.binders.impl;
 
 import com.google.common.base.Preconditions;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionAt;
-import org.bitbucket.googolplex.devourer.paths.SimplePath;
+import org.bitbucket.googolplex.devourer.configuration.modular.binders.ActionBindingBuilder;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionAfter;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionBefore;
+import org.bitbucket.googolplex.devourer.paths.mappings.MappingBuilder;
+import org.bitbucket.googolplex.devourer.paths.patterns.PathPatterns;
 
-public class BindingBuilder implements ActionBindingBuilder {
-    private final MappingBinderImpl mappingBinder;
+public class ActionBindingBinderImpl implements ActionBindingBuilder {
+    private final MappingBuilder mappingBuilder;
     private final String route;
 
-    protected BindingBuilder(MappingBinderImpl mappingBinder, String route) {
-        this.mappingBinder = mappingBinder;
+    ActionBindingBinderImpl(MappingBuilder mappingBuilder,
+                            String route) {
+        this.mappingBuilder = mappingBuilder;
         this.route = route;
     }
 
     @Override
-    public BindingBuilder doBefore(ActionBefore action) {
+    public ActionBindingBinderImpl doBefore(ActionBefore action) {
         Preconditions.checkNotNull(action, "Action is null");
-        mappingBinder.beforeMappings.put(SimplePath.fromString(route), action);
+
+        this.mappingBuilder.add(PathPatterns.fromString(route), action);
         return this;
     }
 
     @Override
-    public BindingBuilder doAt(ActionAt action) {
+    public ActionBindingBinderImpl doAt(ActionAt action) {
         Preconditions.checkNotNull(action, "Action is null");
-        mappingBinder.atMappings.put(SimplePath.fromString(route), action);
+
+        this.mappingBuilder.add(PathPatterns.fromString(route), action);
         return this;
     }
 
     @Override
-    public BindingBuilder doAfter(ActionAfter action) {
+    public ActionBindingBinderImpl doAfter(ActionAfter action) {
         Preconditions.checkNotNull(action, "Action is null");
-        mappingBinder.afterMappings.put(SimplePath.fromString(route), action);
+
+        this.mappingBuilder.add(PathPatterns.fromString(route), action);
         return this;
     }
 }

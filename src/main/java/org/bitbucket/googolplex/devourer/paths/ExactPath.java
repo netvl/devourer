@@ -29,7 +29,7 @@ import java.util.List;
 public class ExactPath {
     public final List<QualifiedName> parts;
 
-    private ExactPath(List<QualifiedName> parts) {
+    ExactPath(List<QualifiedName> parts) {
         this.parts = parts;
     }
 
