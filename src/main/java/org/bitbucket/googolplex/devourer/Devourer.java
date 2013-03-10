@@ -16,25 +16,28 @@
 
 package org.bitbucket.googolplex.devourer;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import org.bitbucket.googolplex.devourer.configuration.DevourerConfig;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionAt;
 import org.bitbucket.googolplex.devourer.configuration.annotated.MappingReflector;
 import org.bitbucket.googolplex.devourer.configuration.modular.MappingModule;
 import org.bitbucket.googolplex.devourer.configuration.modular.binders.MappingBinder;
-import org.bitbucket.googolplex.devourer.configuration.modular.binders.MappingBinderImpl;
+import org.bitbucket.googolplex.devourer.configuration.modular.binders.impl.MappingBinderImpl;
 import org.bitbucket.googolplex.devourer.contexts.AttributesContext;
 import org.bitbucket.googolplex.devourer.contexts.DefaultAttributesContext;
+import org.bitbucket.googolplex.devourer.contexts.namespaces.NamespaceContext;
 import org.bitbucket.googolplex.devourer.contexts.namespaces.QualifiedName;
 import org.bitbucket.googolplex.devourer.contexts.namespaces.QualifiedNames;
 import org.bitbucket.googolplex.devourer.exceptions.ActionException;
 import org.bitbucket.googolplex.devourer.exceptions.DevourerException;
 import org.bitbucket.googolplex.devourer.exceptions.MappingException;
 import org.bitbucket.googolplex.devourer.exceptions.ParsingException;
-import org.bitbucket.googolplex.devourer.paths.SimplePath;
-import org.bitbucket.googolplex.devourer.paths.mappings.PathMapping;
+import org.bitbucket.googolplex.devourer.paths.ExactPath;
+import org.bitbucket.googolplex.devourer.paths.mappings.ActionBundle;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionAfter;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionBefore;
+import org.bitbucket.googolplex.devourer.paths.mappings.PathMapping;
 import org.bitbucket.googolplex.devourer.stacks.DefaultStacks;
 import org.bitbucket.googolplex.devourer.stacks.Stacks;
 
@@ -61,7 +64,7 @@ import java.util.Map;
  * Devourer should be thread-safe.</p>
  *
  * <p>Devourer parses XML document and executes series of actions on each node it encounters. Concrete actions are
- * configured by the user. Each action is set to be executed on certain <i>path</i> inside the document. SimplePath
+ * configured by the user. Each action is set to be executed on certain <i>path</i> inside the document. A path
  * looks like very simple XPath expression or real path inside the filesystem, e.g. {@code /node/in/document}.
  * Actions can be of three types: <i>before-actions</i>, <i>at-actions</i> and <i>after-actions</i>. Correspondingly,
  * before-actions are executed before Devourer digs deeper into the insides of the current XML node, i.e. when
@@ -93,13 +96,15 @@ import java.util.Map;
 public class Devourer {
     private final DevourerConfig config;
     private final XMLInputFactory inputFactory;
-    // TODO: maybe it makes sense to switch to a set of three multimaps, one for each of mapping types
-    private final Map<SimplePath, PathMapping> mappings;
+    private final PathMapping pathMapping;
+    private final NamespaceContext namespaceContext;
 
-    protected Devourer(DevourerConfig config, XMLInputFactory inputFactory, Map<SimplePath, PathMapping> mappings) {
+    protected Devourer(DevourerConfig config, XMLInputFactory inputFactory, PathMapping pathMapping,
+                       NamespaceContext namespaceContext) {
         this.config = config;
         this.inputFactory = inputFactory;
-        this.mappings = mappings;
+        this.pathMapping = pathMapping;
+        this.namespaceContext = namespaceContext;
     }
 
     /**
@@ -131,9 +136,11 @@ public class Devourer {
         } catch (RuntimeException e) {
             throw new MappingException("An exception occured during mapping module configuration", e);
         }
-        Map<SimplePath, PathMapping> mappings = binder.mappings();
 
-        return new Devourer(devourerConfig, createXMLInputFactory(devourerConfig), mappings);
+        PathMapping pathMapping = binder.getMapping();
+        NamespaceContext namespaceContext = binder.getNamespaceContext();
+
+        return new Devourer(devourerConfig, createXMLInputFactory(devourerConfig), pathMapping, namespaceContext);
     }
 
     /**
@@ -160,9 +167,12 @@ public class Devourer {
         Preconditions.checkNotNull(configObject, "Config object is null");
 
         MappingReflector reflector = new MappingReflector();
-        Map<SimplePath, PathMapping> mappings = reflector.collectMappings(configObject);
+        reflector.collectMappings(configObject);
 
-        return new Devourer(devourerConfig, createXMLInputFactory(devourerConfig), mappings);
+        PathMapping pathMapping = reflector.getMapping();
+        NamespaceContext namespaceContext = reflector.getNamespaceContext();
+
+        return new Devourer(devourerConfig, createXMLInputFactory(devourerConfig), pathMapping, namespaceContext);
     }
 
     private static XMLInputFactory createXMLInputFactory(DevourerConfig devourerConfig) {
@@ -260,13 +270,13 @@ public class Devourer {
 
             Deque<AttributesContext> contextStack = new ArrayDeque<AttributesContext>();
             Stacks stacks = new DefaultStacks();
-            SimplePath currentPath = SimplePath.fromString("");
+            ExactPath currentPath = ExactPath.root();
 
             while (streamReader.hasNext()) {
                 streamReader.next();  // We will ignore exact event value in favor of reader methods
 
                 if (streamReader.isStartElement()) {
-                    currentPath = currentPath.resolve(streamReader.getLocalName());
+                    currentPath = currentPath.resolve(QualifiedNames.fromQName(streamReader.getName()));
                     handleStartElement(streamReader, currentPath, stacks, contextStack);
 
                 } else if (streamReader.isCharacters() && !streamReader.isWhiteSpace()) {
@@ -300,20 +310,20 @@ public class Devourer {
         }
     }
 
-    private void handleStartElement(XMLStreamReader streamReader, SimplePath currentPath, Stacks stacks,
+    private void handleStartElement(XMLStreamReader streamReader, ExactPath currentPath, Stacks stacks,
                                     Deque<AttributesContext> contextStack) {
         AttributesContext context = collectAttributesContext(streamReader);
         contextStack.push(context);
 
-        PathMapping mapping = mappings.get(currentPath);
-        if (mapping != null) {
-            for (ActionBefore action : mapping.befores) {
+        Optional<ActionBundle> bundle = pathMapping.lookup(currentPath, namespaceContext);
+        if (bundle.isPresent()) {
+            for (ActionBefore action : bundle.get().befores) {
                 action.act(stacks, context);
             }
         }
     }
 
-    private void handleContent(XMLStreamReader streamReader, SimplePath currentPath, Stacks stacks,
+    private void handleContent(XMLStreamReader streamReader, ExactPath currentPath, Stacks stacks,
                                Deque<AttributesContext> contextStack) {
         String body = streamReader.getText();
         if (config.stripSpaces) {
@@ -321,20 +331,20 @@ public class Devourer {
         }
         AttributesContext context = contextStack.peek();
 
-        PathMapping mapping = mappings.get(currentPath);
-        if (mapping != null) {
-            for (ActionAt action : mapping.ats) {
+        Optional<ActionBundle> bundle = pathMapping.lookup(currentPath, namespaceContext);
+        if (bundle.isPresent()) {
+            for (ActionAt action : bundle.get().ats) {
                 action.act(stacks, context, body);
             }
         }
     }
 
-    private void handleEndElement(SimplePath currentPath, Stacks stacks, Deque<AttributesContext> contextStack) {
+    private void handleEndElement(ExactPath currentPath, Stacks stacks, Deque<AttributesContext> contextStack) {
         AttributesContext context = contextStack.pop();
 
-        PathMapping mapping = mappings.get(currentPath);
-        if (mapping != null) {
-            for (ActionAfter action : mapping.afters) {
+        Optional<ActionBundle> bundle = pathMapping.lookup(currentPath, namespaceContext);
+        if (bundle.isPresent()) {
+            for (ActionAfter action : bundle.get().afters) {
                 action.act(stacks, context);
             }
         }

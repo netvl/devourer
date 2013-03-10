@@ -34,7 +34,7 @@ public class QualifiedName {
     public final Optional<String> namespace;
     public final Optional<String> prefix;
 
-    protected QualifiedName(String localName, Optional<String> namespace, Optional<String> prefix) {
+    QualifiedName(String localName, Optional<String> namespace, Optional<String> prefix) {
         this.localName = localName;
         this.namespace = namespace;
         this.prefix = prefix;
