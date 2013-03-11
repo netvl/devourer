@@ -18,14 +18,14 @@ package org.bitbucket.googolplex.devourer.configuration.annotated;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import org.bitbucket.googolplex.devourer.configuration.actions.ActionAfter;
-import org.bitbucket.googolplex.devourer.configuration.actions.ActionAt;
-import org.bitbucket.googolplex.devourer.configuration.actions.ActionBefore;
+import com.google.common.collect.Lists;
+import org.bitbucket.googolplex.devourer.configuration.annotated.internal.ParameterInfo;
+import org.bitbucket.googolplex.devourer.configuration.annotated.internal.ParameterKind;
 import org.bitbucket.googolplex.devourer.configuration.annotated.annotations.*;
+import org.bitbucket.googolplex.devourer.configuration.annotated.internal.ReflectedActions;
 import org.bitbucket.googolplex.devourer.contexts.AttributesContext;
 import org.bitbucket.googolplex.devourer.contexts.ElementContext;
 import org.bitbucket.googolplex.devourer.contexts.namespaces.NamespaceContext;
-import org.bitbucket.googolplex.devourer.exceptions.DevourerException;
 import org.bitbucket.googolplex.devourer.exceptions.MappingException;
 import org.bitbucket.googolplex.devourer.paths.mappings.MappingBuilder;
 import org.bitbucket.googolplex.devourer.paths.mappings.PathMapping;
@@ -35,7 +35,6 @@ import org.bitbucket.googolplex.devourer.stacks.Stacks;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -47,8 +46,8 @@ import java.util.List;
  * {@link org.bitbucket.googolplex.devourer.configuration.modular.AbstractMappingModule}). The actions are configured
  * using annotations metadata.
  *
- * <p>A class of supplied object should contain methods annotated either with {@link Before}, {@link At} or
- * {@link After} annotation, each of which designating either before-, at- or after-action. These annotations
+ * <p>A class of supplied object should contain methods annotated either with {@link org.bitbucket.googolplex.devourer.configuration.annotated.annotations.Before}, {@link org.bitbucket.googolplex.devourer.configuration.annotated.annotations.At} or
+ * {@link org.bitbucket.googolplex.devourer.configuration.annotated.annotations.After} annotation, each of which designating either before-, at- or after-action. These annotations
  * accept mandatory string parameter, a path to the element inside XML document this method will handle.</p>
  *
  * <p>Each method optionally can return a value. Such method can optionally be annotated with {@link PushTo}
@@ -130,6 +129,9 @@ import java.util.List;
  * <p>Despite that action objects generated during annotated configuration processing contain some internal mutable
  * state, it is wrapped into {@link ThreadLocal}, so it is not possible for different threads to interfere with
  * each other.</p>
+ *
+ * <p>This class is not thread-safe, but this is not a problem since it is used only in Devourer initialization
+ * code.</p>
  */
 public class MappingReflector {
     private Optional<PathMapping> mapping = Optional.absent();
@@ -166,127 +168,21 @@ public class MappingReflector {
                 method.isAnnotationPresent(After.class)) {
 
                 // Check whether the method returns something and try to get stack name where to push
-                Optional<String> stack = Optional.absent();
-                if (method.getReturnType() != void.class) {
-                    // Method cannot return stacks or element context
-                    if (method.getReturnType() == Stacks.class ||
-                        method.getReturnType() == ElementContext.class ||
-                        method.getReturnType() == AttributesContext.class) {
-                        throw new MappingException(
-                            String.format(
-                                "Invalid return type of method %s: %s",
-                                method.getName(), method.getReturnType().getSimpleName()
-                            )
-                        );
-                    }
-                    String stackName = Stacks.DEFAULT_STACK;
-                    if (method.isAnnotationPresent(PushTo.class)) {
-                        stackName = method.getAnnotation(PushTo.class).value();
-                    }
-                    stack = Optional.of(stackName);
-                }
+                Optional<String> stack = getTargetStack(method);
 
                 // Get path to the node
-                String route;
-                if (method.isAnnotationPresent(Before.class)) {
-                    route = method.getAnnotation(Before.class).value();
-                } else if (method.isAnnotationPresent(At.class)) {
-                    route = method.getAnnotation(At.class).value();
-                } else {
-                    route = method.getAnnotation(After.class).value();
-                }
-                PathPattern pattern = PathPatterns.fromString(route);
+                PathPattern pattern = extractRoute(method);
 
                 // Inspect parameters and construct a list of parameter information pieces
-                List<ParameterInfo> parameterInfos = new ArrayList<ParameterInfo>();
-
-                // Parameters information
-                Class<?>[] parameterTypes = method.getParameterTypes();
-                Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-
-                // Loop through all the parameters
-                for (int i = 0; i < parameterTypes.length; ++i) {
-                    Class<?> type = parameterTypes[i];
-                    Annotation[] annotations = parameterAnnotations[i];
-
-                    // Parameter is of context type
-                    if (type == AttributesContext.class || type == ElementContext.class) {
-                        parameterInfos.add(new ParameterInfo(ParameterKind.CONTEXT));
-
-                    // Parameter is of stacks type1
-                    } else if (type == Stacks.class) {
-                        parameterInfos.add(new ParameterInfo(ParameterKind.STACKS));
-
-                    // Parameter is of string type -- body
-                    } else if (type == String.class &&
-                               !anyPresent(annotations, Pop.class, PopFrom.class, Peek.class, PeekFrom.class)) {
-                        if (!method.isAnnotationPresent(At.class)) {
-                            throw new MappingException("Requested body not in @At method");
-                        }
-                        parameterInfos.add(new ParameterInfo(ParameterKind.BODY));
-
-                    // Otherwise it can only be a stack checking operation
-                    } else {
-                        // At least one annotation should be present
-                        if (annotations.length > 0) {
-                            // We will analyze only the first one
-                            Annotation annotation = annotations[0];
-                            ParameterKind kind;
-                            String parameterStack;
-                            if (annotation.annotationType() == Pop.class) {
-                                parameterStack = Stacks.DEFAULT_STACK;
-                                if (Optional.class.equals(type)) {
-                                    kind = ParameterKind.TRY_POP;
-                                } else {
-                                    kind = ParameterKind.POP;
-                                }
-                            } else if (annotation.annotationType() == PopFrom.class) {
-                                parameterStack = ((PopFrom) annotation).value();
-                                if (Optional.class.equals(type)) {
-                                    kind = ParameterKind.TRY_POP;
-                                } else {
-                                    kind = ParameterKind.POP;
-                                }
-                            } else if (annotation.annotationType() == Peek.class) {
-                                parameterStack = Stacks.DEFAULT_STACK;
-                                if (Optional.class.equals(type)) {
-                                    kind = ParameterKind.TRY_PEEK;
-                                } else {
-                                    kind = ParameterKind.PEEK;
-                                }
-                            } else if (annotation.annotationType() == PeekFrom.class) {
-                                parameterStack = ((PeekFrom) annotation).value();
-                                if (Optional.class.equals(type)) {
-                                    kind = ParameterKind.TRY_PEEK;
-                                } else {
-                                    kind = ParameterKind.PEEK;
-                                }
-                            } else {
-                                throw new MappingException(
-                                    String.format(
-                                        "Requested unknown parameter with unknown annotation: %s %s",
-                                        annotation, type.getSimpleName()
-                                    )
-                                );
-                            }
-                            parameterInfos.add(new ParameterInfo(kind, parameterStack));
-
-                        // If there are no annotations, throw an exception
-                        } else {
-                            throw new MappingException(
-                                "Requested unknown parameter with no annotations: " + type.getSimpleName()
-                            );
-                        }
-                    }
-                }
+                List<ParameterInfo> parameterInfos = extractParametersInformation(method);
 
                 // Add a mapping into one of the categories
                 if (method.isAnnotationPresent(Before.class)) {
-                    mappingBuilder.add(pattern, new ReflectedActionBefore(object, method, stack, parameterInfos));
+                    mappingBuilder.add(pattern, new ReflectedActions.Before(object, method, stack, parameterInfos));
                 } else if (method.isAnnotationPresent(At.class)) {
-                    mappingBuilder.add(pattern, new ReflectedActionAt(object, method, stack, parameterInfos));
+                    mappingBuilder.add(pattern, new ReflectedActions.At(object, method, stack, parameterInfos));
                 } else {
-                    mappingBuilder.add(pattern, new ReflectedActionAfter(object, method, stack, parameterInfos));
+                    mappingBuilder.add(pattern, new ReflectedActions.After(object, method, stack, parameterInfos));
                 }
             } else {
                 // TODO: warn about bogus method
@@ -296,6 +192,153 @@ public class MappingReflector {
         this.mapping = Optional.of(mappingBuilder.build());
     }
 
+    /**
+     * @return a list of {@link ParameterInfo}s for method parameters
+     */
+    private List<ParameterInfo> extractParametersInformation(Method method) {
+        List<ParameterInfo> parameterInfos = Lists.newArrayList();
+
+        // Parameters information
+        Class<?>[] parameterTypes = method.getParameterTypes();
+        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+
+        // Loop through all the parameters
+        for (int i = 0; i < parameterTypes.length; ++i) {
+            ParameterInfo parameterInfo = inspectMethodAnnotations(method, parameterTypes[i], parameterAnnotations[i]);
+
+            parameterInfos.add(parameterInfo);
+        }
+
+        return parameterInfos;
+    }
+
+    /**
+     * @param type class object for method parameter
+     * @param annotations all annotations for the method parameters
+     * @return {@link ParameterInfo} information based on method parameter annotations
+     */
+    private ParameterInfo inspectMethodAnnotations(Method method, Class<?> type, Annotation[] annotations) {
+        // Parameter is of context type
+        if (type == AttributesContext.class || type == ElementContext.class) {
+            return new ParameterInfo(ParameterKind.CONTEXT);
+
+        // Parameter is of stacks type
+        } else if (type == Stacks.class) {
+            return new ParameterInfo(ParameterKind.STACKS);
+
+        // Parameter is of string type -- body
+        } else if (type == String.class &&
+                   !anyPresent(annotations, Pop.class, PopFrom.class, Peek.class, PeekFrom.class)) {
+            // Applicable only for at-actions
+            if (!method.isAnnotationPresent(At.class)) {
+                throw new MappingException("Requested body not in @At method");
+            }
+            return new ParameterInfo(ParameterKind.BODY);
+
+        // Otherwise it can only be a stack checking operation
+        } else {
+            // At least one annotation should be present
+            if (annotations.length > 0) {
+                // We will analyze only the first one
+                Annotation annotation = annotations[0];
+                ParameterKind kind;
+                String parameterStack;
+
+                if (annotation.annotationType() == Pop.class) {
+                    parameterStack = Stacks.DEFAULT_STACK;
+                    if (Optional.class.equals(type)) {
+                        kind = ParameterKind.TRY_POP;
+                    } else {
+                        kind = ParameterKind.POP;
+                    }
+
+                } else if (annotation.annotationType() == PopFrom.class) {
+                    parameterStack = ((PopFrom) annotation).value();
+                    if (Optional.class.equals(type)) {
+                        kind = ParameterKind.TRY_POP;
+                    } else {
+                        kind = ParameterKind.POP;
+                    }
+
+                } else if (annotation.annotationType() == Peek.class) {
+                    parameterStack = Stacks.DEFAULT_STACK;
+                    if (Optional.class.equals(type)) {
+                        kind = ParameterKind.TRY_PEEK;
+                    } else {
+                        kind = ParameterKind.PEEK;
+                    }
+                } else if (annotation.annotationType() == PeekFrom.class) {
+                    parameterStack = ((PeekFrom) annotation).value();
+                    if (Optional.class.equals(type)) {
+                        kind = ParameterKind.TRY_PEEK;
+                    } else {
+                        kind = ParameterKind.PEEK;
+                    }
+
+                } else {
+                    throw new MappingException(
+                        String.format(
+                            "Requested unknown parameter with unknown annotation: %s %s",
+                            annotation, type.getSimpleName()
+                        )
+                    );
+                }
+
+                return new ParameterInfo(kind, parameterStack);
+
+            // If there are no annotations, throw an exception
+            } else {
+                throw new MappingException(
+                    "Requested unknown parameter with no annotations: " + type.getSimpleName()
+                );
+            }
+        }
+    }
+
+    /**
+     * @return a route on which the action method is mapped
+     */
+    private PathPattern extractRoute(Method method) {
+        String route;
+        if (method.isAnnotationPresent(Before.class)) {
+            route = method.getAnnotation(Before.class).value();
+        } else if (method.isAnnotationPresent(At.class)) {
+            route = method.getAnnotation(At.class).value();
+        } else {
+            route = method.getAnnotation(After.class).value();
+        }
+        return PathPatterns.fromString(route);
+    }
+
+    /**
+     * @return name of the target stack for action method, if it is present
+     */
+    private Optional<String> getTargetStack(Method method) {
+        if (method.getReturnType() != void.class) {
+            // Method cannot return stacks or element context
+            if (method.getReturnType() == Stacks.class ||
+                method.getReturnType() == ElementContext.class ||
+                method.getReturnType() == AttributesContext.class) {
+                throw new MappingException(
+                    String.format(
+                        "Invalid return type of method %s: %s",
+                        method.getName(), method.getReturnType().getSimpleName()
+                    )
+                );
+            }
+            String stackName = Stacks.DEFAULT_STACK;
+            if (method.isAnnotationPresent(PushTo.class)) {
+                stackName = method.getAnnotation(PushTo.class).value();
+            }
+            return Optional.of(stackName);
+        } else {
+            return Optional.absent();
+        }
+    }
+
+    /**
+     * @return {@code true} if an annotation of one of {@code what} classes is present in {@code annotations} array
+     */
     private boolean anyPresent(Annotation[] annotations, Class... what) {
         for (Annotation first : annotations) {
             for (Class second : what) {
@@ -307,124 +350,4 @@ public class MappingReflector {
         return false;
     }
 
-    private static class AbstractReflectedAction {
-        private final ThreadLocal<Object[]> arguments;
-        private final Object object;
-        private final Method method;
-        private final Optional<String> stack;
-        private final List<ParameterInfo> parameterInfos;
-
-        private AbstractReflectedAction(Object object, Method method, Optional<String> stack,
-                                        final List<ParameterInfo> parameterInfos) {
-            this.object = object;
-            this.method = method;
-            this.stack = stack;
-            this.parameterInfos = parameterInfos;
-            this.arguments = new ThreadLocal<Object[]>() {
-                @Override
-                protected Object[] initialValue() {
-                    return new Object[parameterInfos.size()];
-                }
-            };
-        }
-
-        protected void fillArguments(Stacks stacks, AttributesContext context, Optional<String> body) {
-            for (int i = 0; i < parameterInfos.size(); ++i) {
-                ParameterInfo parameterInfo = parameterInfos.get(i);
-                switch (parameterInfo.kind) {
-                    case POP:
-                        arguments.get()[i] = stacks.get(parameterInfo.argument.get()).pop();
-                        break;
-                    case TRY_POP:
-                        arguments.get()[i] = stacks.get(parameterInfo.argument.get()).tryPop();
-                        break;
-                    case PEEK:
-                        arguments.get()[i] = stacks.get(parameterInfo.argument.get()).peek();
-                        break;
-                    case TRY_PEEK:
-                        arguments.get()[i] = stacks.get(parameterInfo.argument.get()).tryPeek();
-                        break;
-                    case BODY:
-                        arguments.get()[i] = body.get();
-                        break;
-                    case CONTEXT:
-                        arguments.get()[i] = context;
-                        break;
-                    case STACKS:
-                        arguments.get()[i] = stacks;
-                        break;
-                    default:
-                        throw new DevourerException("Invalid enumeration value: " + parameterInfo.kind);
-                }
-            }
-        }
-
-        protected void invokeMethod(Stacks stacks, AttributesContext context, Optional<String> body) {
-            fillArguments(stacks, context, body);
-            Object result;
-            try {
-                result = method.invoke(object, arguments.get());
-            } catch (Exception e) {
-                throw new DevourerException("Error invoking action method", e);
-            }
-            if (stack.isPresent()) {
-                stacks.get(stack.get()).push(result);
-            }
-        }
-    }
-
-    private static class ReflectedActionBefore extends AbstractReflectedAction implements ActionBefore {
-        private ReflectedActionBefore(Object object, Method method, Optional<String> stack,
-                                      List<ParameterInfo> parameterInfos) {
-            super(object, method, stack, parameterInfos);
-        }
-
-        @Override
-        public void act(Stacks stacks, AttributesContext context) {
-            invokeMethod(stacks, context, Optional.<String>absent());
-        }
-    }
-
-    private static class ReflectedActionAt extends AbstractReflectedAction implements ActionAt {
-        private ReflectedActionAt(Object object, Method method, Optional<String> stack,
-                                  List<ParameterInfo> parameterInfos) {
-            super(object, method, stack, parameterInfos);
-        }
-
-        @Override
-        public void act(Stacks stacks, AttributesContext context, String body) {
-            invokeMethod(stacks, context, Optional.of(body));
-        }
-    }
-
-    private static class ReflectedActionAfter extends AbstractReflectedAction implements ActionAfter {
-        private ReflectedActionAfter(Object object, Method method, Optional<String> stack,
-                                     List<ParameterInfo> parameterInfos) {
-            super(object, method, stack, parameterInfos);
-        }
-
-        @Override
-        public void act(Stacks stacks, AttributesContext context) {
-            invokeMethod(stacks, context, Optional.<String>absent());
-        }
-    }
-
-    private static enum ParameterKind {
-        POP, TRY_POP, PEEK, TRY_PEEK, BODY, CONTEXT, STACKS
-    }
-
-    private static class ParameterInfo {
-        private final ParameterKind kind;
-        private final Optional<String> argument;
-
-        private ParameterInfo(ParameterKind kind, String argument) {
-            this.kind = kind;
-            this.argument = Optional.of(argument);
-        }
-
-        private ParameterInfo(ParameterKind kind) {
-            this.kind = kind;
-            this.argument = Optional.absent();
-        }
-    }
- }
+}

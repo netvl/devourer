@@ -14,12 +14,13 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.bitbucket.googolplex.devourer;
+package org.bitbucket.googolplex.devourer.integration;
 
-import org.bitbucket.googolplex.devourer.sandbox2.Login;
-import org.bitbucket.googolplex.devourer.sandbox2.Person;
-import org.bitbucket.googolplex.devourer.sandbox2.PersonAnnotatedConfig;
-import org.bitbucket.googolplex.devourer.sandbox2.PersonModule;
+import org.bitbucket.googolplex.devourer.Devourer;
+import org.bitbucket.googolplex.devourer.integration.sandbox2.Login;
+import org.bitbucket.googolplex.devourer.integration.sandbox2.Person;
+import org.bitbucket.googolplex.devourer.integration.sandbox2.PersonAnnotatedConfig;
+import org.bitbucket.googolplex.devourer.integration.sandbox2.PersonModule;
 import org.bitbucket.googolplex.devourer.stacks.Stacks;
 import org.junit.Test;
 

@@ -1,4 +1,4 @@
-package org.bitbucket.googolplex.devourer.sandbox2;
+package org.bitbucket.googolplex.devourer.integration.sandbox2;
 
 /**
  * Date: 22.02.13
