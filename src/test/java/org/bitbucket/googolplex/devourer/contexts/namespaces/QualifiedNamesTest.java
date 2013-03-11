@@ -14,10 +14,8 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.bitbucket.googolplex.devourer.contexts;
+package org.bitbucket.googolplex.devourer.contexts.namespaces;
 
-import org.bitbucket.googolplex.devourer.contexts.namespaces.QualifiedName;
-import org.bitbucket.googolplex.devourer.contexts.namespaces.QualifiedNames;
 import org.junit.Test;
 
 import javax.xml.XMLConstants;

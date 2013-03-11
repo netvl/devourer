@@ -25,8 +25,8 @@ import org.bitbucket.googolplex.devourer.paths.mappings.MappingBuilder;
 import org.bitbucket.googolplex.devourer.paths.patterns.PathPatterns;
 
 public class ActionBindingBuilderImpl implements ActionBindingBuilder {
-    private final MappingBuilder mappingBuilder;
-    private final String route;
+    protected final MappingBuilder mappingBuilder;
+    protected final String route;
 
     ActionBindingBuilderImpl(MappingBuilder mappingBuilder, String route) {
         this.mappingBuilder = mappingBuilder;
