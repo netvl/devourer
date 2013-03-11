@@ -28,9 +28,9 @@ import org.bitbucket.googolplex.devourer.contexts.namespaces.NamespaceContext;
  * @author Vladimir Matveev
  */
 public class NamespaceContextMappingBuilderImpl implements NamespaceContextMappingBuilder {
-    private final NamespaceContextBuilder parent;
-    private final NamespaceContext.Builder builder;
-    private final String namespace;
+    protected final NamespaceContextBuilder parent;
+    protected final NamespaceContext.Builder builder;
+    protected final String namespace;
 
     NamespaceContextMappingBuilderImpl(NamespaceContextBuilder parent,
                                        NamespaceContext.Builder builder,
