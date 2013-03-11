@@ -1,4 +1,4 @@
-package org.bitbucket.googolplex.devourer.integration.sandbox2;
+package org.bitbucket.googolplex.devourer.integration.sandbox2.classes;
 
 import com.google.common.collect.ImmutableList;
 import org.bitbucket.googolplex.devourer.stacks.Stacks;

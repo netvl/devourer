@@ -14,15 +14,15 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.bitbucket.googolplex.devourer.integration;
+package org.bitbucket.googolplex.devourer.integration.sandbox1;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.bitbucket.googolplex.devourer.Devourer;
-import org.bitbucket.googolplex.devourer.integration.sandbox.ExampleAnnotatedConfig;
-import org.bitbucket.googolplex.devourer.integration.sandbox.ExampleData;
-import org.bitbucket.googolplex.devourer.integration.sandbox.ExampleDataModule;
-import org.bitbucket.googolplex.devourer.integration.sandbox.ExampleDataModuleNamespaces;
+import org.bitbucket.googolplex.devourer.integration.sandbox1.classes.ExampleAnnotatedConfig;
+import org.bitbucket.googolplex.devourer.integration.sandbox1.classes.ExampleData;
+import org.bitbucket.googolplex.devourer.integration.sandbox1.classes.ExampleDataModule;
+import org.bitbucket.googolplex.devourer.integration.sandbox1.classes.ExampleDataModuleNamespaces;
 import org.bitbucket.googolplex.devourer.stacks.Stacks;
 import org.junit.Test;
 
