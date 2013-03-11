@@ -24,12 +24,21 @@ import org.bitbucket.googolplex.devourer.paths.mappings.MappingBuilder;
 import org.bitbucket.googolplex.devourer.paths.mappings.PathMapping;
 
 public class MappingBinderImpl implements MappingBinder {
-    protected final MappingBuilder mappingBuilder = MappingBuilder.create();
-    protected final NamespaceContext.Builder namespaceContext = NamespaceContext.builder();
+    protected final MappingBuilder mappingBuilder;
+    protected final NamespaceContext.Builder namespaceContext;
+
+    MappingBinderImpl(MappingBuilder mappingBuilder, NamespaceContext.Builder namespaceContext) {
+        this.namespaceContext = namespaceContext;
+        this.mappingBuilder = mappingBuilder;
+    }
+
+    public MappingBinderImpl() {
+        this(MappingBuilder.create(), NamespaceContext.builder());
+    }
 
     @Override
     public ActionBindingBuilder on(String route) {
-        return new ActionBindingBinderImpl(mappingBuilder, route);
+        return new ActionBindingBuilderImpl(mappingBuilder, route);
     }
 
     @Override

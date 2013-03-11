@@ -24,18 +24,17 @@ import org.bitbucket.googolplex.devourer.configuration.actions.ActionBefore;
 import org.bitbucket.googolplex.devourer.paths.mappings.MappingBuilder;
 import org.bitbucket.googolplex.devourer.paths.patterns.PathPatterns;
 
-public class ActionBindingBinderImpl implements ActionBindingBuilder {
+public class ActionBindingBuilderImpl implements ActionBindingBuilder {
     private final MappingBuilder mappingBuilder;
     private final String route;
 
-    ActionBindingBinderImpl(MappingBuilder mappingBuilder,
-                            String route) {
+    ActionBindingBuilderImpl(MappingBuilder mappingBuilder, String route) {
         this.mappingBuilder = mappingBuilder;
         this.route = route;
     }
 
     @Override
-    public ActionBindingBinderImpl doBefore(ActionBefore action) {
+    public ActionBindingBuilderImpl doBefore(ActionBefore action) {
         Preconditions.checkNotNull(action, "Action is null");
 
         this.mappingBuilder.add(PathPatterns.fromString(route), action);
@@ -43,7 +42,7 @@ public class ActionBindingBinderImpl implements ActionBindingBuilder {
     }
 
     @Override
-    public ActionBindingBinderImpl doAt(ActionAt action) {
+    public ActionBindingBuilderImpl doAt(ActionAt action) {
         Preconditions.checkNotNull(action, "Action is null");
 
         this.mappingBuilder.add(PathPatterns.fromString(route), action);
@@ -51,7 +50,7 @@ public class ActionBindingBinderImpl implements ActionBindingBuilder {
     }
 
     @Override
-    public ActionBindingBinderImpl doAfter(ActionAfter action) {
+    public ActionBindingBuilderImpl doAfter(ActionAfter action) {
         Preconditions.checkNotNull(action, "Action is null");
 
         this.mappingBuilder.add(PathPatterns.fromString(route), action);
