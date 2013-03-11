@@ -34,8 +34,7 @@ public class MapBackedPathMapping implements PathMapping {
     private final Map<PathPattern, ActionBundle> actionBundleMap;
     private final PatternGroup patternGroup;
 
-    MapBackedPathMapping(Map<PathPattern, ActionBundle> actionBundleMap,
-                         PatternGroup patternGroup) {
+    MapBackedPathMapping(Map<PathPattern, ActionBundle> actionBundleMap, PatternGroup patternGroup) {
         this.actionBundleMap = actionBundleMap;
         this.patternGroup = patternGroup;
     }
