@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.bitbucket.googolplex.devourer.sandbox;
+package org.bitbucket.googolplex.devourer.integration.sandbox;
 
 import com.google.common.collect.ImmutableList;
 import org.bitbucket.googolplex.devourer.stacks.Stacks;

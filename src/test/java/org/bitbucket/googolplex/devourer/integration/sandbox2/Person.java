@@ -1,4 +1,4 @@
-package org.bitbucket.googolplex.devourer.sandbox2;
+package org.bitbucket.googolplex.devourer.integration.sandbox2;
 
 import java.util.List;
 
