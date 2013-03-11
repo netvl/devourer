@@ -1,4 +1,4 @@
-package org.bitbucket.googolplex.devourer.integration.sandbox2;
+package org.bitbucket.googolplex.devourer.integration.sandbox2.classes;
 
 import com.google.common.collect.ImmutableList;
 import org.bitbucket.googolplex.devourer.stacks.Stacks;
@@ -17,7 +17,10 @@ import java.util.List;
 public class PersonModule2 extends AbstractMappingModule {
     @Override
     protected void configure() {
-        on("/persons")
+        namespaceContext()
+            .map("urn:example").to("e");
+
+        on("/e:persons")
             .doBefore(new ActionBefore() {
                 @Override
                 public void act(Stacks stacks, AttributesContext context) {
@@ -32,7 +35,7 @@ public class PersonModule2 extends AbstractMappingModule {
                 }
             });
 
-        on("/persons/person")
+        on("/e:persons/e:person")
             .doBefore(new ActionBefore() {
                 @Override
                 public void act(Stacks stacks, AttributesContext context) {
@@ -51,7 +54,7 @@ public class PersonModule2 extends AbstractMappingModule {
                 }
             });
 
-        on("/persons/person/name")
+        on("/e:persons/e:person/e:name")
             .doAt(new ActionAt() {
                 @Override
                 public void act(Stacks stacks, AttributesContext context, String body) {
@@ -59,7 +62,7 @@ public class PersonModule2 extends AbstractMappingModule {
                 }
             });
 
-        on("/persons/person/logins")
+        on("/e:persons/e:person/e:logins")
             .doBefore(new ActionBefore() {
                 @Override
                 public void act(Stacks stacks, AttributesContext context) {
@@ -75,7 +78,7 @@ public class PersonModule2 extends AbstractMappingModule {
                 }
             });
 
-        on("/persons/person/logins/login")
+        on("/e:persons/e:person/e:logins/e:login")
             .doAt(new ActionAt() {
                 @Override
                 public void act(Stacks stacks, AttributesContext context, String body) {

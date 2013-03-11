@@ -14,13 +14,13 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.bitbucket.googolplex.devourer.integration;
+package org.bitbucket.googolplex.devourer.integration.sandbox2;
 
 import org.bitbucket.googolplex.devourer.Devourer;
-import org.bitbucket.googolplex.devourer.integration.sandbox2.Login;
-import org.bitbucket.googolplex.devourer.integration.sandbox2.Person;
-import org.bitbucket.googolplex.devourer.integration.sandbox2.PersonAnnotatedConfig;
-import org.bitbucket.googolplex.devourer.integration.sandbox2.PersonModule;
+import org.bitbucket.googolplex.devourer.integration.sandbox2.classes.Login;
+import org.bitbucket.googolplex.devourer.integration.sandbox2.classes.Person;
+import org.bitbucket.googolplex.devourer.integration.sandbox2.classes.PersonAnnotatedConfig;
+import org.bitbucket.googolplex.devourer.integration.sandbox2.classes.PersonModule;
 import org.bitbucket.googolplex.devourer.stacks.Stacks;
 import org.junit.Test;
 
@@ -35,7 +35,7 @@ import static org.junit.Assert.assertTrue;
  *
  * @author Vladimir Matveev
  */
-public class DevourerTest2 {
+public class DevourerTest {
     private static final String EXAMPLE =
         "<persons>\n" +
         "  <person id=\"1\">\n" +

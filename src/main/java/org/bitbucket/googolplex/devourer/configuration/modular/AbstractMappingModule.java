@@ -19,6 +19,7 @@ package org.bitbucket.googolplex.devourer.configuration.modular;
 import com.google.common.base.Preconditions;
 import org.bitbucket.googolplex.devourer.configuration.modular.binders.ActionBindingBuilder;
 import org.bitbucket.googolplex.devourer.configuration.modular.binders.MappingBinder;
+import org.bitbucket.googolplex.devourer.configuration.modular.binders.NamespaceContextBuilder;
 
 /**
  * Convenient implementation of {@link MappingModule} which provides an access to {@link MappingBinder} methods
@@ -29,6 +30,9 @@ import org.bitbucket.googolplex.devourer.configuration.modular.binders.MappingBi
  *     public class ExampleModule extends AbstractMappingModule {
  *        {@literal @}Override
  *         public void configure() {
+ *             namespaceContext()
+ *                 .map("urn:namespace").to("n")
+ *                 .map("http://some-where.com/schema.xsd").to("s");
  *             on("/")
  *                 .doBefore(new ActionBefore() {
  *                    {@literal @}Override
@@ -141,6 +145,10 @@ public abstract class AbstractMappingModule implements MappingModule {
 
     protected final ActionBindingBuilder on(String route) {
         return binder.on(route);
+    }
+
+    protected final NamespaceContextBuilder namespaceContext() {
+        return binder.namespaceContext();
     }
 
     @Override
