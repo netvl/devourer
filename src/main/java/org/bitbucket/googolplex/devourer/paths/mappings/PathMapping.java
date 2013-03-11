@@ -16,29 +16,14 @@
 
 package org.bitbucket.googolplex.devourer.paths.mappings;
 
-import com.google.common.base.Preconditions;
-import org.bitbucket.googolplex.devourer.configuration.actions.ActionAfter;
-import org.bitbucket.googolplex.devourer.configuration.actions.ActionAt;
-import org.bitbucket.googolplex.devourer.configuration.actions.ActionBefore;
-
-import java.util.List;
+import com.google.common.base.Optional;
+import org.bitbucket.googolplex.devourer.contexts.namespaces.NamespaceContext;
+import org.bitbucket.googolplex.devourer.paths.ExactPath;
 
 /**
  * Date: 19.02.13
  * Time: 10:53
  */
-public class PathMapping {
-    public final List<ActionBefore> befores;
-    public final List<ActionAt> ats;
-    public final List<ActionAfter> afters;
-
-    public PathMapping(List<ActionBefore> befores, List<ActionAt> ats, List<ActionAfter> afters) {
-        Preconditions.checkNotNull(befores, "ActionBefore list is null");
-        Preconditions.checkNotNull(ats, "ActionAt list is null");
-        Preconditions.checkNotNull(afters, "ActionAfter list is null");
-
-        this.befores = befores;
-        this.ats = ats;
-        this.afters = afters;
-    }
+public interface PathMapping {
+    Optional<ActionBundle> lookup(ExactPath path, NamespaceContext namespaceContext);
 }
