@@ -19,7 +19,7 @@ public class AbstractReflectedAction {
     private final Optional<String> stack;
     private final List<ParameterInfo> parameterInfos;
 
-    public AbstractReflectedAction(Object object, Method method, Optional<String> stack,
+    protected AbstractReflectedAction(Object object, Method method, Optional<String> stack,
                                    final List<ParameterInfo> parameterInfos) {
         this.object = object;
         this.method = method;
@@ -48,6 +48,12 @@ public class AbstractReflectedAction {
                     break;
                 case TRY_PEEK:
                     arguments.get()[i] = stacks.get(parameterInfo.argument.get()).tryPeek();
+                    break;
+                case POP_LIST:
+                    arguments.get()[i] = stacks.get(parameterInfo.argument.get()).popList();
+                    break;
+                case PEEK_LIST:
+                    arguments.get()[i] = stacks.get(parameterInfo.argument.get()).peekList();
                     break;
                 case BODY:
                     arguments.get()[i] = body.get();
