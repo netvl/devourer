@@ -64,6 +64,12 @@ public class AbstractReflectedAction {
                 case STACKS:
                     arguments.get()[i] = stacks;
                     break;
+                case ATTRIBUTE:
+                    arguments.get()[i] = context.attribute(parameterInfo.argument.get()).get();
+                    break;
+                case TRY_ATTRIBUTE:
+                    arguments.get()[i] = context.attribute(parameterInfo.argument.get());
+                    break;
                 default:
                     throw new DevourerException("Invalid enumeration value: " + parameterInfo.kind);
             }

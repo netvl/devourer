@@ -35,6 +35,8 @@ import org.bitbucket.googolplex.devourer.stacks.Stacks;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.List;
 
 /**
@@ -199,7 +201,7 @@ public class MappingReflector {
         List<ParameterInfo> parameterInfos = Lists.newArrayList();
 
         // Parameters information
-        Class<?>[] parameterTypes = method.getParameterTypes();
+        Type[] parameterTypes = method.getGenericParameterTypes();
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
 
         // Loop through all the parameters
@@ -213,11 +215,12 @@ public class MappingReflector {
     }
 
     /**
+     *
      * @param type class object for method parameter
      * @param annotations all annotations for the method parameters
      * @return {@link ParameterInfo} information based on method parameter annotations
      */
-    private ParameterInfo inspectMethodAnnotations(Method method, Class<?> type, Annotation[] annotations) {
+    private ParameterInfo inspectMethodAnnotations(Method method, Type type, Annotation[] annotations) {
         // Parameter is of context type
         if (type == AttributesContext.class || type == ElementContext.class) {
             return new ParameterInfo(ParameterKind.CONTEXT);
@@ -228,25 +231,26 @@ public class MappingReflector {
 
         // Parameter is of string type -- body
         } else if (type == String.class &&
-                   !anyPresent(annotations, Pop.class, PopFrom.class, Peek.class, PeekFrom.class)) {
+                   !anyPresent(annotations, Pop.class, PopFrom.class, Peek.class, PeekFrom.class, Attribute.class)) {
             // Applicable only for at-actions
             if (!method.isAnnotationPresent(At.class)) {
                 throw new MappingException("Requested body not in @At method");
             }
             return new ParameterInfo(ParameterKind.BODY);
 
-        // Otherwise it can only be a stack checking operation
+        // Otherwise it can only be a stack checking operation or an attribute
         } else {
             // At least one annotation should be present
             if (annotations.length > 0) {
                 // We will analyze only the first one
                 Annotation annotation = annotations[0];
                 ParameterKind kind;
-                String parameterStack;
+                String parameter;
 
+                // First check stacks manipulation annotations
                 Class<? extends Annotation> annotationClass = annotation.annotationType();
                 if (annotationClass == Pop.class) {
-                    parameterStack = Stacks.DEFAULT_STACK;
+                    parameter = Stacks.DEFAULT_STACK;
                     if (type == Optional.class) {
                         kind = ParameterKind.TRY_POP;
                     } else {
@@ -254,7 +258,7 @@ public class MappingReflector {
                     }
 
                 } else if (annotationClass == PopFrom.class) {
-                    parameterStack = ((PopFrom) annotation).value();
+                    parameter = ((PopFrom) annotation).value();
                     if (type == Optional.class) {
                         kind = ParameterKind.TRY_POP;
                     } else {
@@ -262,7 +266,7 @@ public class MappingReflector {
                     }
 
                 } else if (annotationClass == Peek.class) {
-                    parameterStack = Stacks.DEFAULT_STACK;
+                    parameter = Stacks.DEFAULT_STACK;
                     if (type == Optional.class) {
                         kind = ParameterKind.TRY_PEEK;
                     } else {
@@ -270,7 +274,7 @@ public class MappingReflector {
                     }
 
                 } else if (annotationClass == PeekFrom.class) {
-                    parameterStack = ((PeekFrom) annotation).value();
+                    parameter = ((PeekFrom) annotation).value();
                     if (type == Optional.class) {
                         kind = ParameterKind.TRY_PEEK;
                     } else {
@@ -279,16 +283,19 @@ public class MappingReflector {
 
                 } else if (annotationClass == PopList.class || annotationClass == PopListFrom.class) {
                     if (annotationClass == PopList.class) {
-                        parameterStack = Stacks.DEFAULT_STACK;
+                        parameter = Stacks.DEFAULT_STACK;
                     } else {
-                        parameterStack = ((PopListFrom) annotation).value();
+                        parameter = ((PopListFrom) annotation).value();
                     }
 
-                    if (type != List.class) {
+                    if ((type instanceof ParameterizedType &&
+                         ((ParameterizedType) type).getRawType() != List.class)
+                        ||
+                        (type instanceof Class && type != List.class)) {
                         throw new MappingException(
                             String.format(
-                                "%s annotation applied to a parameter not of List type: %s",
-                                annotationClass.getSimpleName(), type.getSimpleName()
+                                "%s annotation is applied to a parameter not of List type: %s",
+                                annotationClass.getSimpleName(), type.toString()
                             )
                         );
                     } else {
@@ -297,37 +304,66 @@ public class MappingReflector {
 
                 } else if (annotationClass == PeekList.class || annotationClass == PeekListFrom.class) {
                     if (annotationClass == PeekList.class) {
-                        parameterStack = Stacks.DEFAULT_STACK;
+                        parameter = Stacks.DEFAULT_STACK;
                     } else {
-                        parameterStack = ((PeekListFrom) annotation).value();
+                        parameter = ((PeekListFrom) annotation).value();
                     }
 
-                    if (type != List.class) {
+                    if ((type instanceof ParameterizedType &&
+                         ((ParameterizedType) type).getRawType() != List.class)
+                        ||
+                        (type instanceof Class && type != List.class)) {
                         throw new MappingException(
                             String.format(
-                                "%s annotation applied to a parameter not of List type: %s",
-                                annotationClass.getSimpleName(), type.getSimpleName()
+                                "%s annotation is applied to a parameter not of List type: %s",
+                                annotationClass.getSimpleName(), type.toString()
                             )
                         );
                     } else {
                         kind = ParameterKind.PEEK_LIST;
                     }
 
+                } else if (annotationClass == Attribute.class) {
+                    parameter = ((Attribute) annotation).value();
+
+                    if (type instanceof ParameterizedType) {
+                        ParameterizedType parameterizedType = (ParameterizedType) type;
+                        if (parameterizedType.getRawType() != Optional.class ||
+                            parameterizedType.getActualTypeArguments()[0] != String.class) {
+                            throw new MappingException(
+                                "Attribute annotation is applied to invalid Optional type: %s" + type.toString()
+                            );
+
+                        } else {  // Type is Optional<String>, all is OK
+                            kind = ParameterKind.TRY_ATTRIBUTE;
+                        }
+
+                    } else if (type != String.class) {
+                        throw new MappingException(
+                            "Attribute annotation is applied to a parameter not of String type: " + type.toString()
+                        );
+
+                    } else {  // Type is String, all is OK
+                        kind = ParameterKind.ATTRIBUTE;
+
+                    }
+
                 } else {
                     throw new MappingException(
                         String.format(
                             "Requested unknown parameter with unknown annotation: %s %s",
-                            annotation, type.getSimpleName()
+                            annotation, type.toString()
                         )
                     );
+
                 }
 
-                return new ParameterInfo(kind, parameterStack);
+                return new ParameterInfo(kind, parameter);
 
             // If there are no annotations, throw an exception
             } else {
                 throw new MappingException(
-                    "Requested unknown parameter with no annotations: " + type.getSimpleName()
+                    "Requested unknown parameter with no annotations: " + type
                 );
             }
         }
