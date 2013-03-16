@@ -1,7 +1,10 @@
 package org.bitbucket.googolplex.devourer.stacks;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import org.junit.Test;
+
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -171,5 +174,33 @@ public class DefaultStacksTest {
         stacks.get("stack2").pop();
         assertEquals(0, stacks.get("stack1").size());
         assertEquals(0, stacks.get("stack2").size());
+    }
+
+    @Test
+    public void testPopList() throws Exception {
+        Stacks stacks = new DefaultStacks();
+
+        List<Object> list1 = stacks.popList();
+        assertTrue(list1.isEmpty());
+
+        stacks.push(1).push(2).push(3);
+        List<Integer> list2 = stacks.popList();
+        assertEquals(ImmutableList.of(1, 2, 3), list2);
+        assertTrue(stacks.isEmpty());
+    }
+
+    @Test
+    public void testPeekList() throws Exception {
+        Stacks stacks = new DefaultStacks();
+
+        List<Object> list1 = stacks.peekList();
+        assertTrue(list1.isEmpty());
+
+        stacks.push("a").push("b").push("c");
+        List<String> list2 = stacks.peekList();
+        assertEquals(ImmutableList.of("a", "b", "c"), list2);
+        assertFalse(stacks.isEmpty());
+        assertEquals(3, stacks.size());
+        assertEquals("c", stacks.peek());
     }
 }
