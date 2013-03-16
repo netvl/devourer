@@ -244,35 +244,73 @@ public class MappingReflector {
                 ParameterKind kind;
                 String parameterStack;
 
-                if (annotation.annotationType() == Pop.class) {
+                Class<? extends Annotation> annotationClass = annotation.annotationType();
+                if (annotationClass == Pop.class) {
                     parameterStack = Stacks.DEFAULT_STACK;
-                    if (Optional.class.equals(type)) {
+                    if (type == Optional.class) {
                         kind = ParameterKind.TRY_POP;
                     } else {
                         kind = ParameterKind.POP;
                     }
 
-                } else if (annotation.annotationType() == PopFrom.class) {
+                } else if (annotationClass == PopFrom.class) {
                     parameterStack = ((PopFrom) annotation).value();
-                    if (Optional.class.equals(type)) {
+                    if (type == Optional.class) {
                         kind = ParameterKind.TRY_POP;
                     } else {
                         kind = ParameterKind.POP;
                     }
 
-                } else if (annotation.annotationType() == Peek.class) {
+                } else if (annotationClass == Peek.class) {
                     parameterStack = Stacks.DEFAULT_STACK;
-                    if (Optional.class.equals(type)) {
+                    if (type == Optional.class) {
                         kind = ParameterKind.TRY_PEEK;
                     } else {
                         kind = ParameterKind.PEEK;
                     }
-                } else if (annotation.annotationType() == PeekFrom.class) {
+
+                } else if (annotationClass == PeekFrom.class) {
                     parameterStack = ((PeekFrom) annotation).value();
-                    if (Optional.class.equals(type)) {
+                    if (type == Optional.class) {
                         kind = ParameterKind.TRY_PEEK;
                     } else {
                         kind = ParameterKind.PEEK;
+                    }
+
+                } else if (annotationClass == PopList.class || annotationClass == PopListFrom.class) {
+                    if (annotationClass == PopList.class) {
+                        parameterStack = Stacks.DEFAULT_STACK;
+                    } else {
+                        parameterStack = ((PopListFrom) annotation).value();
+                    }
+
+                    if (type != List.class) {
+                        throw new MappingException(
+                            String.format(
+                                "%s annotation applied to a parameter not of List type: %s",
+                                annotationClass.getSimpleName(), type.getSimpleName()
+                            )
+                        );
+                    } else {
+                        kind = ParameterKind.POP_LIST;
+                    }
+
+                } else if (annotationClass == PeekList.class || annotationClass == PeekListFrom.class) {
+                    if (annotationClass == PeekList.class) {
+                        parameterStack = Stacks.DEFAULT_STACK;
+                    } else {
+                        parameterStack = ((PeekListFrom) annotation).value();
+                    }
+
+                    if (type != List.class) {
+                        throw new MappingException(
+                            String.format(
+                                "%s annotation applied to a parameter not of List type: %s",
+                                annotationClass.getSimpleName(), type.getSimpleName()
+                            )
+                        );
+                    } else {
+                        kind = ParameterKind.PEEK_LIST;
                     }
 
                 } else {

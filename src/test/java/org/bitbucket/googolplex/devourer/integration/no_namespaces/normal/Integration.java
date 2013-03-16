@@ -93,6 +93,16 @@ public class Integration {
         checkProject(project, expectedProject);
     }
 
+    @Test
+    public void testAnnotatedConfig() throws Exception {
+        Devourer devourer = Devourer.create(new NoNamespacesAnnotatedConfig());
+
+        Stacks stacks = devourer.parse(DOCUMENT);
+        Project project = stacks.pop();
+
+        checkProject(project, expectedProject);
+    }
+
     private void checkProject(Project project, Project expectedProject) {
         assertEquals(expectedProject.name, project.name);
 
