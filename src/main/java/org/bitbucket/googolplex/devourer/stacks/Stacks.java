@@ -49,8 +49,9 @@ public interface Stacks extends Stack {
      *
      * @param object object to push onto the stack
      * @param <T> type of the object
+     * @return this object
      */
-    <T> void push(T object);
+    <T> Stack push(T object);
 
     /**
      * Peeks an element from the top of the default stack. The object will not be removed from the stack.

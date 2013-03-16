@@ -17,6 +17,7 @@
 package org.bitbucket.googolplex.devourer.stacks;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 
 import java.util.*;
 
@@ -40,8 +41,9 @@ public class DefaultStacks implements Stacks {
     }
 
     @Override
-    public <T> void push(T object) {
+    public <T> Stack push(T object) {
         get(DEFAULT_STACK).push(object);
+        return this;
     }
 
     @Override
@@ -74,12 +76,23 @@ public class DefaultStacks implements Stacks {
         return get(DEFAULT_STACK).size();
     }
 
+    @Override
+    public <T> List<T> popList() {
+        return get(DEFAULT_STACK).popList();
+    }
+
+    @Override
+    public <T> List<T> peekList() {
+        return get(DEFAULT_STACK).peekList();
+    }
+
     private static class DequeWrapper implements Stack {
         private final Deque<Object> deque = new ArrayDeque<Object>();
 
         @Override
-        public <T> void push(T object) {
+        public <T> Stack push(T object) {
             deque.push(object);
+            return this;
         }
 
         @Override
@@ -118,6 +131,18 @@ public class DefaultStacks implements Stacks {
         @Override
         public int size() {
             return deque.size();
+        }
+
+        @Override
+        public <T> List<T> popList() {
+            List<T> result = (List<T>) ImmutableList.copyOf(deque).reverse();
+            deque.clear();
+            return result;
+        }
+
+        @Override
+        public <T> List<T> peekList() {
+            return (List<T>) ImmutableList.copyOf(deque).reverse();
         }
     }
 }

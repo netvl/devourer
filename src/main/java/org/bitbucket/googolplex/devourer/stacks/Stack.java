@@ -18,6 +18,7 @@ package org.bitbucket.googolplex.devourer.stacks;
 
 import com.google.common.base.Optional;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
@@ -29,8 +30,9 @@ public interface Stack {
      *
      * @param object object to add to the stack
      * @param <T> type of the object
+     * @return this object
      */
-    <T> void push(T object);
+    <T> Stack push(T object);
 
     /**
      * Returns an element from the top of the stack. The element will not be removed from the stack.
@@ -77,4 +79,30 @@ public interface Stack {
      * @return number of elements in the stack
      */
     int size();
+
+    /**
+     * Returns all stack elements as a list. The current top of the stack will be the last element of the list.
+     * The list is immutable. All items will be removed from the stack.
+     *
+     * <p><b>CAUTION!</b> This method does not check element types in the stack, so if you have elements
+     * of different types in the stack, the list returned by this method <b>will</b> be the cause of
+     * {@link ClassCastException}s!</p>
+     *
+     * @param <T> type of the elements in the result
+     * @return a full snapshot of the stack, in normal order (stack top becomes last element of the list)
+     */
+    <T> List<T> popList();
+
+    /**
+     * Returns all stack elements as a list. The current top of the stack will be the last element of the list.
+     * The list is immutable. Stack is not altered by this method.
+     *
+     * <p><b>CAUTION!</b> This method does not check element types in the stack, so if you have elements
+     * of different types in the stack, the list returned by this method <b>will</b> be the cause of
+     * {@link ClassCastException}s!</p>
+     *
+     * @param <T> type of the elements in the result
+     * @return a full snapshot of the stack, in normal order (stack top becomes last element of the list)
+     */
+    <T> List<T> peekList();
 }
