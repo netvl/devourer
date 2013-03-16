@@ -1,10 +1,6 @@
 package org.bitbucket.googolplex.devourer.integration.no_namespaces.normal;
 
-import org.bitbucket.googolplex.devourer.configuration.annotated.annotations.After;
-import org.bitbucket.googolplex.devourer.configuration.annotated.annotations.At;
-import org.bitbucket.googolplex.devourer.configuration.annotated.annotations.PopListFrom;
-import org.bitbucket.googolplex.devourer.configuration.annotated.annotations.PushTo;
-import org.bitbucket.googolplex.devourer.contexts.AttributesContext;
+import org.bitbucket.googolplex.devourer.configuration.annotated.annotations.*;
 import org.bitbucket.googolplex.devourer.integration.data.Library;
 import org.bitbucket.googolplex.devourer.integration.data.Module;
 import org.bitbucket.googolplex.devourer.integration.data.Project;
@@ -22,37 +18,39 @@ public class NoNamespacesAnnotatedConfig {
     @After("/project")
     public Project createProject(@PopListFrom("project-libraries") List<Library> libraries,
                                  @PopListFrom("modules") List<Module> modules,
-                                 AttributesContext context) {
-        return new Project(context.attribute("name").get(), modules, libraries);
+                                 @Attribute("name") String name) {
+        return new Project(name, modules, libraries);
     }
 
     @After("/project/libraries/library")
     @PushTo("project-libraries")
-    public Library createLibrary(AttributesContext context) {
-        return new Library(context.attribute("groupId").get(),
-                           context.attribute("artifactId").get(),
-                           context.attribute("version").get());
+    public Library createLibrary(@Attribute("groupId") String groupId,
+                                 @Attribute("artifactId") String artifactId,
+                                 @Attribute("version") String version) {
+        return new Library(groupId, artifactId, version);
     }
 
     @After("/project/module")
     @PushTo("modules")
     public Module createModule(@PopListFrom("files") List<SourceFile> files,
                                @PopListFrom("libraries") List<Library> libraries,
-                               AttributesContext context) {
-        return new Module(context.attribute("name").get(), files, libraries);
+                               @Attribute("name") String name) {
+        return new Module(name, files, libraries);
     }
 
     @At("/project/module/files/file")
     @PushTo("files")
-    public SourceFile createFile(AttributesContext context, String body) {
-        return new SourceFile(context.attribute("name").get(), context.attribute("type").get(), body);
+    public SourceFile createFile(@Attribute("name") String name,
+                                 @Attribute("type") String type,
+                                 String body) {
+        return new SourceFile(name, type, body);
     }
 
     @After("/project/module/libraries/library")
     @PushTo("libraries")
-    public Library createModuleLibrary(AttributesContext context) {
-        return new Library(context.attribute("groupId").get(),
-                           context.attribute("artifactId").get(),
-                           context.attribute("version").get());
+    public Library createModuleLibrary(@Attribute("groupId") String groupId,
+                                       @Attribute("artifactId") String artifactId,
+                                       @Attribute("version") String version) {
+        return new Library(groupId, artifactId, version);
     }
 }
