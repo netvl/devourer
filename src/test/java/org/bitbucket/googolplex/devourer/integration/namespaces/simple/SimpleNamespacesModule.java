@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.bitbucket.googolplex.devourer.integration.no_namespaces.normal;
+package org.bitbucket.googolplex.devourer.integration.namespaces.simple;
 
 import org.bitbucket.googolplex.devourer.configuration.actions.EnhancedAction;
 import org.bitbucket.googolplex.devourer.configuration.modular.AbstractMappingModule;
@@ -26,15 +26,18 @@ import org.bitbucket.googolplex.devourer.integration.data.SourceFile;
 import java.util.List;
 
 /**
- * Date: 15.03.13
- * Time: 14:12
+ * Date: 28.04.13
+ * Time: 19:58
  *
  * @author Vladimir Matveev
  */
-public class NoNamespacesModule extends AbstractMappingModule {
+public class SimpleNamespacesModule extends AbstractMappingModule {
     @Override
     protected void configure() {
-        on("/project").doAfter(new EnhancedAction() {
+        namespaceContext()
+            .map("urn:project").to("pr");
+
+        on("/pr:project").doAfter(new EnhancedAction() {
             @Override
             public void act() {
                 List<Library> libraries = get("project-libraries").popList();
@@ -44,7 +47,7 @@ public class NoNamespacesModule extends AbstractMappingModule {
             }
         });
 
-        on("/project/libraries/library").doAfter(new EnhancedAction() {
+        on("/pr:project/pr:libraries/pr:library").doAfter(new EnhancedAction() {
             @Override
             public void act() {
                 get("project-libraries").push(
@@ -55,7 +58,7 @@ public class NoNamespacesModule extends AbstractMappingModule {
             }
         });
 
-        on("/project/module").doAfter(new EnhancedAction() {
+        on("/pr:project/pr:module").doAfter(new EnhancedAction() {
             @Override
             public void act() {
                 get("modules").push(
@@ -66,7 +69,7 @@ public class NoNamespacesModule extends AbstractMappingModule {
             }
         });
 
-        on("/project/module/files/file").doAt(new EnhancedAction() {
+        on("/pr:project/pr:module/pr:files/pr:file").doAt(new EnhancedAction() {
             @Override
             public void act() {
                 get("files").push(
@@ -79,15 +82,16 @@ public class NoNamespacesModule extends AbstractMappingModule {
             }
         });
 
-        on("/project/module/libraries/library").doAfter(new EnhancedAction() {
+        on("/pr:project/pr:module/pr:libraries/pr:library").doAfter(new EnhancedAction() {
             @Override
             public void act() {
                 get("libraries").push(
-                    new Library(attribute("groupId").get(),
+                    new Library(attributeWithPrefix("groupId", "pr").get(),
                                 attribute("artifactId").get(),
                                 attribute("version").get())
                 );
             }
         });
+
     }
 }

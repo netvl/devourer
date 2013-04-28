@@ -2,16 +2,14 @@ package org.bitbucket.googolplex.devourer.integration.no_namespaces.normal;
 
 import com.google.common.collect.ImmutableList;
 import org.bitbucket.googolplex.devourer.Devourer;
+import org.bitbucket.googolplex.devourer.Devourers;
+import org.bitbucket.googolplex.devourer.integration.Checks;
 import org.bitbucket.googolplex.devourer.integration.data.Library;
 import org.bitbucket.googolplex.devourer.integration.data.Module;
 import org.bitbucket.googolplex.devourer.integration.data.Project;
 import org.bitbucket.googolplex.devourer.integration.data.SourceFile;
 import org.bitbucket.googolplex.devourer.stacks.Stacks;
 import org.junit.Test;
-
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * Date: 15.03.13
@@ -85,69 +83,22 @@ public class Integration {
 
     @Test
     public void testModularConfig() throws Exception {
-        Devourer devourer = Devourer.create(new NoNamespacesModule());
+        Devourer devourer = Devourers.create(new NoNamespacesModule());
 
         Stacks stacks = devourer.parse(DOCUMENT);
         Project project = stacks.pop();
 
-        checkProject(project, expectedProject);
+        Checks.checkProject(project, expectedProject);
     }
 
     @Test
     public void testAnnotatedConfig() throws Exception {
-        Devourer devourer = Devourer.create(new NoNamespacesAnnotatedConfig());
+        Devourer devourer = Devourers.create(new NoNamespacesAnnotatedConfig());
 
         Stacks stacks = devourer.parse(DOCUMENT);
         Project project = stacks.pop();
 
-        checkProject(project, expectedProject);
+        Checks.checkProject(project, expectedProject);
     }
 
-    private void checkProject(Project project, Project expectedProject) {
-        assertEquals(expectedProject.name, project.name);
-
-        checkLibraries(project.libraries, expectedProject.libraries);
-        checkModules(project.modules, expectedProject.modules);
-    }
-
-    private void checkModules(List<Module> modules, List<Module> expectedModules) {
-        assertEquals(expectedModules.size(), modules.size());
-
-        for (int i = 0; i < expectedModules.size(); ++i) {
-            Module module = modules.get(i);
-            Module expectedModule = expectedModules.get(i);
-
-            assertEquals(expectedModule.name, module.name);
-
-            checkSourceFiles(expectedModule.sourceFiles, module.sourceFiles);
-
-            checkLibraries(expectedModule.libraries, module.libraries);
-        }
-    }
-
-    private void checkSourceFiles(List<SourceFile> files, List<SourceFile> expectedFiles) {
-        assertEquals(expectedFiles.size(), files.size());
-
-        for (int i = 0; i < expectedFiles.size(); i++) {
-            SourceFile file = files.get(i);
-            SourceFile expectedFile = expectedFiles.get(i);
-
-            assertEquals(expectedFile.name, file.name);
-            assertEquals(expectedFile.type, file.type);
-            assertEquals(expectedFile.content, file.content);
-        }
-    }
-
-    private void checkLibraries(List<Library> libraries, List<Library> expectedLibraries) {
-        assertEquals(expectedLibraries.size(), libraries.size());
-
-        for (int i = 0; i < expectedLibraries.size(); ++i) {
-            Library library = libraries.get(i);
-            Library expectedLibrary = expectedLibraries.get(i);
-
-            assertEquals(expectedLibrary.groupId, library.groupId);
-            assertEquals(expectedLibrary.artifactId, library.artifactId);
-            assertEquals(expectedLibrary.version, library.version);
-        }
-    }
 }

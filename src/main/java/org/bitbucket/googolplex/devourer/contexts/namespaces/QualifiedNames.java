@@ -17,16 +17,15 @@
 package org.bitbucket.googolplex.devourer.contexts.namespaces;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
- * Date: 07.03.13
- * Time: 22:08
- *
- * @author Vladimir Matveev
+ * Contains factory methods for creating {@link QualifiedName}s of different structure.
  */
 public final class QualifiedNames {
     private QualifiedNames() {
@@ -39,8 +38,8 @@ public final class QualifiedNames {
      * @return new qualified name
      */
     public static QualifiedName localOnly(String localName) {
-        Preconditions.checkNotNull(localName, "Local name is null");
-        Preconditions.checkArgument(!localName.isEmpty(), "Local name is empty");
+        checkNotNull(localName, "Local name is null");
+        checkArgument(!localName.isEmpty(), "Local name is empty");
 
         return new QualifiedName(localName, Optional.<String>absent(), Optional.<String>absent());
     }
@@ -53,10 +52,10 @@ public final class QualifiedNames {
      * @return new qualified name
      */
     public static QualifiedName withNamespace(String localName, String namespace) {
-        Preconditions.checkNotNull(localName, "Local name is null");
-        Preconditions.checkNotNull(namespace, "Namespace is null");
-        Preconditions.checkArgument(!localName.isEmpty(), "Local name is empty");
-        Preconditions.checkArgument(!namespace.isEmpty(), "Namespace is empty");
+        checkNotNull(localName, "Local name is null");
+        checkNotNull(namespace, "Namespace is null");
+        checkArgument(!localName.isEmpty(), "Local name is empty");
+        checkArgument(!namespace.isEmpty(), "Namespace is empty");
 
         return new QualifiedName(localName, Optional.of(namespace), Optional.<String>absent());
     }
@@ -70,12 +69,12 @@ public final class QualifiedNames {
      * @return new qualified name
      */
     public static QualifiedName full(String localName, String namespace, String prefix) {
-        Preconditions.checkNotNull(localName, "Local name is null");
-        Preconditions.checkNotNull(namespace, "Namespace is null");
-        Preconditions.checkNotNull(prefix, "Prefix is null");
-        Preconditions.checkArgument(!localName.isEmpty(), "Local name is empty");
-        Preconditions.checkArgument(!namespace.isEmpty(), "Namespace is empty");
-        Preconditions.checkArgument(!prefix.isEmpty(), "Prefix is empty");
+        checkNotNull(localName, "Local name is null");
+        checkNotNull(namespace, "Namespace is null");
+        checkNotNull(prefix, "Prefix is null");
+        checkArgument(!localName.isEmpty(), "Local name is empty");
+        checkArgument(!namespace.isEmpty(), "Namespace is empty");
+        checkArgument(!prefix.isEmpty(), "Prefix is empty");
 
         return new QualifiedName(localName, Optional.of(namespace), Optional.of(prefix));
     }
@@ -88,7 +87,7 @@ public final class QualifiedNames {
      * @return new qualified name
      */
     public static QualifiedName fromQName(QName qName) {
-        Preconditions.checkNotNull(qName, "Qualified name is null");
+        checkNotNull(qName, "Qualified name is null");
 
         if (XMLConstants.NULL_NS_URI.equals(qName.getNamespaceURI())) {
             return localOnly(qName.getLocalPart());
@@ -117,8 +116,8 @@ public final class QualifiedNames {
      * @return new qualified name
      */
     public static QualifiedName fromString(String string) {
-        Preconditions.checkNotNull(string, "String is null");
-        Preconditions.checkArgument(!string.isEmpty(), "String is empty");
+        checkNotNull(string, "String is null");
+        checkArgument(!string.isEmpty(), "String is empty");
 
         // Remove side spaces
         string = string.trim();

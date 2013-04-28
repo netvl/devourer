@@ -18,6 +18,7 @@ package org.bitbucket.googolplex.devourer.stacks;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 
 import java.util.*;
 
@@ -27,7 +28,7 @@ import java.util.*;
  * <p>This implementation is not thread-safe.</p>
  */
 public class DefaultStacks implements Stacks {
-    private final Map<String, Stack> stacks = new HashMap<String, Stack>();
+    private final Map<String, Stack> stacks = Maps.newHashMap();
 
     @Override
     public Stack get(String name) {

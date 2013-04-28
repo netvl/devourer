@@ -16,13 +16,13 @@
 
 package org.bitbucket.googolplex.devourer.configuration.actions;
 
+import org.bitbucket.googolplex.devourer.contexts.ElementContext;
 import org.bitbucket.googolplex.devourer.stacks.Stacks;
-import org.bitbucket.googolplex.devourer.contexts.AttributesContext;
 
 /**
  * Date: 19.02.13
  * Time: 11:04
  */
 public interface ActionAt {
-    void act(Stacks stacks, AttributesContext context, String body);
+    void act(Stacks stacks, ElementContext context, String body);
 }

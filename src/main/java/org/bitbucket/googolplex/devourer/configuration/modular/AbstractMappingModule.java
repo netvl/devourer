@@ -36,13 +36,13 @@ import org.bitbucket.googolplex.devourer.configuration.modular.binders.Namespace
  *             on("/")
  *                 .doBefore(new ActionBefore() {
  *                    {@literal @}Override
- *                     public void act(Stacks stacks, AttributesContext context) {
+ *                     public void act(Stacks stacks, ElementContext context) {
  *                         stacks.push(ImmutableMap.builder());
  *                     }
  *                 })
  *                 .doAfter(new ActionAfter() {
  *                    {@literal @}Override
- *                     public void act(Stacks stacks, AttributesContext context) {
+ *                     public void act(Stacks stacks, ElementContext context) {
  *                         ImmutableMap.Builder<String, String> builder = stacks.pop();
  *                         stacks.push(builder.build());
  *                     }
@@ -51,19 +51,19 @@ import org.bitbucket.googolplex.devourer.configuration.modular.binders.Namespace
  *             on("/header")
  *                 .doBefore(new ActionBefore() {
  *                    {@literal @}Override
- *                     public void act(Stacks stacks, AttributesContext context) {
+ *                     public void act(Stacks stacks, ElementContext context) {
  *                         stacks.push(context.attribute("name").get());
  *                     }
  *                 })
  *                 .doAt(new ActionAt() {
  *                    {@literal @}Override
- *                     public void act(Stacks stacks, AttributesContext context, String body) {
+ *                     public void act(Stacks stacks, ElementContext context, String body) {
  *                         stacks.push(body);
  *                     }
  *                 })
  *                 .doAfter(new ActionAfter() {
  *                    {@literal @}Override
- *                     public void act(Stacks stacks, AttributesContext context) {
+ *                     public void act(Stacks stacks, ElementContext context) {
  *                         String value = stacks.pop();
  *                         String name = stacks.pop();
  *                         ImmutableMap.Builder<String, String> builder = stacks.peek();

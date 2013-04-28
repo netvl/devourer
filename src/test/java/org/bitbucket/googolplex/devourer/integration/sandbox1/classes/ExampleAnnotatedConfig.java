@@ -17,6 +17,7 @@
 package org.bitbucket.googolplex.devourer.integration.sandbox1.classes;
 
 import com.google.common.collect.ImmutableList;
+import org.bitbucket.googolplex.devourer.contexts.ElementContext;
 import org.bitbucket.googolplex.devourer.stacks.Stacks;
 import org.bitbucket.googolplex.devourer.configuration.annotated.annotations.After;
 import org.bitbucket.googolplex.devourer.configuration.annotated.annotations.At;
@@ -24,7 +25,6 @@ import org.bitbucket.googolplex.devourer.configuration.annotated.annotations.Bef
 import org.bitbucket.googolplex.devourer.configuration.annotated.annotations.Peek;
 import org.bitbucket.googolplex.devourer.configuration.annotated.annotations.Pop;
 import org.bitbucket.googolplex.devourer.configuration.annotated.annotations.PushTo;
-import org.bitbucket.googolplex.devourer.contexts.AttributesContext;
 
 import java.util.List;
 
@@ -42,7 +42,7 @@ public class ExampleAnnotatedConfig {
     }
 
     @Before("/data/datum")
-    public ExampleData.Builder createDatum(AttributesContext context) {
+    public ExampleData.Builder createDatum(ElementContext context) {
         ExampleData.Builder builder = new ExampleData.Builder();
         builder.setId(Integer.parseInt(context.attribute("id").or("0")));
         return builder;
@@ -59,7 +59,7 @@ public class ExampleAnnotatedConfig {
     }
 
     @At("/data/datum/header")
-    public void addDatumHeader(@Peek ExampleData.Builder builder, AttributesContext context, String body) {
+    public void addDatumHeader(@Peek ExampleData.Builder builder, ElementContext context, String body) {
         builder.addHeader(context.attribute("name").get(), body);
     }
 

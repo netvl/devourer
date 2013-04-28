@@ -3,7 +3,7 @@ package org.bitbucket.googolplex.devourer.integration.sandbox2.classes;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.bitbucket.googolplex.devourer.configuration.annotated.annotations.*;
-import org.bitbucket.googolplex.devourer.contexts.AttributesContext;
+import org.bitbucket.googolplex.devourer.contexts.ElementContext;
 
 import java.util.List;
 
@@ -21,7 +21,7 @@ public class PersonAnnotatedConfig {
 
     @Before("/persons/person")
     @PushTo("person")
-    public String personId(AttributesContext context) {
+    public String personId(ElementContext context) {
         return context.attribute("id").get();
     }
 
@@ -39,7 +39,7 @@ public class PersonAnnotatedConfig {
 
     @At("/persons/person/logins/login")
     public void addLogin(@PeekFrom("logins") ImmutableList.Builder<Login> loginsBuilder, String body,
-                         AttributesContext context) {
+                         ElementContext context) {
         loginsBuilder.add(new Login(context.attribute("site").get(), body));
     }
 
