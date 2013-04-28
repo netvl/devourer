@@ -17,12 +17,12 @@
 package org.bitbucket.googolplex.devourer.integration.sandbox1.classes;
 
 import com.google.common.collect.ImmutableList;
+import org.bitbucket.googolplex.devourer.contexts.ElementContext;
 import org.bitbucket.googolplex.devourer.stacks.Stacks;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionAt;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionBefore;
 import org.bitbucket.googolplex.devourer.configuration.modular.AbstractMappingModule;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionAfter;
-import org.bitbucket.googolplex.devourer.contexts.AttributesContext;
 
 /**
  * Date: 19.02.13
@@ -34,13 +34,13 @@ public class ExampleDataModule extends AbstractMappingModule {
         on("/data")
             .doBefore(new ActionBefore() {
                 @Override
-                public void act(Stacks stacks, AttributesContext context) {
+                public void act(Stacks stacks, ElementContext context) {
                     stacks.push(ImmutableList.builder());
                 }
             })
             .doAfter(new ActionAfter() {
                 @Override
-                public void act(Stacks stacks, AttributesContext context) {
+                public void act(Stacks stacks, ElementContext context) {
                     ImmutableList.Builder<ExampleData> dataBuilder = stacks.pop();
                     stacks.push(dataBuilder.build());
                 }
@@ -49,7 +49,7 @@ public class ExampleDataModule extends AbstractMappingModule {
         on("/data/datum")
             .doBefore(new ActionBefore() {
                 @Override
-                public void act(Stacks stacks, AttributesContext context) {
+                public void act(Stacks stacks, ElementContext context) {
                     ExampleData.Builder builder = new ExampleData.Builder();
                     builder.setId(Integer.parseInt(context.attribute("id").or("0")));
                     stacks.push(builder);
@@ -57,7 +57,7 @@ public class ExampleDataModule extends AbstractMappingModule {
             })
             .doAfter(new ActionAfter() {
                 @Override
-                public void act(Stacks stacks, AttributesContext context) {
+                public void act(Stacks stacks, ElementContext context) {
                     ExampleData.Builder builder = stacks.pop();
                     ImmutableList.Builder<ExampleData> dataBuilder = stacks.peek();
                     dataBuilder.add(builder.build());
@@ -67,7 +67,7 @@ public class ExampleDataModule extends AbstractMappingModule {
         on("/data/datum/name")
             .doAt(new ActionAt() {
                 @Override
-                public void act(Stacks stacks, AttributesContext context, String body) {
+                public void act(Stacks stacks, ElementContext context, String body) {
                     ExampleData.Builder builder = stacks.peek();
                     builder.setName(body);
                 }
@@ -76,7 +76,7 @@ public class ExampleDataModule extends AbstractMappingModule {
         on("/data/datum/arg")
             .doAt(new ActionAt() {
                 @Override
-                public void act(Stacks stacks, AttributesContext context, String body) {
+                public void act(Stacks stacks, ElementContext context, String body) {
                     ExampleData.Builder builder = stacks.peek();
                     builder.addArg(Double.parseDouble(body));
                 }
@@ -85,7 +85,7 @@ public class ExampleDataModule extends AbstractMappingModule {
         on("/data/datum/header")
             .doAt(new ActionAt() {
                 @Override
-                public void act(Stacks stacks, AttributesContext context, String body) {
+                public void act(Stacks stacks, ElementContext context, String body) {
                     ExampleData.Builder builder = stacks.peek();
                     builder.addHeader(context.attribute("name").get(), body);
                 }

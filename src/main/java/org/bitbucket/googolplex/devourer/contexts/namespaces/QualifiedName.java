@@ -21,6 +21,9 @@ import com.google.common.base.Optional;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Represents qualified name used in XML documents. Qualified name consists of local name, namespace and prefix.
  * Namespace is optional, as well as prefix, but prefix cannot be present without a namespace.
@@ -35,6 +38,11 @@ public class QualifiedName {
     public final Optional<String> prefix;
 
     QualifiedName(String localName, Optional<String> namespace, Optional<String> prefix) {
+        checkNotNull(localName, "Local name is null");
+        checkNotNull(namespace, "Namespace is null");
+        checkNotNull(prefix, "Prefix is null");
+        checkArgument(!localName.isEmpty(), "Local name is empty");
+
         this.localName = localName;
         this.namespace = namespace;
         this.prefix = prefix;

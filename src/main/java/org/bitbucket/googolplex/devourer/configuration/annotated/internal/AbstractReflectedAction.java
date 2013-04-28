@@ -1,7 +1,7 @@
 package org.bitbucket.googolplex.devourer.configuration.annotated.internal;
 
 import com.google.common.base.Optional;
-import org.bitbucket.googolplex.devourer.contexts.AttributesContext;
+import org.bitbucket.googolplex.devourer.contexts.ElementContext;
 import org.bitbucket.googolplex.devourer.exceptions.DevourerException;
 import org.bitbucket.googolplex.devourer.stacks.Stacks;
 
@@ -20,7 +20,7 @@ public class AbstractReflectedAction {
     private final List<ParameterInfo> parameterInfos;
 
     protected AbstractReflectedAction(Object object, Method method, Optional<String> stack,
-                                   final List<ParameterInfo> parameterInfos) {
+                                      final List<ParameterInfo> parameterInfos) {
         this.object = object;
         this.method = method;
         this.stack = stack;
@@ -33,7 +33,7 @@ public class AbstractReflectedAction {
         };
     }
 
-    private void fillArguments(Stacks stacks, AttributesContext context, Optional<String> body) {
+    private void fillArguments(Stacks stacks, ElementContext context, Optional<String> body) {
         for (int i = 0; i < parameterInfos.size(); ++i) {
             ParameterInfo parameterInfo = parameterInfos.get(i);
             switch (parameterInfo.kind) {
@@ -76,7 +76,7 @@ public class AbstractReflectedAction {
         }
     }
 
-    public void invokeMethod(Stacks stacks, AttributesContext context, Optional<String> body) {
+    public void invokeMethod(Stacks stacks, ElementContext context, Optional<String> body) {
         fillArguments(stacks, context, body);
         Object result;
         try {

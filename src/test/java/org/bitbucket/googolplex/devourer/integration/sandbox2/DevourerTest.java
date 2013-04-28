@@ -17,6 +17,7 @@
 package org.bitbucket.googolplex.devourer.integration.sandbox2;
 
 import org.bitbucket.googolplex.devourer.Devourer;
+import org.bitbucket.googolplex.devourer.Devourers;
 import org.bitbucket.googolplex.devourer.integration.sandbox2.classes.Login;
 import org.bitbucket.googolplex.devourer.integration.sandbox2.classes.Person;
 import org.bitbucket.googolplex.devourer.integration.sandbox2.classes.PersonAnnotatedConfig;
@@ -58,7 +59,7 @@ public class DevourerTest {
 
     @Test
     public void testModule() throws Exception {
-        Devourer devourer = Devourer.create(new PersonModule());
+        Devourer devourer = Devourers.create(new PersonModule());
         Stacks stacks = devourer.parse(EXAMPLE);
 
         checkStacks(stacks);
@@ -66,7 +67,7 @@ public class DevourerTest {
 
     @Test
     public void testAnnotations() throws Exception {
-        Devourer devourer = Devourer.create(new PersonAnnotatedConfig());
+        Devourer devourer = Devourers.create(new PersonAnnotatedConfig());
         Stacks stacks = devourer.parse(EXAMPLE);
 
         checkStacks(stacks);

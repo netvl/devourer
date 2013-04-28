@@ -19,11 +19,10 @@ package org.bitbucket.googolplex.devourer.configuration.annotated;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import org.bitbucket.googolplex.devourer.configuration.annotated.annotations.*;
 import org.bitbucket.googolplex.devourer.configuration.annotated.internal.ParameterInfo;
 import org.bitbucket.googolplex.devourer.configuration.annotated.internal.ParameterKind;
-import org.bitbucket.googolplex.devourer.configuration.annotated.annotations.*;
 import org.bitbucket.googolplex.devourer.configuration.annotated.internal.ReflectedActions;
-import org.bitbucket.googolplex.devourer.contexts.AttributesContext;
 import org.bitbucket.googolplex.devourer.contexts.ElementContext;
 import org.bitbucket.googolplex.devourer.contexts.namespaces.NamespaceContext;
 import org.bitbucket.googolplex.devourer.exceptions.MappingException;
@@ -56,25 +55,25 @@ import java.util.List;
  * annotations, which accepts string argument, a stack name. If non-void method is not annotated with {@link PushTo},
  * it is considered as being annotated with {@code @PushTo(Stacks.DEFAULT_STACK}. The return value of
  * such method will be pushed onto the corresponding stack during parsing process. It is an error to return
- * instances of {@link AttributesContext}, {@link ElementContext} or {@link Stacks} interfaces.</p>
+ * instances of {@link ElementContext} or {@link Stacks} interfaces.</p>
  *
  * <p>Each method can take variable number of arguments. Argument types and annotations are inspected in order
- * to find out which values to inject into them. If argument type is {@link AttributesContext} or
- * {@link ElementContext}, the element context will be injected into it. If argument type is {@link String},
- * textual body of the currently processed element will be injected into it (only applicable to at-actions).
- * If argument type is {@link Stacks}, the stacks object used in this processing will be injected into the
- * it. However, the need for manual injection of {@link Stacks} is alleviated by {@link PushTo} annotation
- * and {@link Peek} and {@link Pop} annotations, described in the next paragraph.</p>
+ * to find out which values to inject into them. If argument type is {@link ElementContext}, the element context
+ * will be injected into it. If argument type is {@link String}, textual body of the currently processed element
+ * will be injected into it (only applicable to at-actions). If argument type is {@link Stacks}, the stacks object
+ * used in this processing will be injected into the it. However, the need for manual injection of {@link Stacks}
+ * is alleviated by {@link PushTo} annotation and {@link Peek} and {@link Pop} annotations, described in the next
+ * paragraph.</p>
  *
- * <p>If argument type is not {@link AttributesContext}, {@link ElementContext} or {@link Stacks},
- * then the parameter must be annotated with one of the following annotations: {@link Peek}, {@link PeekFrom},
- * {@link Pop}, {@link PopFrom}. {@link PeekFrom} and {@link PopFrom} accept a string parameter
- * which should be the name of the stack. {@code @Peek} is considered equals to {@code @PeekFrom(Stacks.DEFAULT_STACK)},
- * {@code @Pop} is considered equals to {@code @PopFrom(Stacks.DEFAULT_STACK}. These annotations allow implicit
- * manipulation of stacks object. Essentialy, such annotated fields will be injected with the object from the
- * top of the stack; if the field is annotated with {@code Pop*} annotation, the object being injected will
- * be removed from the stack; if the field is annotated with {@code Peek*} annotation, the object will be
- * retained on the top of the stack. Consequently, the number and the order of annotations matter.</p>
+ * <p>If argument type is not {@link ElementContext} or {@link Stacks}, then the parameter must be annotated with
+ * one of the following annotations: {@link Peek}, {@link PeekFrom}, {@link Pop}, {@link PopFrom}. {@link PeekFrom}
+ * and {@link PopFrom} accept a string parameter which should be the name of the stack. {@code @Peek} is considered
+ * equals to {@code @PeekFrom(Stacks.DEFAULT_STACK)}, {@code @Pop} is considered equals to
+ * {@code @PopFrom(Stacks.DEFAULT_STACK}. These annotations allow implicit manipulation of stacks object.
+ * Essentialy, such annotated fields will be injected with the object from the top of the stack; if the field is
+ * annotated with {@code Pop*} annotation, the object being injected will be removed from the stack; if the
+ * field is annotated with {@code Peek*} annotation, the object will be retained on the top of the stack.
+ * Consequently, the number and the order of annotations matter.</p>
  *
  * <p>The arguments of the method are inspected in declaration order, and actions on the stacks object during the
  * processing are taken exactly in this order too. So, if you have e.g. the following declaration:
@@ -222,7 +221,7 @@ public class MappingReflector {
      */
     private ParameterInfo inspectMethodAnnotations(Method method, Type type, Annotation[] annotations) {
         // Parameter is of context type
-        if (type == AttributesContext.class || type == ElementContext.class) {
+        if (type == ElementContext.class) {
             return new ParameterInfo(ParameterKind.CONTEXT);
 
         // Parameter is of stacks type
@@ -391,8 +390,7 @@ public class MappingReflector {
         if (method.getReturnType() != void.class) {
             // Method cannot return stacks or element context
             if (method.getReturnType() == Stacks.class ||
-                method.getReturnType() == ElementContext.class ||
-                method.getReturnType() == AttributesContext.class) {
+                method.getReturnType() == ElementContext.class) {
                 throw new MappingException(
                     String.format(
                         "Invalid return type of method %s: %s",

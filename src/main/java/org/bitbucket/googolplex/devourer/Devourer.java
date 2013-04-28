@@ -19,24 +19,21 @@ package org.bitbucket.googolplex.devourer;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import org.bitbucket.googolplex.devourer.configuration.DevourerConfig;
+import org.bitbucket.googolplex.devourer.configuration.actions.ActionAfter;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionAt;
+import org.bitbucket.googolplex.devourer.configuration.actions.ActionBefore;
 import org.bitbucket.googolplex.devourer.configuration.annotated.MappingReflector;
 import org.bitbucket.googolplex.devourer.configuration.modular.MappingModule;
-import org.bitbucket.googolplex.devourer.configuration.modular.binders.MappingBinder;
-import org.bitbucket.googolplex.devourer.configuration.modular.binders.impl.MappingBinderImpl;
-import org.bitbucket.googolplex.devourer.contexts.AttributesContext;
-import org.bitbucket.googolplex.devourer.contexts.DefaultAttributesContext;
+import org.bitbucket.googolplex.devourer.contexts.DefaultElementContext;
+import org.bitbucket.googolplex.devourer.contexts.ElementContext;
 import org.bitbucket.googolplex.devourer.contexts.namespaces.NamespaceContext;
 import org.bitbucket.googolplex.devourer.contexts.namespaces.QualifiedName;
 import org.bitbucket.googolplex.devourer.contexts.namespaces.QualifiedNames;
 import org.bitbucket.googolplex.devourer.exceptions.ActionException;
 import org.bitbucket.googolplex.devourer.exceptions.DevourerException;
-import org.bitbucket.googolplex.devourer.exceptions.MappingException;
 import org.bitbucket.googolplex.devourer.exceptions.ParsingException;
 import org.bitbucket.googolplex.devourer.paths.ExactPath;
 import org.bitbucket.googolplex.devourer.paths.mappings.ActionBundle;
-import org.bitbucket.googolplex.devourer.configuration.actions.ActionAfter;
-import org.bitbucket.googolplex.devourer.configuration.actions.ActionBefore;
 import org.bitbucket.googolplex.devourer.paths.mappings.PathMapping;
 import org.bitbucket.googolplex.devourer.stacks.DefaultStacks;
 import org.bitbucket.googolplex.devourer.stacks.Stacks;
@@ -44,15 +41,10 @@ import org.bitbucket.googolplex.devourer.stacks.Stacks;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringReader;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.Map;
 
 /**
  * Devourer pulls XML from the given source and executes preconfigured actions on it. These actions are defined
@@ -73,12 +65,12 @@ import java.util.Map;
  *
  * <p>Actions are represented by interfaces, {@link ActionBefore}, {@link ActionAt} and
  * {@link ActionAfter}. These are functional interfaces (in terms of Java 8 Lambda extension), that is,
- * they consists of single method. In each type this method accepts {@link Stacks} object and {@link AttributesContext}
+ * they consists of single method. In each type this method accepts {@link Stacks} object and {@link ElementContext}
  * object. {@link ActionAt} interface also accepts additional {@link String} parameter.</p>
  *
  * <p>{@link Stacks} object is the main state container for the Devourer; it contains intermediate
  * objects, e.g. builders, and it should contain results of the processing. This object is returned by
- * {@code parse()} family of methods. {@link AttributesContext} object contains information about the element
+ * {@code parse()} family of methods. {@link ElementContext} object contains information about the element
  * currently being processed: name and namespace of the element, as well as its attributes.
  * {@link ActionAt}'s additional {@link String} parameter is set to the body of the element.</p>
  *
@@ -86,7 +78,7 @@ import java.util.Map;
  * of actions to be taken on the nodes of expected XML document. Then you ask Devourer to parse
  * the document. Devourer walks through the document and executes the configured actions on each appropriate
  * node. These actions modify {@link Stacks} object based on information provided by the Devourer
- * by the means of {@link AttributesContext} object and {@link String} element content. When the whole document
+ * by the means of {@link ElementContext} object and {@link String} element content. When the whole document
  * has been processed, Devourer returns the {@link Stacks} object used during the processing, which
  * contains results of the actions.</p>
  *
@@ -99,90 +91,12 @@ public class Devourer {
     private final PathMapping pathMapping;
     private final NamespaceContext namespaceContext;
 
-    protected Devourer(DevourerConfig config, XMLInputFactory inputFactory, PathMapping pathMapping,
-                       NamespaceContext namespaceContext) {
+    Devourer(DevourerConfig config, XMLInputFactory inputFactory, PathMapping pathMapping,
+             NamespaceContext namespaceContext) {
         this.config = config;
         this.inputFactory = inputFactory;
         this.pathMapping = pathMapping;
         this.namespaceContext = namespaceContext;
-    }
-
-    /**
-     * Creates new {@link Devourer} with actions defined in the provided {@link MappingModule} using
-     * default configuration.
-     *
-     * @param module mapping module with configured actions
-     * @return new Devourer instance
-     */
-    public static Devourer create(MappingModule module) {
-        return create(DevourerConfig.builder().build(), module);
-    }
-
-    /**
-     * Creates new {@link Devourer} with actions defined in the provided {@link MappingModule} using
-     * specified configuration.
-     *
-     * @param devourerConfig configuration object
-     * @param module mapping module with configured actions
-     * @return new Devourer instance
-     */
-    public static Devourer create(DevourerConfig devourerConfig, MappingModule module) {
-        Preconditions.checkNotNull(devourerConfig, "Devourer config is null");
-        Preconditions.checkNotNull(module, "Module object is null");
-
-        MappingBinder binder = new MappingBinderImpl();
-        try {
-            module.configure(binder);
-        } catch (RuntimeException e) {
-            throw new MappingException("An exception occured during mapping module configuration", e);
-        }
-
-        PathMapping pathMapping = binder.getMapping();
-        NamespaceContext namespaceContext = binder.getNamespaceContext();
-
-        return new Devourer(devourerConfig, createXMLInputFactory(devourerConfig), pathMapping, namespaceContext);
-    }
-
-    /**
-     * Creates new {@link Devourer} with actions defined in the annotated class of the provided object using
-     * default configuration.
-     *
-     * @param configObject object of a class with annotated configuration
-     * @return new Devourer instance
-     */
-    public static Devourer create(Object configObject) {
-        return create(DevourerConfig.builder().build(), configObject);
-    }
-
-    /**
-     * Creates new {@link Devourer} with actions defined in the annotated class of the provided object using
-     * default configuration.
-     *
-     * @param devourerConfig configuration object
-     * @param configObject object of a class with annotated configuration
-     * @return new Devourer instance
-     */
-    public static Devourer create(DevourerConfig devourerConfig, Object configObject) {
-        Preconditions.checkNotNull(devourerConfig, "Devourer config is null");
-        Preconditions.checkNotNull(configObject, "Config object is null");
-
-        MappingReflector reflector = new MappingReflector();
-        reflector.collectMappings(configObject);
-
-        PathMapping pathMapping = reflector.getMapping();
-        NamespaceContext namespaceContext = reflector.getNamespaceContext();
-
-        return new Devourer(devourerConfig, createXMLInputFactory(devourerConfig), pathMapping, namespaceContext);
-    }
-
-    private static XMLInputFactory createXMLInputFactory(DevourerConfig devourerConfig) {
-        // Create input factory and configure it
-        XMLInputFactory inputFactory = XMLInputFactory.newFactory();
-        for (Map.Entry<String, Object> entry : devourerConfig.staxConfig.entrySet()) {
-            inputFactory.setProperty(entry.getKey(), entry.getValue());
-        }
-
-        return inputFactory;
     }
 
     /**
@@ -199,11 +113,11 @@ public class Devourer {
     }
 
     /**
-     * Parses an XML document contained inside the given array of bytes. The bytes are considered to contain a text
-     * encoded using {@code charset} encoding.
+     * Parses an XML document contained inside the given array of bytes. The byte array is considered to contain
+     * a text encoded using the specified encoding.
      *
-     * @param bytes byte array containing an XML document
-     * @param charset an encoding of the of the text inside byte array
+     * @param bytes a byte array containing an XML document
+     * @param charset an encoding of the of the text inside the byte array
      * @return stacks object with parsing results
      * @throws DevourerException in case of XML parsing errors or exceptions in actions
      */
@@ -215,10 +129,10 @@ public class Devourer {
     }
 
     /**
-     * Parses an XML document contained inside the given array of bytes. The bytes array is considered to contain
+     * Parses an XML document contained inside the given array of bytes. The byte array is considered to contain
      * a text encoded using default encoding.
      *
-     * @param bytes byte array containing an XML document
+     * @param bytes a byte array containing an XML document
      * @return stacks object with parsing results
      * @throws DevourerException in case of XML parsing errors or exceptions in actions
      */
@@ -228,9 +142,9 @@ public class Devourer {
 
     /**
      * Parses an XML document contained within the given input stream. The stream is considered to be encoded using
-     * {@code charset} encoding.
+     * the specified encoding.
      *
-     * @param inputStream input stream containing an XML document
+     * @param inputStream an input stream containing an XML document
      * @param charset an encoding of the input stream
      * @return stacks object with parsing results
      * @throws DevourerException in case of XML parsing errors or exceptions in actions
@@ -246,7 +160,7 @@ public class Devourer {
      * Parses an XML document contained within the given input stream. The stream is considered to be encoded using
      * default encoding.
      *
-     * @param inputStream input stream containing an XML document
+     * @param inputStream an input stream containing an XML document
      * @return stacks object with parsing results
      * @throws DevourerException in case of XML parsing errors or exceptions in actions
      */
@@ -257,7 +171,7 @@ public class Devourer {
     /**
      * Parses and XML document contained within the given reader.
      *
-     * @param reader reader containing an XML document
+     * @param reader a reader containing an XML document
      * @return stacks objects with parsing results
      * @throws DevourerException in case of XML parsing errors or exceptions in actions
      */
@@ -268,7 +182,7 @@ public class Devourer {
         try {
             streamReader = inputFactory.createXMLStreamReader(reader);
 
-            Deque<AttributesContext> contextStack = new ArrayDeque<AttributesContext>();
+            Deque<ElementContext> contextStack = new ArrayDeque<ElementContext>();
             Stacks stacks = new DefaultStacks();
             ExactPath currentPath = ExactPath.root();
 
@@ -311,8 +225,8 @@ public class Devourer {
     }
 
     private void handleStartElement(XMLStreamReader streamReader, ExactPath currentPath, Stacks stacks,
-                                    Deque<AttributesContext> contextStack) {
-        AttributesContext context = collectAttributesContext(streamReader);
+                                    Deque<ElementContext> contextStack) {
+        ElementContext context = assembleAttributesContext(streamReader);
         contextStack.push(context);
 
         Optional<ActionBundle> bundle = pathMapping.lookup(currentPath, namespaceContext);
@@ -324,12 +238,12 @@ public class Devourer {
     }
 
     private void handleContent(XMLStreamReader streamReader, ExactPath currentPath, Stacks stacks,
-                               Deque<AttributesContext> contextStack) {
+                               Deque<ElementContext> contextStack) {
         String body = streamReader.getText();
         if (config.stripSpaces) {
             body = body.trim();
         }
-        AttributesContext context = contextStack.peek();
+        ElementContext context = contextStack.peek();
 
         Optional<ActionBundle> bundle = pathMapping.lookup(currentPath, namespaceContext);
         if (bundle.isPresent()) {
@@ -339,8 +253,8 @@ public class Devourer {
         }
     }
 
-    private void handleEndElement(ExactPath currentPath, Stacks stacks, Deque<AttributesContext> contextStack) {
-        AttributesContext context = contextStack.pop();
+    private void handleEndElement(ExactPath currentPath, Stacks stacks, Deque<ElementContext> contextStack) {
+        ElementContext context = contextStack.pop();
 
         Optional<ActionBundle> bundle = pathMapping.lookup(currentPath, namespaceContext);
         if (bundle.isPresent()) {
@@ -350,10 +264,11 @@ public class Devourer {
         }
     }
 
-    private AttributesContext collectAttributesContext(XMLStreamReader reader) {
-        DefaultAttributesContext.Builder builder = new DefaultAttributesContext.Builder();
+    private ElementContext assembleAttributesContext(XMLStreamReader reader) {
+        DefaultElementContext.Builder builder = new DefaultElementContext.Builder();
 
-        builder.setNamespaceContext(reader.getNamespaceContext());
+        builder.setRealNamespaceContext(reader.getNamespaceContext());
+        builder.setCustomNamespaceContext(namespaceContext);
 
         QualifiedName elementName = QualifiedNames.fromQName(reader.getName());
         builder.setName(elementName);

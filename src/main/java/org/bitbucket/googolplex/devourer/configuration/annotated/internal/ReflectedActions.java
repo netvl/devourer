@@ -4,7 +4,7 @@ import com.google.common.base.Optional;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionAfter;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionAt;
 import org.bitbucket.googolplex.devourer.configuration.actions.ActionBefore;
-import org.bitbucket.googolplex.devourer.contexts.AttributesContext;
+import org.bitbucket.googolplex.devourer.contexts.ElementContext;
 import org.bitbucket.googolplex.devourer.stacks.Stacks;
 
 import java.lang.reflect.Method;
@@ -20,7 +20,7 @@ public final class ReflectedActions {
         }
 
         @Override
-        public void act(Stacks stacks, AttributesContext context, String body) {
+        public void act(Stacks stacks, ElementContext context, String body) {
             invokeMethod(stacks, context, Optional.of(body));
         }
     }
@@ -31,7 +31,7 @@ public final class ReflectedActions {
         }
 
         @Override
-        public void act(Stacks stacks, AttributesContext context) {
+        public void act(Stacks stacks, ElementContext context) {
             invokeMethod(stacks, context, Optional.<String>absent());
         }
     }
@@ -42,7 +42,7 @@ public final class ReflectedActions {
         }
 
         @Override
-        public void act(Stacks stacks, AttributesContext context) {
+        public void act(Stacks stacks, ElementContext context) {
             invokeMethod(stacks, context, Optional.<String>absent());
         }
     }

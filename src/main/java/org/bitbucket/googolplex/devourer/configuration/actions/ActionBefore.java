@@ -16,8 +16,8 @@
 
 package org.bitbucket.googolplex.devourer.configuration.actions;
 
+import org.bitbucket.googolplex.devourer.contexts.ElementContext;
 import org.bitbucket.googolplex.devourer.stacks.Stacks;
-import org.bitbucket.googolplex.devourer.contexts.AttributesContext;
 
 /**
  * Date: 18.02.13
@@ -26,5 +26,5 @@ import org.bitbucket.googolplex.devourer.contexts.AttributesContext;
  * @author Vladimir Matveev
  */
 public interface ActionBefore {
-    void act(Stacks stacks, AttributesContext context);
+    void act(Stacks stacks, ElementContext context);
 }

@@ -17,7 +17,6 @@
 package org.bitbucket.googolplex.devourer.contexts.namespaces;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableBiMap;
@@ -25,19 +24,24 @@ import com.google.common.collect.ImmutableBiMap;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
- * Represents bidirectional map from namespaces to prefixes. This class is intended to be used solely for
+ * Represents a bidirectional map from namespaces to prefixes. This class is intended to be used solely for
  * definition of mapping between namespaces and prefixes, so it does not allow empty prefixes or namespaces.
  * Do not mistake this class with {@link javax.xml.namespace.NamespaceContext}, it serves different purpose.
- * This class also does not support mapping multiple prefixes to single namespace.
+ * This class also does not support mapping multiple prefixes to a single namespace.
  */
 public class NamespaceContext {
     private final BiMap<String, String> namespaceMap;
 
     private NamespaceContext(BiMap<String, String> namespaceMap) {
         for (BiMap.Entry<String, String> entry : namespaceMap.entrySet()) {
-            Preconditions.checkArgument(!entry.getKey().isEmpty(), "Map contains empty namespace");
-            Preconditions.checkArgument(!entry.getValue().isEmpty(), "Map contains empty prefix");
+            String key = entry.getKey();
+            String value = entry.getValue();
+            checkArgument(!key.isEmpty(), "Map contains empty namespace for prefix %s", value);
+            checkArgument(!value.isEmpty(), "Map contains empty prefix for namespace %s", key);
         }
         this.namespaceMap = ImmutableBiMap.copyOf(namespaceMap);
     }
@@ -51,9 +55,9 @@ public class NamespaceContext {
      * @return fully qualified name, if prefix defines a namespace in this context, absent value otherwise
      */
     public Optional<QualifiedName> qualifiedName(String name, String prefix) {
-        Preconditions.checkNotNull(name, "Name is null");
-        Preconditions.checkArgument(!name.isEmpty(), "Name is empty");
-        Preconditions.checkNotNull(prefix, "Prefix is null");
+        checkNotNull(name, "Name is null");
+        checkArgument(!name.isEmpty(), "Name is empty");
+        checkNotNull(prefix, "Prefix is null");
 
         String namespace = namespaceMap.inverse().get(prefix);
         if (namespace == null) {
@@ -70,7 +74,7 @@ public class NamespaceContext {
      * @return namespace to which {@code prefix} is mapped, if present
      */
     public Optional<String> namespace(String prefix) {
-        Preconditions.checkNotNull(prefix, "Prefix is null");
+        checkNotNull(prefix, "Prefix is null");
 
         return Optional.fromNullable(namespaceMap.inverse().get(prefix));
     }
@@ -82,7 +86,7 @@ public class NamespaceContext {
      * @return prefix mapped to {@code namespace}, if present
      */
     public Optional<String> prefix(String namespace) {
-        Preconditions.checkNotNull(namespace, "Namespace is null");
+        checkNotNull(namespace, "Namespace is null");
 
         return Optional.fromNullable(namespaceMap.get(namespace));
     }
@@ -129,8 +133,8 @@ public class NamespaceContext {
      * @return new namespace context
      */
     public static NamespaceContext fromItems(String... items) {
-        Preconditions.checkNotNull(items, "Items are null");
-        Preconditions.checkArgument((items.length & 1) == 0, "Items length is odd");
+        checkNotNull(items, "Items are null");
+        checkArgument((items.length & 1) == 0, "Items length is odd");
 
         BiMap<String, String> namespaceMap = HashBiMap.create();
         for (int i = 0; i + 1 < items.length; i += 2) {
@@ -147,7 +151,7 @@ public class NamespaceContext {
      * @return new namespace context
      */
     public static NamespaceContext fromMap(Map<String, String> namespaceMap) {
-        Preconditions.checkNotNull(namespaceMap, "Namespace map is null");
+        checkNotNull(namespaceMap, "Namespace map is null");
 
         return new NamespaceContext(ImmutableBiMap.copyOf(namespaceMap));
     }
@@ -184,10 +188,10 @@ public class NamespaceContext {
          * @return this object
          */
         public Builder add(String namespace, String prefix) {
-            Preconditions.checkNotNull(namespace, "Namespace is null");
-            Preconditions.checkNotNull(prefix, "Prefix is null");
-            Preconditions.checkArgument(!namespace.isEmpty(), "Namespace is empty");
-            Preconditions.checkArgument(!prefix.isEmpty(), "Prefix is empty");
+            checkNotNull(namespace, "Namespace is null");
+            checkNotNull(prefix, "Prefix is null");
+            checkArgument(!namespace.isEmpty(), "Namespace is empty");
+            checkArgument(!prefix.isEmpty(), "Prefix is empty");
 
             this.namespaceMap.put(namespace, prefix);
 
@@ -201,7 +205,7 @@ public class NamespaceContext {
          * @return this object
          */
         public Builder addFrom(NamespaceContext context) {
-            Preconditions.checkNotNull(context, "Context is null");
+            checkNotNull(context, "Context is null");
 
             for (String namespace : context.namespaces()) {
                 this.namespaceMap.put(namespace, context.prefix(namespace).get());

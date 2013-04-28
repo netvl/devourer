@@ -19,6 +19,7 @@ package org.bitbucket.googolplex.devourer.integration.sandbox1;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.bitbucket.googolplex.devourer.Devourer;
+import org.bitbucket.googolplex.devourer.Devourers;
 import org.bitbucket.googolplex.devourer.integration.sandbox1.classes.ExampleAnnotatedConfig;
 import org.bitbucket.googolplex.devourer.integration.sandbox1.classes.ExampleData;
 import org.bitbucket.googolplex.devourer.integration.sandbox1.classes.ExampleDataModule;
@@ -51,7 +52,7 @@ public class DevourerTest {
 
     @Test
     public void testModularConfig() throws Exception {
-        Devourer devourer = Devourer.create(new ExampleDataModule());
+        Devourer devourer = Devourers.create(new ExampleDataModule());
         Stacks stacks = devourer.parse(EXAMPLE);
 
         List<ExampleData> dataList = stacks.pop();
@@ -66,7 +67,7 @@ public class DevourerTest {
 
     @Test
     public void testAnnotatedConfig() throws Exception {
-        Devourer devourer = Devourer.create(new ExampleAnnotatedConfig());
+        Devourer devourer = Devourers.create(new ExampleAnnotatedConfig());
         Stacks stacks = devourer.parse(EXAMPLE);
 
         List<ExampleData> dataList = stacks.get("results").pop();
@@ -99,7 +100,7 @@ public class DevourerTest {
 //    @Test
     // TODO: fix
     public void testNamespaces() throws Exception {
-        Devourer devourer = Devourer.create(new ExampleDataModuleNamespaces());
+        Devourer devourer = Devourers.create(new ExampleDataModuleNamespaces());
         Stacks stacks = devourer.parse(EXAMPLE_2);
 
         List<ExampleData> dataList = stacks.pop();
