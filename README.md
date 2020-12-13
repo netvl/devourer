@@ -1,6 +1,10 @@
 Devourer - simple XML processing library
 ========================================
 
+**Unmaintained.**
+
+---
+
 Devourer is simple streaming XML processing library written in Java taking advantage of modern XML
 parsing library and providing easy-to-use API, which is compatible with latest Java releases,
 i.e. Java 8 and its Project Lambda.
